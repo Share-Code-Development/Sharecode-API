@@ -1,0 +1,21 @@
+#Riders
+/.idea
+
+#Ignore env settings to keep it as private
+/Sharecode.Backend.Api/appsettings.json
+
+# Logs, bin, obj
+/Sharecode.Backend.Api/bin/
+/Sharecode.Backend.Api/obj/
+/Sharecode.Backend.Api/Logs/
+/Sharecode.Backend.Infrastructure/obj/
+/Sharecode.Backend.Infrastructure/bin/
+/Sharecode.Backend.Presentation/obj/
+/Sharecode.Backend.Presentation/bin/
+/Sharecode.Backend.Domain/obj/
+/Sharecode.Backend.Domain/bin/
+/Sharecode.Backend.Utilities/obj/
+/Sharecode.Backend.Utilities/bin/
+/Sharecode.Backend.Application/obj/
+/Sharecode.Backend.Application/bin/
+
