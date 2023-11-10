@@ -11,3 +11,5 @@ Sharecode.Backend.Utilities
  - KeyValueClient
    The key value client is capable of fetching all the keys of the specified namespace, which would then serve as the
    key vault for this project. 
+
+   Cloudflare authentication can be configured in the appsettings.json
