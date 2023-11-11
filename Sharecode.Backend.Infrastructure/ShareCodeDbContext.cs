@@ -2,16 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Entity;
 using Sharecode.Backend.Infrastructure.Configuration;
 
 namespace Sharecode.Backend.Infrastructure;
 
-public class ShareCodeDbContext : DbContext
+public class ShareCodeDbContext : DbContext, IShareCodeDbContext, IUnitOfWork
 {
     
-    public DbSet<User> Users { get; set; }
+    public DbSet<User> Users { get; private set; }
     
     public ShareCodeDbContext(DbContextOptions options) : base(options)
     {
@@ -91,5 +92,15 @@ public class ShareCodeDbContext : DbContext
             input = input.Replace(persian[j], j.ToString());
 
         return input;
+    }
+
+    public void Commit()
+    {
+        this.SaveChanges();
+    }
+
+    public async Task CommitAsync()
+    {
+        await this.SaveChangesAsync();
     }
 }

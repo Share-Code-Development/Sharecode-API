@@ -41,6 +41,7 @@ public sealed class KeyValueClient : IKeyValueClient
     public async Task<Namespace?> GetKeysOfNamespaceAsync()
     {
         var keys = await GetKeysAsync();
+        _namespace = new Namespace();
         await GetValueInternal(keys);
         return _namespace;
     }
@@ -115,6 +116,7 @@ public sealed class KeyValueClient : IKeyValueClient
         KeyValue? value = null;
         using (HttpClient client = new HttpClient())
         {
+            ConfigureClient(client);
             value = await Call($"{CloudFlareApi}/{Configuration.AccountIdentifier}/storage/kv/namespaces/{Configuration.NamespaceIdentifier}/values/{key}", client);
         }
         return value;

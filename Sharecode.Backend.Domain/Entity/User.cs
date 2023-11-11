@@ -11,6 +11,20 @@ public class User : BaseEntity
     {
     }
 
+    public User(string emailAddress, string firstName, string? middleName, string lastName, byte[]? salt, byte[]? passwordHash)
+    {
+        EmailAddress = emailAddress;
+        FirstName = firstName;
+        MiddleName = middleName;
+        LastName = lastName;
+        Salt = salt;
+        PasswordHash = passwordHash;
+        AccountSetting = new AccountSetting();
+        EmailVerified = false;
+        Visibility = AccountVisibility.Private;
+    }
+    
+
     [EmailAddress]
     [Length(minimumLength:5, maximumLength: 100)]
     [Required]
@@ -47,10 +61,8 @@ public class User : BaseEntity
             
         }
     }
-    [Required]
-    public byte[] Salt { get; set; }
-    [Required]
-    public byte[] PasswordHash { get; set; }
+    public byte[]? Salt { get; set; }
+    public byte[]? PasswordHash { get; set; }
     [Required]
     public bool EmailVerified { get; set; }
     [Url]

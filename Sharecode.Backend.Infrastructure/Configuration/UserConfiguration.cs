@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Sharecode.Backend.Domain.Entity;
+using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Infrastructure.Configuration;
 
@@ -8,8 +9,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        //Set the table name
-        builder.ToTable("User");
         //Create unique indexes
         builder.HasIndex(x => x.EmailAddress).IsUnique();
         /*builder.Property(x => x.FullName)
@@ -41,6 +40,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(100);     
         
         builder.Property(x => x.NormalizedFullName)
-            .HasMaxLength(300);                
+            .HasMaxLength(300);
+
+        builder.Property(x => x.EmailVerified)
+            .HasDefaultValue(false);
+
+        builder.Property(x => x.Visibility)
+            .HasDefaultValue(AccountVisibility.Public);
+
+        builder.Property(x => x.IsDeleted)
+            .HasDefaultValue(false);
     }
 }

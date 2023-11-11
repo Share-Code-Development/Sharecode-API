@@ -4,6 +4,9 @@
 #Ignore env settings to keep it as private
 /Sharecode.Backend.Api/appsettings.json
 
+# Migrations Folder
+/Sharecode.Backend.Infrastructure/Migrations/
+
 # Logs, bin, obj
 /Sharecode.Backend.Api/bin/
 /Sharecode.Backend.Api/obj/

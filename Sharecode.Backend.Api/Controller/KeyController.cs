@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using Sharecode.Backend.Application.Users.Create;
 using Sharecode.Backend.Utilities.KeyValue;
 
 namespace Sharecode.Backend.Api.Controller;
@@ -8,18 +11,17 @@ namespace Sharecode.Backend.Api.Controller;
 [ApiController]
 public class KeyController : ControllerBase
 {
-    public readonly IKeyValueClient ValueClient;
+    private readonly IMediator _mediator;
 
-    public KeyController(IKeyValueClient valueClient)
+    public KeyController(IMediator mediator)
     {
-        ValueClient = valueClient;
+        _mediator = mediator;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> Result()
+    [HttpPost]
+    public async Task<IActionResult> Result([FromBody] CreateUserCommand command)
     {
-        Namespace? namespaceAsync = await ValueClient.GetKeysOfNamespaceAsync();
-        Console.WriteLine(JsonConvert.SerializeObject(namespaceAsync));
-        return Ok(namespaceAsync);
+        await _mediator.Send(command);
+        return CreatedAtRoute("user", command);
     }
 }

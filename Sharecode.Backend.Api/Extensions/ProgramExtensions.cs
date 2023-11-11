@@ -1,3 +1,4 @@
+using FluentValidation;
 using Sharecode.Backend.Utilities.KeyValue;
 
 namespace Sharecode.Backend.Api.Extensions;
@@ -9,6 +10,12 @@ public static class ProgramExtensions
         KeyValueConfiguration configuration = new KeyValueConfiguration();
         configurationManager.GetSection("CloudFlareKV").Bind(configuration);
         service.Configure<KeyValueConfiguration>(options => configurationManager.GetSection("CloudFlareKV").Bind(options));
+        return service;
+    }
+
+    public static IServiceCollection RegisterServices(this IServiceCollection service)
+    {
+        service.AddValidatorsFromAssembly(typeof(ProgramExtensions).Assembly);
         return service;
     }
 }
