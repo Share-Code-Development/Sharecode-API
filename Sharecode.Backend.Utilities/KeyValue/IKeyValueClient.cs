@@ -1,3 +1,5 @@
+using Sharecode.Backend.Utilities.Configuration;
+
 namespace Sharecode.Backend.Utilities.KeyValue;
 
 public interface IKeyValueClient

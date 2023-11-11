@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Sharecode.Backend.Utilities.Configuration;
 using Sharecode.Backend.Utilities.KeyValue;
 
 namespace Sharecode.Backend.Infrastructure;

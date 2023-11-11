@@ -5,25 +5,24 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Entity;
+using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Infrastructure.Configuration;
+using Sharecode.Backend.Infrastructure.Outbox;
 
 namespace Sharecode.Backend.Infrastructure;
 
-public class ShareCodeDbContext : DbContext, IShareCodeDbContext, IUnitOfWork
+public class ShareCodeDbContext : DbContext, IShareCodeDbContext
 {
     
-    public DbSet<User> Users { get; private set; }
-    
+    //public DbSet<User> Users { get; private set; } = null!;
+    //public DbSet<AccountSetting> AccountSettings { get; private set; } = null!;
+    //public DbSet<OutboxMessage> OutboxMessages { get; private set; } = null!;
+    //public DbSet<UserRefreshToken> UserRefreshTokens { get; private set; } = null!;
     public ShareCodeDbContext(DbContextOptions options) : base(options)
     {
-        base.SavingChanges += OnSavingChanges;
     }
 
-    private void OnSavingChanges(object? sender, SavingChangesEventArgs e)
-    {
-        _cleanString();
-        SetModified(ChangeTracker);
-    }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,65 +41,5 @@ public class ShareCodeDbContext : DbContext, IShareCodeDbContext, IUnitOfWork
                 }
             }
         }
-    }
-    
-    private void SetModified(ChangeTracker tracker)
-    {
-        var entities = ChangeTracker.Entries()
-            .Where(e => e.Entity is BaseEntity && (e.State == EntityState.Added || e.State == EntityState.Modified))
-            .Select(e => e.Entity as BaseEntity);
-
-        foreach (var entity in entities)
-        {
-            entity?.SetUpdated();
-        }
-    }
-    
-    private void _cleanString()
-    {
-        var changedEntities = ChangeTracker.Entries()
-            .Where(x => x.State == EntityState.Added || x.State == EntityState.Modified);
-
-        foreach (var item in changedEntities)
-        {
-            if (item.Entity == null)
-                continue;
-
-            var properties = item.Entity.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanRead && p.CanWrite && p.PropertyType == typeof(string));
-
-            foreach (var property in properties)
-            {
-                var propName = property.Name;
-                var val = (string)property.GetValue(item.Entity, null);
-
-                if (val != null && val.Length > 0)
-                {
-                    var newVal = TransformString(val);
-                    if (!string.Equals(newVal, val, StringComparison.Ordinal))
-                        property.SetValue(item.Entity, newVal, null);
-                }
-            }
-        }
-    }
-    
-    private string TransformString(string input)
-    {
-        string[] persian = new string[10] { "۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹" };
-
-        for (int j=0; j<persian.Length; j++)
-            input = input.Replace(persian[j], j.ToString());
-
-        return input;
-    }
-
-    public void Commit()
-    {
-        this.SaveChanges();
-    }
-
-    public async Task CommitAsync()
-    {
-        await this.SaveChangesAsync();
     }
 }

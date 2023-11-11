@@ -50,38 +50,40 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         _table.Update(entity);
     }
 
-    public async Task<TEntity?> GetAsync(Guid id, bool track = true, CancellationToken token = default)
+    public async Task<TEntity?> GetAsync(Guid id, bool track = true, CancellationToken token = default, bool includeSoftDeleted = false)
     {
         if (track)
         {
-            return await _table.FirstOrDefaultAsync(x => x.Id == id, cancellationToken: token);
+            return await _table.FirstOrDefaultAsync(x => x.Id == id && ((includeSoftDeleted) || !x.IsDeleted), cancellationToken: token);
         }
         else
         {
            return await _table
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken: token);
+                .FirstOrDefaultAsync(x => x.Id == id && ((includeSoftDeleted) || !x.IsDeleted), cancellationToken: token);
         }
     }
 
-    public TEntity? Get(Guid id, bool track = true)
+    public TEntity? Get(Guid id, bool track = true, bool includeSoftDeleted = false)
     {
         if (track)
         {
-            return _table.FirstOrDefault(x => x.Id == id);
+            return _table.FirstOrDefault(x => x.Id == id && ((includeSoftDeleted) || !x.IsDeleted));
         }
         else
         {
             return _table
                 .AsNoTracking()
-                .FirstOrDefault(x => x.Id == id);
+                .FirstOrDefault(x => x.Id == id && ((includeSoftDeleted) || !x.IsDeleted));
         }
     }
 
-    public async Task<IReadOnlyList<TEntity>> ListAsync(int skip = 0, int take = 50, bool track = true, ISpecification<TEntity>? specification = null, CancellationToken token = default)
+    public async Task<IReadOnlyList<TEntity>> ListAsync(int skip = 0, int take = 50, bool track = true, ISpecification<TEntity>? specification = null, CancellationToken token = default, bool includeSoftDeleted = false)
     {
         IQueryable<TEntity> baseEntities = _table.AsQueryable();
 
+        baseEntities = baseEntities.Where(x => (includeSoftDeleted) || !x.IsDeleted);
+        
         if (specification != null)
         {
             baseEntities = ApplySpecification(baseEntities, specification);

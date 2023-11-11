@@ -5,5 +5,5 @@ namespace Sharecode.Backend.Application.Data;
 public interface IUnitOfWork : IDisposable
 {
     void Commit();
-    Task CommitAsync();    
+    Task CommitAsync(CancellationToken cancellationToken = default);    
 }

@@ -1,4 +1,4 @@
-namespace Sharecode.Backend.Utilities.KeyValue;
+namespace Sharecode.Backend.Utilities.Configuration;
 
 public class KeyValueConfiguration
 {

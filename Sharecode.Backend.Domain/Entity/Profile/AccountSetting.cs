@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Sharecode.Backend.Domain.Base;
 
-namespace Sharecode.Backend.Domain.Entity;
+namespace Sharecode.Backend.Domain.Entity.Profile;
 
-public class AccountSetting : BaseEntity
+public class AccountSetting : BaseEntityWithMetadata
 {
     [Required] public Guid UserId { get; set; }
     [Required] public User User { get; set; }

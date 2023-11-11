@@ -2,10 +2,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Enums;
+using Sharecode.Backend.Domain.Events;
 
-namespace Sharecode.Backend.Domain.Entity;
+namespace Sharecode.Backend.Domain.Entity.Profile;
 
-public class User : BaseEntity
+public class User : BaseEntityWithMetadata
 {
     public User()
     {
@@ -70,5 +71,10 @@ public class User : BaseEntity
     public AccountSetting AccountSetting { get; set; }
     [Required]
     public required AccountVisibility Visibility { get; set; }
-
+    
+    public override void RaiseCreatedEvent()
+    {
+        UserCreatedDomainEvent @event = UserCreatedDomainEvent.Create(this);
+        RaiseDomainEvent(@event);
+    }
 }

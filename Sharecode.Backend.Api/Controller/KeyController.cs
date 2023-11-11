@@ -22,6 +22,6 @@ public class KeyController : ControllerBase
     public async Task<IActionResult> Result([FromBody] CreateUserCommand command)
     {
         await _mediator.Send(command);
-        return CreatedAtRoute("user", command);
+        return Ok();
     }
 }

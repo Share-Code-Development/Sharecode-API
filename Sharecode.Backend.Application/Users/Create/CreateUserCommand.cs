@@ -1,4 +1,5 @@
 using MediatR;
+using Sharecode.Backend.Application.Base;
 
 namespace Sharecode.Backend.Application.Users.Create;
 
@@ -9,4 +10,4 @@ public record CreateUserCommand(
     string LastName,
     byte[]? Salt,
     byte[]? PasswordHash
-    ) : IRequest;
+    ) : ICommand;

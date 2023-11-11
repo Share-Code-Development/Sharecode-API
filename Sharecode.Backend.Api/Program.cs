@@ -1,8 +1,12 @@
 using System.Net;
+using FluentValidation;
+using Quartz;
 using Serilog;
 using Sharecode.Backend.Api.Extensions;
+using Sharecode.Backend.Api.Middleware;
 using Sharecode.Backend.Application;
 using Sharecode.Backend.Infrastructure;
+using Sharecode.Backend.Infrastructure.Jobs;
 using Sharecode.Backend.Presentation;
 using Sharecode.Backend.Utilities.KeyValue;
 using StackExchange.Redis;
@@ -23,8 +27,13 @@ if (keyValueNamespace == null)
 }
 
 builder.Services.AddSingleton<Namespace>(keyValueNamespace);
-builder.Services.RegisterApplicationLayer()
+
+//Register validators in this domain first
+builder.Services.AddValidatorsFromAssembly(typeof(ProgramExtensions).Assembly);
+
+builder.Services
     .RegisterInfrastructureLayer(keyValueNamespace)
+    .RegisterApplicationLayer()
     .RegisterPresentationLayer();
 
 builder.Host.UseSerilog((ctx, conf) =>
@@ -34,6 +43,21 @@ builder.Host.UseSerilog((ctx, conf) =>
 
 builder.Services.AddControllers();
 builder.Services.RegisterServices();
+
+builder.Services.AddQuartz(conf =>
+{
+    var outboxJob = new JobKey(nameof(ProcessOutboxJob));
+
+    conf
+        .AddJob<ProcessOutboxJob>(outboxJob)
+        .AddTrigger(trigger =>
+        {
+            trigger.ForJob(jobKey: outboxJob)
+                .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(20).RepeatForever());
+        });
+});
+
+builder.Services.AddQuartzHostedService(); 
 
 /*
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -63,6 +87,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseRouting();
