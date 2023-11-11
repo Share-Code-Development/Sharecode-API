@@ -6,6 +6,7 @@
 
 # Migrations Folder
 /Sharecode.Backend.Infrastructure/Migrations/
+/Sharecode.Backend.Infrastructure/Migrations/ShareCodeDbContextModelSnapshot.cs
 
 # Logs, bin, obj
 /Sharecode.Backend.Api/bin/
