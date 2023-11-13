@@ -6,7 +6,7 @@ using Sharecode.Backend.Domain.Events;
 
 namespace Sharecode.Backend.Domain.Entity.Profile;
 
-public class User : BaseEntityWithMetadata
+public class User : AggregateRootWithMetadata
 {
     public User()
     {
@@ -21,6 +21,7 @@ public class User : BaseEntityWithMetadata
         Salt = salt;
         PasswordHash = passwordHash;
         AccountSetting = new AccountSetting();
+        AccountSetting.User = this;
         EmailVerified = false;
         Visibility = AccountVisibility.Private;
     }
@@ -65,7 +66,7 @@ public class User : BaseEntityWithMetadata
     public byte[]? Salt { get; set; }
     public byte[]? PasswordHash { get; set; }
     [Required]
-    public bool EmailVerified { get; set; }
+    public bool EmailVerified { get; private set; }
     [Url]
     public string? ProfilePicture { get; set; }
     public AccountSetting AccountSetting { get; set; }

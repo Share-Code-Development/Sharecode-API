@@ -3,30 +3,26 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Sharecode.Backend.Application;
-using Sharecode.Backend.Application.Models;
-using Sharecode.Backend.Application.Service;
+using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Domain.Entity.Profile;
-using Sharecode.Backend.Infrastructure.Exceptions.Jwt;
-using Sharecode.Backend.Utilities;
 using Sharecode.Backend.Utilities.Configuration;
 using Sharecode.Backend.Utilities.KeyValue;
 
-namespace Sharecode.Backend.Infrastructure.Service;
+namespace Sharecode.Backend.Infrastructure.Client;
 
-public class JwtService : IJwtService
+public class JwtClient : IJwtClient
 {
 
     private readonly JwtConfiguration _jwtConfiguration;
     private readonly Namespace _keyVaultNamespace;
     
-    public JwtService(IOptions<JwtConfiguration> jwtConfiguration, Namespace keyVaultNamespace)
+    public JwtClient(IOptions<JwtConfiguration> jwtConfiguration, Namespace keyVaultNamespace)
     {
         _jwtConfiguration = jwtConfiguration.Value;
         this._keyVaultNamespace = keyVaultNamespace;
     }
     
-    public JwtService(JwtConfiguration jwtConfiguration, Namespace keyVaultNamespace)
+    public JwtClient(JwtConfiguration jwtConfiguration, Namespace keyVaultNamespace)
     {
         _jwtConfiguration = jwtConfiguration;
         this._keyVaultNamespace = keyVaultNamespace;

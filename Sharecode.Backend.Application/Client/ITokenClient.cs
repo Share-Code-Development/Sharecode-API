@@ -3,7 +3,7 @@ using Sharecode.Backend.Domain.Entity.Profile;
 
 namespace Sharecode.Backend.Application.Service;
 
-public interface ITokenService
+public interface ITokenClient
 {
     AccessCredentials Generate(User user);
 }

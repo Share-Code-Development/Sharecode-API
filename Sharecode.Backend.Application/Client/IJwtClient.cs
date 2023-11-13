@@ -1,10 +1,9 @@
 using System.Security.Claims;
-using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Domain.Entity.Profile;
 
-namespace Sharecode.Backend.Application.Service;
+namespace Sharecode.Backend.Application.Client;
 
-public interface IJwtService
+public interface IJwtClient
 {
     String? GenerateRefreshToken(Guid userId, string secretKey, out Guid tokenIdentifier);
 

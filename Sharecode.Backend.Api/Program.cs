@@ -1,10 +1,14 @@
 using System.Net;
 using FluentValidation;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Quartz;
 using Serilog;
 using Sharecode.Backend.Api.Extensions;
 using Sharecode.Backend.Api.Middleware;
+using Sharecode.Backend.Api.Service;
 using Sharecode.Backend.Application;
+using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Infrastructure;
 using Sharecode.Backend.Infrastructure.Jobs;
 using Sharecode.Backend.Presentation;
@@ -15,6 +19,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.BindConfigurationEntries(builder.Configuration);
 builder.Services.AddSingleton<IKeyValueClient, KeyValueClient>();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<IHttpClientContext, HttpClientContext>();
 
 //Cheeky way to access KeyValueClient
 ServiceProvider serviceProvider = builder.Services.BuildServiceProvider();
@@ -41,9 +48,13 @@ builder.Host.UseSerilog((ctx, conf) =>
     conf.ReadFrom.Configuration(ctx.Configuration);
 });
 
-builder.Services.AddControllers();
-builder.Services.RegisterServices();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(jsonOptions =>
+    {
+        jsonOptions.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+    });
 
+builder.Services.RegisterServices();
 builder.Services.AddQuartz(conf =>
 {
     var outboxJob = new JobKey(nameof(ProcessOutboxJob));
