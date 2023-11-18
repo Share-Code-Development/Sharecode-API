@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Sharecode.Backend.Api.Exceptions;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Profile;
@@ -13,6 +14,7 @@ public class HttpClientContext : IHttpClientContext
     private Guid? _userIdentifier = null;
     private User? _user = null;
     private bool? _isApiRequest = null;
+    public string? _cacheKey = null;
     
     public HttpClientContext(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
     {
@@ -55,6 +57,28 @@ public class HttpClientContext : IHttpClientContext
         User? user = await _userRepository.GetAsync(userIdentifier!.Value, track: false);
         _user = user;
         return _user;
+    }
+
+    public string CacheKey
+    {
+        get
+        {
+            if (_cacheKey == null)
+            {
+                var fullRequestUrl = $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host}{_contextAccessor.HttpContext?.Request.Path}{_contextAccessor.HttpContext?.Request.QueryString}";
+                throw new InvalidCacheAccessException(fullRequestUrl, false);
+            }
+
+            return _cacheKey;
+        }
+        set
+        {
+            if (_cacheKey == null)
+                _cacheKey = value;
+            
+            var fullRequestUrl = $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host}{_contextAccessor.HttpContext?.Request.Path}{_contextAccessor.HttpContext?.Request.QueryString}";
+            throw new InvalidCacheAccessException(fullRequestUrl, true);
+        }
     }
 
     private Guid? GetUserIdentifierFromClaim()

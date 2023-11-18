@@ -7,4 +7,5 @@ public interface IHttpClientContext
     bool IsApiRequest { get; }
     Task<Guid?> GetUserIdentifierAsync();
     Task<User?> GetNonTrackingUserAsync();
+    string CacheKey { get; set; }
 }
