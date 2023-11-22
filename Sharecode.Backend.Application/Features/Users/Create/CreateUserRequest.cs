@@ -9,4 +9,4 @@ public record CreateUserCommand(
     string LastName,
     byte[]? Salt,
     byte[]? PasswordHash
-    ) : ICommand<UserCreatedResponse>;
+    ) : IAppRequest<UserCreatedResponse>;

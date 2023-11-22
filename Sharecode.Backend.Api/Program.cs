@@ -1,6 +1,10 @@
 using System.Net;
+using System.Text;
 using FluentValidation;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -15,6 +19,7 @@ using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Infrastructure;
 using Sharecode.Backend.Infrastructure.Jobs;
 using Sharecode.Backend.Presentation;
+using Sharecode.Backend.Utilities;
 using Sharecode.Backend.Utilities.KeyValue;
 using StackExchange.Redis;
 
@@ -73,6 +78,25 @@ builder.Services.AddQuartz(conf =>
                 .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(20).RepeatForever());
         });
 });
+IdentityModelEventSource.ShowPII = true;
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(bearerOptions =>
+    {
+        var value = keyValueNamespace.Of(KeyVaultConstants.JwtSecretKey)?.Value;
+        if (value != null)
+            bearerOptions.TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuerSigningKey = true,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidIssuer = builder.Configuration["JWT:Issuer"],
+                ValidAudience = builder.Configuration["JWT:Audience"],
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.ASCII.GetBytes(value))
+            };
+    });
 
 builder.Services.AddQuartzHostedService();
 builder.Services.AddFluentValidationRulesToSwagger();
@@ -118,9 +142,9 @@ app.UseSerilogRequestLogging();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseRouting();
-/*app.UseAuthentication();
-app.UseAuthorization();*/
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

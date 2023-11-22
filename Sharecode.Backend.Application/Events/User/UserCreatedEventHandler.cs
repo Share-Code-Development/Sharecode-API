@@ -9,20 +9,10 @@ using Sharecode.Backend.Utilities.Email;
 
 namespace Sharecode.Backend.Application.Events.User;
 
-public class UserCreatedEventHandler : INotificationHandler<UserCreatedDomainEvent>
+public class UserCreatedEventHandler(IEmailClient emailClient, IGatewayRepository gatewayRepository,
+        IGatewayService gatewayService)
+    : INotificationHandler<UserCreatedDomainEvent>
 {
-
-    private readonly IEmailClient _emailClient;
-    private readonly IGatewayRepository _gatewayRepository;
-    private readonly IGatewayService _gatewayService;
-
-    public UserCreatedEventHandler(IEmailClient emailClient, IGatewayRepository gatewayRepository, IGatewayService gatewayService)
-    {
-        _emailClient = emailClient;
-        _gatewayRepository = gatewayRepository;
-        _gatewayService = gatewayService;
-    }
-
     public async Task Handle(UserCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         await SendVerificationEmailAsync(notification, cancellationToken);
@@ -35,10 +25,10 @@ public class UserCreatedEventHandler : INotificationHandler<UserCreatedDomainEve
         if(requestAsync == null)
             return;
         
-        await _gatewayRepository.AddAsync(requestAsync, cancellationToken);
+        await gatewayRepository.AddAsync(requestAsync, cancellationToken);
         
         var placeholders = new Dictionary<string, string> { { "VERIFICATION_URL", $"{requestAsync.Id}" }, {"USER_NAME", notification.FullName} };
-        await _emailClient.SendTemplateMailAsync(
+        await emailClient.SendTemplateMailAsync(
             EmailTemplateKeys.EmailValidation,
             new EmailTargets(notification.EmailAddress),
             placeholders
@@ -47,7 +37,7 @@ public class UserCreatedEventHandler : INotificationHandler<UserCreatedDomainEve
 
     private async Task<GatewayRequest?> CreateGatewayRequestAsync(UserCreatedDomainEvent notification, CancellationToken cancellationToken = default)
     {
-        bool limitReached = await _gatewayService.IsLimitReachedAsync(notification.UserId, GatewayRequestType.VerifyUserAccount, cancellationToken);
+        bool limitReached = await gatewayService.IsLimitReachedAsync(notification.UserId, GatewayRequestType.VerifyUserAccount, cancellationToken);
         if (limitReached)
             return null;
 

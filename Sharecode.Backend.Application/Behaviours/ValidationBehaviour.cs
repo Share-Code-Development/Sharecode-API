@@ -7,7 +7,7 @@ using ValidationException = Sharecode.Backend.Application.Exceptions.ValidationE
 
 namespace Sharecode.Backend.Application.Behaviours;
 
-public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : ICommandBase
+public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequestBase
 {
 
     private readonly IEnumerable<IValidator<TRequest>> _validators;

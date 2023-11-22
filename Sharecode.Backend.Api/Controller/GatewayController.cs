@@ -12,8 +12,8 @@ public class GatewayController(IDistributedCache cache, IHttpClientContext reque
     [HttpPatch("{id}")]
     public async Task<IActionResult> ValidateGateway(Guid id)
     {
-        ValidateGatewayCommand gatewayCommand = new ValidateGatewayCommand(id);
-        var commandResponse = await mediator.Send(gatewayCommand);
+        ValidateGatewayAppRequest gatewayAppRequest = new ValidateGatewayAppRequest(id);
+        var commandResponse = await mediator.Send(gatewayAppRequest);
 
         if (commandResponse.Response != HttpStatusCode.OK)
         {

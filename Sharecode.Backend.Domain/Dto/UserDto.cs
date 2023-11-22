@@ -12,6 +12,8 @@ public sealed record AccountSettingDto(
     public static AccountSettingDto From(User user)
     {
         AccountSetting setting = user.AccountSetting;
+        if (setting == null)
+            return null;
         return new AccountSettingDto(
                 setting.AllowTagging,
                 setting.Metadata
@@ -28,7 +30,7 @@ public record UserDto(
     bool EmailVerified,
     List<Meta> Metadata,
     AccountVisibility Visibility,
-    AccountSettingDto Settings,
+    AccountSettingDto? Settings,
     DateTime Created
 )
 {

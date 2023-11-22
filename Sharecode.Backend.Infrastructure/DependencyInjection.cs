@@ -7,6 +7,7 @@ using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Infrastructure.Base;
 using Sharecode.Backend.Infrastructure.Client;
 using Sharecode.Backend.Infrastructure.Repositories;
 using Sharecode.Backend.Infrastructure.Service;

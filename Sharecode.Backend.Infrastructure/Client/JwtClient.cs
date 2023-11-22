@@ -62,6 +62,7 @@ public class JwtClient : IJwtClient
         }
         claims.Add(new Claim(ClaimTypes.Name, user.FullName));
         claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+        claims.Add(new Claim(ClaimTypes.Email, user.EmailAddress));
         tokenDescriptor.Subject = new ClaimsIdentity(claims);
         tokenDescriptor.IssuedAt = DateTime.UtcNow;
         tokenDescriptor.Issuer = _jwtConfiguration.Issuer;

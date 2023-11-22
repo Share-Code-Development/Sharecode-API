@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Sharecode.Backend.Application.Exceptions;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Profile;
+using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Domain.Repositories;
 
 namespace Sharecode.Backend.Infrastructure.Service;
@@ -32,7 +33,7 @@ public class UserService : IUserService
         User? user = await _userRepository.GetAsync(userId, token: token);
         
         if (user == null)
-            throw new UserNotFoundException(49999, userId);
+            throw new EntityNotFoundException(typeof(User), userId);
 
         return user.VerifyUser();
     }

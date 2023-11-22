@@ -23,16 +23,16 @@ internal class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Use
         _tokenClient = tokenClient;
     }
 
-    public async Task<UserCreatedResponse> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+    public async Task<UserCreatedResponse> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
         var user = new User()
         {
-            EmailAddress = request.EmailAddress,
-            FirstName = request.FirstName,
-            MiddleName = request.MiddleName,
-            LastName = request.LastName,
-            Salt = request.Salt,
-            PasswordHash = request.PasswordHash,
+            EmailAddress = command.EmailAddress,
+            FirstName = command.FirstName,
+            MiddleName = command.MiddleName,
+            LastName = command.LastName,
+            Salt = command.Salt,
+            PasswordHash = command.PasswordHash,
             Visibility = AccountVisibility.Private,
         };
         user.AccountSetting = new()

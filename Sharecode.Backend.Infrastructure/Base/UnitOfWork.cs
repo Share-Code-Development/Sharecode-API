@@ -2,12 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Sharecode.Backend.Application.Data;
-using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Infrastructure.Outbox;
-using ILogger = Serilog.ILogger;
 
-namespace Sharecode.Backend.Infrastructure;
+namespace Sharecode.Backend.Infrastructure.Base;
 
 public class UnitOfWork : IUnitOfWork
 {
@@ -23,14 +21,33 @@ public class UnitOfWork : IUnitOfWork
     {
         SetModified();
         ConvertDomainEvents();
-        _context.SaveChanges();
+        try
+        {
+            _context.SaveChanges();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _log.LogError(ex, "Concurrency conflict detected when committing changes.");
+            HandleConcurrencyException(ex);
+            _context.SaveChanges();
+        }
+        
     }
     
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
         SetModified();
         ConvertDomainEvents();
-        await _context.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _log.LogError(ex, "Concurrency conflict detected when committing changes asynchronously.");
+            HandleConcurrencyException(ex);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
     }
 
     public void Rollback()
@@ -44,6 +61,46 @@ public class UnitOfWork : IUnitOfWork
         _context.Dispose();
     }
 
+    
+    private void HandleConcurrencyException(DbUpdateConcurrencyException ex)
+    {
+        foreach (var entry in ex.Entries)
+        {
+            var databaseValues = entry.GetDatabaseValues();
+            if (databaseValues != null)
+            {
+                // Overwrite the database values with the values of the entity that attempted the update
+                entry.OriginalValues.SetValues(databaseValues);
+            }
+        }
+    }
+    
+    /*private void HandleConcurrencyException(DbUpdateConcurrencyException ex)
+    {
+        foreach (var entry in ex.Entries)
+        {
+            var proposedValues = entry.CurrentValues;
+            var databaseValues = entry.GetDatabaseValues();
+
+            if (databaseValues != null)
+            {
+                // Iterate through each property and decide how to merge the proposed value and the database value
+                foreach (var property in proposedValues.Properties)
+                {
+                    var proposedValue = proposedValues[property];
+                    var databaseValue = databaseValues[property];
+
+                    // TODO: Determine how to merge. This might involve user input, business logic, etc.
+                    // e.g., proposedValues[property] = ChooseValue(proposedValue, databaseValue);
+                }
+
+                // Update the original values to the database values and retry
+                entry.OriginalValues.SetValues(databaseValues);
+            }
+        }
+    }*/
+
+    
     private void ConvertDomainEvents()
     {
         var events = _context.ChangeTracker.Entries<BaseEntity>()

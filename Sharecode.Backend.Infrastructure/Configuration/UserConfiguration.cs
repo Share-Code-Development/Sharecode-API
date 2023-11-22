@@ -17,7 +17,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsClustered(false);
         
         //Configure the meta data column to be a JSON
-        builder.OwnsOne(x => x.Metadata, b => b.ToJson());
+        
+        builder.OwnsOne(x => x.Metadata, b =>
+        {
+            b.ToJson();
+        });
         builder.ToTable(x => x.HasCheckConstraint("CK_User_Ensure_Json", "ISJSON([Metadata]) > 0"));
 
         builder.HasOne(user => user.AccountSetting)

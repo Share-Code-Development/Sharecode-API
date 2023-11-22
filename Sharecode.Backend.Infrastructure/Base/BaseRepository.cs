@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Query;
 using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Base.Primitive;
+using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Infrastructure.Exceptions;
 
 namespace Sharecode.Backend.Infrastructure.Repositories;
@@ -34,7 +35,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         TEntity? entity = Table.Find(id);
         if (entity == null)
         {
-            throw new NoEntityFoundException(id);
+            throw new EntityNotFoundException(typeof(TEntity), id);
         }
         
         Delete(entity);

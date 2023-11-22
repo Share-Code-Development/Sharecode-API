@@ -14,13 +14,34 @@ public class HttpClientContext : IHttpClientContext
     private Guid? _userIdentifier = null;
     private User? _user = null;
     private bool? _isApiRequest = null;
-    public string? _cacheKey = null;
+    private string? _cacheKey = null;
+    private string? _emailAddress = null;
     
     public HttpClientContext(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
     {
         _contextAccessor = contextAccessor;
         _userRepository = userRepository;
         _isApiRequest = IsApiRequest;
+    }
+
+    public string? EmailAddress
+    {
+        get
+        {
+            if (IsApiRequest)
+                return null;
+
+            if (string.IsNullOrEmpty(_emailAddress))
+            {
+                string? emailAddress = _contextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email);
+                if (string.IsNullOrEmpty(emailAddress))
+                    return null;
+
+                _emailAddress = emailAddress;
+            }
+
+            return _emailAddress;
+        }
     }
 
     /// <summary>
@@ -97,6 +118,15 @@ public class HttpClientContext : IHttpClientContext
     }
 
     public bool HasCacheKey => !string.IsNullOrEmpty(_cacheKey);
+    public bool HasPermission(Permission key)
+    {
+        return true;
+    }
+
+    public async Task<bool> HasPermissionAsync(Permission key, CancellationToken token = default)
+    {
+        return true;
+    }
 
     private Guid? GetUserIdentifierFromClaim()
     {

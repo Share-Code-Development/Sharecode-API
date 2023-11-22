@@ -27,12 +27,14 @@ public abstract class AppException : Exception
     {
         ErrorCode = errorCode;
         StatusCode = statusCode;
+        PublicMessage = message ?? String.Empty;
     }
 
     protected AppException(string? message, Exception? innerException, long errorCode, HttpStatusCode statusCode) : base(message, innerException)
     {
         ErrorCode = errorCode;
         StatusCode = statusCode;
+        PublicMessage = message ?? String.Empty;
     }
 
     public AppException AddError(object error)

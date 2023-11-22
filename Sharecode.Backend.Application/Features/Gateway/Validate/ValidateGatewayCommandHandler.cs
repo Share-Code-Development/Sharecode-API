@@ -5,12 +5,14 @@ using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Exceptions;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Gateway;
+using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Enums;
+using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Domain.Repositories;
 
 namespace Sharecode.Backend.Application.Features.Gateway.Validate;
 
-public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayCommand, ValidateGatewayCommandResponse>
+public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayAppRequest, ValidateGatewayCommandResponse>
 {
     private readonly IGatewayRepository _gatewayRepository;
     private readonly IUserService _userService;
@@ -23,9 +25,9 @@ public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayComm
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<ValidateGatewayCommandResponse> Handle(ValidateGatewayCommand request, CancellationToken cancellationToken)
+    public async Task<ValidateGatewayCommandResponse> Handle(ValidateGatewayAppRequest appRequest, CancellationToken cancellationToken)
     {
-        GatewayRequest? gatewayRequest = await _gatewayRepository.GetAsync(request.GatewayId, token: cancellationToken);
+        GatewayRequest? gatewayRequest = await _gatewayRepository.GetAsync(appRequest.GatewayId, token: cancellationToken);
         if (gatewayRequest == null)
         {
             return ValidateGatewayCommandResponse.NotFound;
@@ -67,8 +69,11 @@ public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayComm
         }
         catch (Exception e)
         {
-            if (e is UserNotFoundException)
-                return ValidateGatewayCommandResponse.UserNotFound;
+            if (e is EntityNotFoundException notFoundException)
+            {
+                if(notFoundException?.EntityType == typeof(User))
+                    return ValidateGatewayCommandResponse.UserNotFound;
+            }
 
             throw;
         }
