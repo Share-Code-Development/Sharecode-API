@@ -1,10 +1,8 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace Sharecode.Backend.Domain.Base;
+namespace Sharecode.Backend.Domain.Base.Primitive;
 
 public abstract class BaseEntityWithMetadata : BaseEntity
 {
-    [Required] public Dictionary<string, object> Metadata { get; set; } = new Dictionary<string, object>();
+    public List<Meta> Metadata = new List<Meta>();
 
 }
 

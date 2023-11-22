@@ -16,6 +16,7 @@ public abstract class AppException : Exception
         StatusCode = statusCode;
     }
 
+    [Obsolete("Obsolete")]
     protected AppException(SerializationInfo info, StreamingContext context, long errorCode, HttpStatusCode statusCode) : base(info, context)
     {
         ErrorCode = errorCode;

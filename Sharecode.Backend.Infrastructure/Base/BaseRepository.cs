@@ -2,6 +2,8 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Sharecode.Backend.Domain.Base;
+using Sharecode.Backend.Domain.Base.Interfaces;
+using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Infrastructure.Exceptions;
 
 namespace Sharecode.Backend.Infrastructure.Repositories;
@@ -9,28 +11,27 @@ namespace Sharecode.Backend.Infrastructure.Repositories;
 public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : BaseEntity
 {
 
-    private readonly ShareCodeDbContext _dbContext;
-    private readonly DbSet<TEntity> _table;
+    protected readonly ShareCodeDbContext DbContext;
+    protected DbSet<TEntity> Table => DbContext.Set<TEntity>();
 
     public BaseRepository(ShareCodeDbContext dbContext)
     {
-        _dbContext = dbContext;
-        _table = _dbContext.Set<TEntity>();
+        DbContext = dbContext;
     }
 
     public void Add(TEntity entity)
     {
-        _table.Add(entity);
+        Table.Add(entity);
     }
 
-    public async Task AddAsync(TEntity entity)
+    public async Task AddAsync(TEntity entity, CancellationToken token)
     {
-        await _table.AddAsync(entity);
+        await Table.AddAsync(entity, token);
     }
 
     public void Delete(Guid id)
     {
-        TEntity? entity = _table.Find(id);
+        TEntity? entity = Table.Find(id);
         if (entity == null)
         {
             throw new NoEntityFoundException(id);
@@ -41,26 +42,39 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
     public void Delete(TEntity entity)
     {
-        _table.Remove(entity);
+        Table.Remove(entity);
     }
     
 
     public void Update(TEntity entity)
     {
-        _table.Update(entity);
+        Table.Update(entity);
     }
 
     public async Task<TEntity?> GetAsync(Guid id, bool track = true, CancellationToken token = default, bool includeSoftDeleted = false)
     {
         if (track)
         {
-            return await _table.FirstOrDefaultAsync(x => x.Id == id && ((includeSoftDeleted) || !x.IsDeleted), cancellationToken: token);
+            if (!includeSoftDeleted)
+            {
+                DbSet<TEntity> entities = Table;
+                Console.WriteLine(Table.Count());
+                List<TEntity> listAsync = DbContext.Set<TEntity>().ToList();
+                return await DbContext.Set<TEntity>().FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken: token);
+            }
+            
+            return await Table.FirstOrDefaultAsync(x => x.Id == id, cancellationToken: token);
         }
         else
         {
-           return await _table
+            if(!includeSoftDeleted)
+                return await Table
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken: token);
+            
+            return await Table
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id && ((includeSoftDeleted) || !x.IsDeleted), cancellationToken: token);
+                .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken: token);
         }
     }
 
@@ -68,11 +82,11 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
     {
         if (track)
         {
-            return _table.FirstOrDefault(x => x.Id == id && ((includeSoftDeleted) || !x.IsDeleted));
+            return Table.FirstOrDefault(x => x.Id == id && ((includeSoftDeleted) || !x.IsDeleted));
         }
         else
         {
-            return _table
+            return Table
                 .AsNoTracking()
                 .FirstOrDefault(x => x.Id == id && ((includeSoftDeleted) || !x.IsDeleted));
         }
@@ -80,7 +94,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
     public async Task<IReadOnlyList<TEntity>> ListAsync(int skip = 0, int take = 50, bool track = true, ISpecification<TEntity>? specification = null, CancellationToken token = default, bool includeSoftDeleted = false)
     {
-        IQueryable<TEntity> baseEntities = _table.AsQueryable();
+        IQueryable<TEntity> baseEntities = Table.AsQueryable();
 
         baseEntities = baseEntities.Where(x => (includeSoftDeleted) || !x.IsDeleted);
         

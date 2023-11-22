@@ -23,6 +23,9 @@ public class HttpClientContext : IHttpClientContext
         _isApiRequest = IsApiRequest;
     }
 
+    /// <summary>
+    /// Is the request coming from an API Endpoint
+    /// </summary>
     public bool IsApiRequest
     {
         get
@@ -35,6 +38,10 @@ public class HttpClientContext : IHttpClientContext
         }
     }
 
+    /// <summary>
+    /// Get the user who send the request
+    /// </summary>
+    /// <returns></returns>
     public async Task<Guid?> GetUserIdentifierAsync()
     {
         if (_userIdentifier != null)
@@ -46,6 +53,10 @@ public class HttpClientContext : IHttpClientContext
         return _userIdentifier;
     }
 
+    /// <summary>
+    /// Get the user as no tracking
+    /// </summary>
+    /// <returns></returns>
     public async Task<User?> GetNonTrackingUserAsync()
     {
         if (_user != null)
@@ -59,6 +70,10 @@ public class HttpClientContext : IHttpClientContext
         return _user;
     }
 
+    /// <summary>
+    /// What would be the request key, this is a scoped class so it will be same for each and every request
+    /// </summary>
+    /// <exception cref="InvalidCacheAccessException"></exception>
     public string CacheKey
     {
         get
@@ -80,6 +95,8 @@ public class HttpClientContext : IHttpClientContext
             throw new InvalidCacheAccessException(fullRequestUrl, true);
         }
     }
+
+    public bool HasCacheKey => !string.IsNullOrEmpty(_cacheKey);
 
     private Guid? GetUserIdentifierFromClaim()
     {

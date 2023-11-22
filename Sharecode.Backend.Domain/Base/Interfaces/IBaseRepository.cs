@@ -1,11 +1,11 @@
-using System.Linq.Expressions;
+using Sharecode.Backend.Domain.Base.Primitive;
 
-namespace Sharecode.Backend.Domain.Base;
+namespace Sharecode.Backend.Domain.Base.Interfaces;
 
 public interface IBaseRepository<TEntity>  where TEntity : BaseEntity
 {
     void Add(TEntity entity);
-    Task AddAsync(TEntity entity);
+    Task AddAsync(TEntity entity, CancellationToken token);
     void Delete(Guid id);
     void Delete(TEntity entity);
     void Update(TEntity entity);

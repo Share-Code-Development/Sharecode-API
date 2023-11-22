@@ -1,4 +1,4 @@
-namespace Sharecode.Backend.Domain.Base;
+namespace Sharecode.Backend.Domain.Base.Primitive;
 
 public class AggregateRootWithMetadata : BaseEntityWithMetadata
 {

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Sharecode.Backend.Domain.Base;
+using Sharecode.Backend.Domain.Base.Primitive;
 
 namespace Sharecode.Backend.Domain.Entity.Profile;
 

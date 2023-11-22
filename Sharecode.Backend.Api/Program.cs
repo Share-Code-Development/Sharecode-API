@@ -1,10 +1,13 @@
 using System.Net;
 using FluentValidation;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Quartz;
 using Serilog;
 using Sharecode.Backend.Api.Extensions;
+using Sharecode.Backend.Api.Filters;
 using Sharecode.Backend.Api.Middleware;
 using Sharecode.Backend.Api.Service;
 using Sharecode.Backend.Application;
@@ -48,7 +51,10 @@ builder.Host.UseSerilog((ctx, conf) =>
     conf.ReadFrom.Configuration(ctx.Configuration);
 });
 
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        options.Filters.Add(new ApiRequestFilter());
+    })
     .AddNewtonsoftJson(jsonOptions =>
     {
         jsonOptions.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
@@ -68,9 +74,13 @@ builder.Services.AddQuartz(conf =>
         });
 });
 
-builder.Services.AddQuartzHostedService(); 
-
-/*
+builder.Services.AddQuartzHostedService();
+builder.Services.AddFluentValidationRulesToSwagger();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+    // Additional Swagger configuration if needed
+});
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     var connectionStringTask = keyValueClient.GetAsync("redis-connection-string");
@@ -93,9 +103,16 @@ builder.Services.AddStackExchangeRedisCache(options =>
         EndPoints = {endPoint}
     };
 });
-*/
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    });}
 
 app.UseSerilogRequestLogging();
 app.UseMiddleware<ExceptionHandlingMiddleware>();

@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
@@ -6,8 +7,10 @@ using Sharecode.Backend.Application.Client;
 
 namespace Sharecode.Backend.Api.Controller;
 
+[Route("v1/api/[controller]")]
+[ApiController]
 public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientContext requestContext,
-        ILogger<AbstractBaseEndpoint> logger)
+        ILogger<AbstractBaseEndpoint> logger, IMediator mediator)
     : ControllerBase
 {
     private readonly IDistributedCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -25,6 +28,9 @@ public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientC
     {
         try
         {
+            if (!AppRequestContext.HasCacheKey)
+                return default;
+            
             if (ShouldSkipCache(NoCache))
             {
                 Response.Headers.Add(CacheStatusHeader, SkippedDueToDirective);
@@ -48,6 +54,9 @@ public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientC
     {
         try
         {
+            if (!AppRequestContext.HasCacheKey)
+                return;
+            
             if (ShouldSkipCache(NoStore))
             {
                 Response.Headers.Add(CacheStatusHeader, SkippedDueToDirective);
@@ -84,9 +93,18 @@ public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientC
         response = null;
         return false;
     }
-
-    protected void FrameCacheKey(string key)
+    
+    protected string FrameCacheKey(params string[] keys)
     {
-        requestContext.CacheKey = key;
+        string cacheKey = string.Empty;
+        foreach (var key in keys)
+        {
+            if (cacheKey == string.Empty)
+                cacheKey = key;
+            else
+                cacheKey += "-" + key;
+        }
+        requestContext.CacheKey = cacheKey;
+        return cacheKey;
     }
 }

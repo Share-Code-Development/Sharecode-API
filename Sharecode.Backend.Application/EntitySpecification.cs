@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Sharecode.Backend.Domain.Base;
+using Sharecode.Backend.Domain.Base.Primitive;
 
 namespace Sharecode.Backend.Application.Data;
 

@@ -1,9 +1,9 @@
 namespace Sharecode.Backend.Utilities.Email;
 
-public class EmailDeliveryDetail
+public class EmailTargets
 {
     public readonly string Target;
-    public EmailDeliveryDetail(string target)
+    public EmailTargets(string target)
     {
         Target = target;
     }

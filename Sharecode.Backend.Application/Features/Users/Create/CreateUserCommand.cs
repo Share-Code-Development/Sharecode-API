@@ -1,7 +1,6 @@
-using MediatR;
 using Sharecode.Backend.Application.Base;
 
-namespace Sharecode.Backend.Application.Users.Create;
+namespace Sharecode.Backend.Application.Features.Users.Create;
 
 public record CreateUserCommand(
     string EmailAddress, 

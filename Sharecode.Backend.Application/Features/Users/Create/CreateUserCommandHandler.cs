@@ -1,14 +1,12 @@
 using MediatR;
-using Newtonsoft.Json;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Application.Service;
-using Sharecode.Backend.Domain.Entity;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Domain.Repositories;
 
-namespace Sharecode.Backend.Application.Users.Create;
+namespace Sharecode.Backend.Application.Features.Users.Create;
 
 internal class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserCreatedResponse>
 {

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Domain.Base;
+using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Domain.Entity;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Infrastructure.Configuration;

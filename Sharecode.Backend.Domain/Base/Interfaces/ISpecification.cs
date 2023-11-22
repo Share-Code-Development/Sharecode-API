@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Sharecode.Backend.Domain.Base.Primitive;
 
 namespace Sharecode.Backend.Domain.Base;
 

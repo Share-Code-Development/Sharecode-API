@@ -1,5 +1,5 @@
 using FluentValidation;
-using Sharecode.Backend.Application.Users.Create;
+using Sharecode.Backend.Application.Features.Users.Create;
 
 namespace Sharecode.Backend.Api.Validators.User;
 

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace Sharecode.Backend.Domain.Base;
+namespace Sharecode.Backend.Domain.Base.Primitive;
 
 public abstract class BaseEntity
 {

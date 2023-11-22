@@ -1,3 +1,4 @@
+using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Enums;
 
@@ -5,7 +6,7 @@ namespace Sharecode.Backend.Domain.Dto;
 
 public sealed record AccountSettingDto(
     bool AllowTagging,
-    Dictionary<string, object> Metadata
+    List<Meta> Metadata
 )
 {
     public static AccountSettingDto From(User user)
@@ -25,7 +26,7 @@ public record UserDto(
     string LastName,
     string EmailAddress,
     bool EmailVerified,
-    Dictionary<string, object> Metadata,
+    List<Meta> Metadata,
     AccountVisibility Visibility,
     AccountSettingDto Settings,
     DateTime Created

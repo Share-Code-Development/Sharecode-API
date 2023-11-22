@@ -28,4 +28,5 @@ public class EmailTemplateKey
 public static class EmailTemplateKeys
 {
     public static readonly EmailTemplateKey EmailValidation = new EmailTemplateKey("validate-email.html", "Welcome to Sharecode! Verify your email address");
+    public static readonly EmailTemplateKey WelcomeUser = new EmailTemplateKey("welcome-email.html", "Welcome onboard {(WELCOME_USER)}");
 }

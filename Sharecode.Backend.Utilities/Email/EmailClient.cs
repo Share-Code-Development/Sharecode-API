@@ -22,7 +22,7 @@ public class EmailClient : IEmailClient
         _directoryConfiguration = directoryConfiguration.Value;
     }
     
-    public async Task SendTemplateMailAsync(EmailTemplateKey templateKey, EmailDeliveryDetail deliveryDetail, Dictionary<string, string>? placeholders)
+    public async Task SendTemplateMailAsync(EmailTemplateKey templateKey, EmailTargets targets, Dictionary<string, string>? placeholders, Dictionary<string, string>? subjectPlaceholders = null)
     {
         var htmlTemplate = await templateKey.GetOrFetchAsync(_directoryConfiguration.EmailTemplates);
         EmailTemplate emailTemplate = new EmailTemplate(htmlTemplate, placeholders);
@@ -55,18 +55,28 @@ public class EmailClient : IEmailClient
             _port = port;
         }
 
+        var subject = templateKey.Subject;
+        if (subjectPlaceholders != null)
+        {
+            foreach (var placeholder in subjectPlaceholders)
+            {
+                subject = subject.Replace("{("+placeholder.Key+")}", placeholder.Value);
+            }
+        }
+
+
 
         var bodyBuilder = new BodyBuilder();
         bodyBuilder.HtmlBody = emailTemplate.TemplateHtml;
         var mailMessage = new MimeMessage();
         mailMessage.From.Add(new MailboxAddress("Sharecode", _from));
-        mailMessage.To.Add(new MailboxAddress("Alen Geo Alex", deliveryDetail.Target));
-        mailMessage.Subject = templateKey.Subject;
+        mailMessage.To.Add(new MailboxAddress("Alen Geo Alex", targets.Target));
+        mailMessage.Subject = subject;
         mailMessage.Body = bodyBuilder.ToMessageBody();
 
         using var client = new SmtpClient();
         await client.ConnectAsync(_host, _port!.Value, SecureSocketOptions.Auto);
         await client.AuthenticateAsync(_username, _password);
-        string async = await client.SendAsync(mailMessage);
+        await client.SendAsync(mailMessage);
     }
 }

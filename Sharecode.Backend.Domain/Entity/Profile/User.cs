@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Sharecode.Backend.Domain.Base;
+using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Domain.Enums;
-using Sharecode.Backend.Domain.Events;
+using Sharecode.Backend.Domain.Events.Users;
 
 namespace Sharecode.Backend.Domain.Entity.Profile;
 
@@ -54,15 +55,13 @@ public class User : AggregateRootWithMetadata
     [Length(minimumLength: 9, maximumLength: 300)]
     public string NormalizedFullName
     {
-        get
-        {
-            return FullName.ToUpper();
-        }
+        get => FullName.ToUpper();
         private set
         {
             
         }
     }
+
     public byte[]? Salt { get; set; }
     public byte[]? PasswordHash { get; set; }
     [Required]
@@ -77,5 +76,15 @@ public class User : AggregateRootWithMetadata
     {
         UserCreatedDomainEvent @event = UserCreatedDomainEvent.Create(this);
         RaiseDomainEvent(@event);
+    }
+
+    public bool VerifyUser()
+    {
+        if(EmailVerified)
+            return false;
+
+        EmailVerified = true;
+        RaiseDomainEvent(UserVerifiedDomainEvent.Create(this));
+        return true;
     }
 }

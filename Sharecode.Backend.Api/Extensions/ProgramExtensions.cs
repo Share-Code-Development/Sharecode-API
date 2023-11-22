@@ -15,14 +15,28 @@ public static class ProgramExtensions
             configurationManager.GetSection("JWT").Bind(options));
         service.Configure<LocalDirectoryConfiguration>(options =>
             configurationManager.GetSection("LocalDirectory").Bind(options));
-        var conf = new LocalDirectoryConfiguration();
-        configurationManager.GetSection("LocalDirectory").Bind(conf);
+        service.Configure<GatewayLimitConfiguration>(options =>
+            configurationManager.GetSection("GatewayLimit").Bind(options)
+        );
         return service;
     }
 
     public static IServiceCollection RegisterServices(this IServiceCollection service)
     {
         service.AddSingleton<IEmailClient, EmailClient>();
+        return service;
+    }
+
+    public static IServiceCollection RegisterCors(this IServiceCollection service)
+    {
+        service.AddCors(options =>
+        {
+            options.AddPolicy("GatewayPolicy", builder =>
+            {
+                builder.WithOrigins("")
+                    .WithMethods("PUT");
+            });
+        });
         return service;
     }
 }

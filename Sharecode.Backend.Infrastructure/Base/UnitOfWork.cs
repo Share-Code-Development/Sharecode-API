@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Domain.Base;
+using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Infrastructure.Outbox;
 using ILogger = Serilog.ILogger;
 

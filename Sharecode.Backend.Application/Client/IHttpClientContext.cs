@@ -8,4 +8,5 @@ public interface IHttpClientContext
     Task<Guid?> GetUserIdentifierAsync();
     Task<User?> GetNonTrackingUserAsync();
     string CacheKey { get; set; }
+    bool HasCacheKey { get;  }
 }

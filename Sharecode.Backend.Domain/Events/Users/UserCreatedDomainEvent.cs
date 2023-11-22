@@ -1,7 +1,6 @@
-using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Entity.Profile;
 
-namespace Sharecode.Backend.Domain.Events;
+namespace Sharecode.Backend.Domain.Events.Users;
 
 public sealed record UserCreatedDomainEvent(
     Guid UserId,
@@ -10,7 +9,7 @@ public sealed record UserCreatedDomainEvent(
     string LastName,
     string FullName,
     string EmailAddress
-    ) : IDomainEvent
+) : UserEvent(UserId, FullName, EmailAddress)
 {
 
     public static UserCreatedDomainEvent Create(User user)
