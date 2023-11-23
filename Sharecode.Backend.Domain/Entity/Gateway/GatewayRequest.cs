@@ -18,6 +18,7 @@ public class GatewayRequest : BaseEntity
         var expiry = GetExpiry(requestType);
         return new GatewayRequest()
         {
+            Id = Guid.NewGuid(),
             RequestType = requestType,
             SourceId = sourceId,
             Expiry = expiry

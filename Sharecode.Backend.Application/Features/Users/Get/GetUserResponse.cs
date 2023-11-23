@@ -1,4 +1,3 @@
-using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Domain.Dto;
 using Sharecode.Backend.Domain.Entity.Profile;

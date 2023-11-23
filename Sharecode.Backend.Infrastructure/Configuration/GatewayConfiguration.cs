@@ -15,10 +15,10 @@ public class GatewayConfiguration : IEntityTypeConfiguration<GatewayRequest>
         
         // Partial index for IsDeleted
         builder.HasIndex(p => p.IsDeleted)
-            .HasFilter("IsDeleted = 0");
+            .HasFilter("\"IsDeleted\" = true");
 
         // Partial index for Completed
         builder.HasIndex(p => p.IsCompleted)
-            .HasFilter("IsCompleted = 0");
+            .HasFilter("\"IsCompleted\" = true");
     }
 } 

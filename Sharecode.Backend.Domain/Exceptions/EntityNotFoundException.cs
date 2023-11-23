@@ -12,7 +12,7 @@ public class EntityNotFoundException : AppException
     {
         EntityType = entityType;
         EntityIdentifier = identifier;
-        SetMessage($"The requested {entityType.Name} with identifier {identifier} is not found");
+        SetMessage($"The requested {entityType.Name.ToLower()} with identifier {identifier} is not found");
     }
     
 }

@@ -5,6 +5,7 @@ using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Domain.Exceptions;
+using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Exceptions;
 
 namespace Sharecode.Backend.Infrastructure.Repositories;

@@ -28,7 +28,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.BindConfigurationEntries(builder.Configuration);
 builder.Services.AddSingleton<IKeyValueClient, KeyValueClient>();
 builder.Services.AddHttpContextAccessor();
-
+builder.Host.UseSerilog((ctx, conf) =>
+{
+    conf.ReadFrom.Configuration(ctx.Configuration);
+});
 builder.Services.AddScoped<IHttpClientContext, HttpClientContext>();
 
 //Cheeky way to access KeyValueClient
@@ -51,10 +54,7 @@ builder.Services
     .RegisterApplicationLayer()
     .RegisterPresentationLayer();
 
-builder.Host.UseSerilog((ctx, conf) =>
-{
-    conf.ReadFrom.Configuration(ctx.Configuration);
-});
+
 
 builder.Services.AddControllers(options =>
     {

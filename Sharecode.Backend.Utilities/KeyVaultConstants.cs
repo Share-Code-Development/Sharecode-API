@@ -36,4 +36,20 @@ public class KeyVaultConstants
     public static string SmtpFromName => "smtp-from-name";
 
     #endregion
+
+    #region PSQL
+
+    public static string PsDatabase => "ps-database";
+    public static string PsHost => "ps-host";
+    public static string PsPort => "ps-port";
+    public static string PsUserName => "ps-username";
+    public static string PsPassword => "ps-password";
+
+    #endregion
+
+    #region Google Secrets
+    public static string GoogleClientId => "google-client-id";
+    public static string GoogleClientSecret => "google-client-secret";
+
+    #endregion
 }

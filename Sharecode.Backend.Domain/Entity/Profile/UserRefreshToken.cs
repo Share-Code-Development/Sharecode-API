@@ -12,6 +12,7 @@ public class UserRefreshToken : BaseEntity
     [Required] [Key] public Guid TokenIdentifier { get; init; }
     public Guid IssuedFor { get; init; }
     public bool IsValid { get; private set; }
+    
 
     public override void SoftDeleteEntity()
     {

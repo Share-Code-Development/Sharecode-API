@@ -1,5 +1,6 @@
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Infrastructure.Db;
 
 namespace Sharecode.Backend.Infrastructure.Repositories;
 

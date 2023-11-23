@@ -14,7 +14,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(x => x.EmailAddress).IsUnique();
 
         builder.HasIndex(x => x.NormalizedFullName)
-            .IsClustered(false);
+            .HasMethod("btree");
         
         //Configure the meta data column to be a JSON
         
@@ -22,7 +22,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         {
             b.ToJson();
         });
-        builder.ToTable(x => x.HasCheckConstraint("CK_User_Ensure_Json", "ISJSON([Metadata]) > 0"));
+        builder.ToTable(x => x.HasCheckConstraint("CK_User_Ensure_Json", "\"Metadata\"::jsonb IS NOT NULL"));
 
         builder.HasOne(user => user.AccountSetting)
             .WithOne(accountSettings => accountSettings.User)
@@ -54,5 +54,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.IsDeleted)
             .HasDefaultValue(false);
         
+        // Partial index for IsDeleted
+        builder.HasIndex(p => p.IsDeleted)
+            .HasFilter("\"IsDeleted\" = true");
+
+        builder.HasIndex(p => p.EmailVerified)
+            .HasFilter("\"EmailVerified\" = true");
+
     }
 }

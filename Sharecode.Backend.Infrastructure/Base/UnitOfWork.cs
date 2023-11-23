@@ -3,33 +3,27 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Domain.Base.Primitive;
+using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Outbox;
 
 namespace Sharecode.Backend.Infrastructure.Base;
 
-public class UnitOfWork : IUnitOfWork
+public class UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger) : IUnitOfWork
 {
-    private readonly ShareCodeDbContext _context;
-    private readonly ILogger<IUnitOfWork> _log;
-    public UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger)
-    {
-        _context = context;
-        _log = logger;
-    }
-
     public void Commit()
     {
         SetModified();
         ConvertDomainEvents();
+        EnsureTimeZoneForNg();
         try
         {
-            _context.SaveChanges();
+            context.SaveChanges();
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            _log.LogError(ex, "Concurrency conflict detected when committing changes.");
+            logger.LogError(ex, "Concurrency conflict detected when committing changes.");
             HandleConcurrencyException(ex);
-            _context.SaveChanges();
+            context.SaveChanges();
         }
         
     }
@@ -38,15 +32,16 @@ public class UnitOfWork : IUnitOfWork
     {
         SetModified();
         ConvertDomainEvents();
+        EnsureTimeZoneForNg();
         try
         {
-            await _context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            _log.LogError(ex, "Concurrency conflict detected when committing changes asynchronously.");
+            logger.LogError(ex, "Concurrency conflict detected when committing changes asynchronously.");
             HandleConcurrencyException(ex);
-            await _context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -56,9 +51,10 @@ public class UnitOfWork : IUnitOfWork
     }
     
     
+    
     public void Dispose()
     {
-        _context.Dispose();
+        context.Dispose();
     }
 
     
@@ -103,7 +99,7 @@ public class UnitOfWork : IUnitOfWork
     
     private void ConvertDomainEvents()
     {
-        var events = _context.ChangeTracker.Entries<BaseEntity>()
+        var events = context.ChangeTracker.Entries<BaseEntity>()
             .Select(x => x.Entity)
             .SelectMany(x =>
             {
@@ -115,7 +111,7 @@ public class UnitOfWork : IUnitOfWork
             .Select(x => new OutboxMessage()
             {
                 Id = Guid.NewGuid(),
-                OccuredOnUtc = DateTime.Now,
+                OccuredOnUtc = DateTime.UtcNow,
                 Type = x.GetType().Name,
                 Content = JsonConvert.SerializeObject(x, new JsonSerializerSettings()
                 {
@@ -124,12 +120,12 @@ public class UnitOfWork : IUnitOfWork
             })
             .ToList();
 
-        _context.Set<OutboxMessage>().AddRange(events);
+        context.Set<OutboxMessage>().AddRange(events);
     }
     
     private void SetModified()
     {
-        var entities = _context.ChangeTracker.Entries()
+        var entities = context.ChangeTracker.Entries()
             .Where(e => e.Entity is BaseEntity && (e.State == EntityState.Added || e.State == EntityState.Modified));
 
         foreach (var entity in entities)
@@ -155,7 +151,7 @@ public class UnitOfWork : IUnitOfWork
                 {
                     if (baseEntity.IsDeleted)
                     {
-                        _log.LogInformation($"Delete has been called on again already deleted. Id: {baseEntity.Id}!");
+                        logger.LogInformation($"Delete has been called on again already deleted. Id: {baseEntity.Id}!");
                         continue;
                     }
                     
@@ -164,5 +160,35 @@ public class UnitOfWork : IUnitOfWork
                 }
             }
         }
+    }
+    
+
+    private void EnsureTimeZoneForNg()
+    {
+        foreach (var entry in context.ChangeTracker.Entries()
+                     .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified))
+        {
+            foreach (var property in entry.Properties)
+            {
+                if (property.CurrentValue is DateTime)
+                {
+                    var currentValue = (DateTime)property.CurrentValue;
+                    property.CurrentValue = DateTime.SpecifyKind(currentValue, DateTimeKind.Utc);
+                }
+            }
+        }
+
+        foreach (var entry in context.ChangeTracker.Entries())
+        {
+            foreach (var property in entry.Properties)
+            {
+                if (property.CurrentValue is DateTime)
+                {
+                    var currentValue = (DateTime)property.CurrentValue;
+                    Console.WriteLine($"Entity: {entry.Entity.GetType().Name}, Property: {property.Metadata.Name}, DateTimeKind: {currentValue.Kind}");
+                }
+            }
+        }
+
     }
 }

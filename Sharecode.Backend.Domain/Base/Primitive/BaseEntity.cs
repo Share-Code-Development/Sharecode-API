@@ -13,7 +13,7 @@ public abstract class BaseEntity
     [Key] [Required] [DatabaseGenerated(DatabaseGeneratedOption.Identity)] public Guid Id { get; set; }
     [Required] public DateTime CreatedAt { get; set; } = DateTime.Now;
     [Required] public DateTime ModifiedAt { get; set; } 
-    [Timestamp] public byte[] Version { get; set; } = null!;
+    [Timestamp] public uint Version { get; set; }
     [Required] public bool IsDeleted { get; private set; } = false;
     [NotMapped] public bool HardDelete { get; private set; } = false;
     

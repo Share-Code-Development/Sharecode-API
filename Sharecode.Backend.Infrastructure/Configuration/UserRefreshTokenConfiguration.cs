@@ -8,7 +8,7 @@ public class UserRefreshTokenConfiguration : IEntityTypeConfiguration<UserRefres
 {
     public void Configure(EntityTypeBuilder<UserRefreshToken> builder)
     {
-        builder.HasIndex(x => x.IssuedFor).IsClustered(false);
+        builder.HasIndex(x => x.IssuedFor).HasMethod("btree");
         builder.Property(x => x.IssuedFor).IsRequired();
         builder.HasKey(t => t.TokenIdentifier);
 

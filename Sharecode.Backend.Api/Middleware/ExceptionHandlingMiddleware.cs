@@ -48,7 +48,7 @@ public class ExceptionHandlingMiddleware
         ExceptionDetail exceptionDetail = BuildExceptionMessage(exception, _env.IsDevelopment());
         context.Response.StatusCode = exceptionDetail.StatusCode;
         context.Response.ContentType = "application/json";
-        if (exceptionDetail.StatusCode < 500 || exceptionDetail.StatusCode >= 400)
+        if (exceptionDetail.StatusCode is < 500 and >= 300 )
         {
             context.Response.Headers["SCE-Code"] = exceptionDetail.ErrorCode.ToString();
             context.Response.Headers["SCE-Message"] = exceptionDetail.Message;

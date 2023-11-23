@@ -1,12 +1,12 @@
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
+using Npgsql;
+using Sharecode.Backend.Utilities;
 using Sharecode.Backend.Utilities.Configuration;
 using Sharecode.Backend.Utilities.KeyValue;
 
-namespace Sharecode.Backend.Infrastructure;
+namespace Sharecode.Backend.Infrastructure.Db;
 
 public class ShareCodeDbContextFactory : IDesignTimeDbContextFactory<ShareCodeDbContext>
 {
@@ -24,22 +24,23 @@ public class ShareCodeDbContextFactory : IDesignTimeDbContextFactory<ShareCodeDb
         configuration.GetSection("CloudFlareKV").Bind(keyValueConfiguration);
 
         KeyValueClient keyValueClient = new KeyValueClient(keyValueConfiguration);
-        Namespace? result = keyValueClient.GetKeysOfNamespaceAsync().GetAwaiter().GetResult();
+        Namespace? nameSpace = keyValueClient.GetKeysOfNamespaceAsync().GetAwaiter().GetResult();
 
-        if (result == null)
+        if (nameSpace == null)
             throw new Exception("Failed to fetch data from Key Vault");
         
-        SqlConnectionStringBuilder connectionStringBuilder = new SqlConnectionStringBuilder()
+        NpgsqlConnectionStringBuilder connectionStringBuilder = new NpgsqlConnectionStringBuilder()
         {
-            DataSource = result.Of("sql-server-data-source")?.Value ?? string.Empty,
-            InitialCatalog = result.Of("sql-server-initial-catalog")?.Value ?? string.Empty,
-            UserID = result.Of("sql-server-user-id")?.Value ?? string.Empty,
-            IntegratedSecurity = false,
-            Password = result.Of("sql-server-password")?.Value ?? string.Empty,
-            MultipleActiveResultSets = true
+            Database = nameSpace.Of(KeyVaultConstants.PsDatabase)?.Value ?? string.Empty,
+            Host = nameSpace.Of(KeyVaultConstants.PsHost)?.Value ?? string.Empty,
+            Username = nameSpace.Of(KeyVaultConstants.PsUserName)?.Value ?? string.Empty,
+            Password = nameSpace.Of(KeyVaultConstants.PsPassword)?.Value ?? string.Empty,
+            Port = int.Parse(nameSpace.Of(KeyVaultConstants.PsPort)?.Value ?? "5432"),
+            ApplicationName = "Sharecode"
         };
+        
         var optionsBuilder = new DbContextOptionsBuilder<ShareCodeDbContext>();
-        optionsBuilder.UseSqlServer(connectionStringBuilder.ConnectionString);
+        optionsBuilder.UseNpgsql(connectionStringBuilder.ConnectionString);
         return new ShareCodeDbContext(optionsBuilder.Options);
     }
 }

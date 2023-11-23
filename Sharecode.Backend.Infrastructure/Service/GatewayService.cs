@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Gateway;
 using Sharecode.Backend.Domain.Enums;
+using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Utilities.Configuration;
 
 namespace Sharecode.Backend.Infrastructure.Service;

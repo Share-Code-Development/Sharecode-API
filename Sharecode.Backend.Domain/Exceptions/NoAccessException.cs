@@ -1,8 +1,10 @@
 using System.Net;
 using System.Runtime.Serialization;
+using Sharecode.Backend.Utilities.JsonExceptions;
 
 namespace Sharecode.Backend.Domain.Exceptions;
 
+[ExceptionDetail(errorCode: 34181, "The user doesn't have privilege to access the provided entity")] //No Access
 public class NoAccessException : AppException
 {
 

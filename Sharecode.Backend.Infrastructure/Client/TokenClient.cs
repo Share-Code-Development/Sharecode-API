@@ -31,8 +31,8 @@ public class TokenClient(Namespace keyVaultNamespace, IOptions<JwtConfiguration>
 
         UserRefreshToken userRefreshToken = new UserRefreshToken()
         {
+            IssuedFor = user.Id,
             TokenIdentifier = tokenIdentifier,
-            IssuedFor = user.Id
         };
         
         return new AccessCredentials(accessToken, refreshToken, userRefreshToken);

@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using Sharecode.Backend.Application.Behaviours;
+using Sharecode.Backend.Utilities.SecurityClient;
 
 namespace Sharecode.Backend.Application;
 
@@ -15,6 +16,7 @@ public static class DependencyInjection
             conf.RegisterServicesFromAssembly(assembly);
             conf.AddOpenBehavior(typeof(ValidationBehaviour<,>));
         });
+        collection.AddSingleton<ISecurityClient>(new SecurityClient());
         return collection;
     }
 }

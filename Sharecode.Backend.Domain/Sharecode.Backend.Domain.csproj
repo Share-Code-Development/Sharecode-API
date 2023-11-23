@@ -17,4 +17,8 @@
       <Folder Include="Base\Exceptions\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Sharecode.Backend.Utilities\Sharecode.Backend.Utilities.csproj" />
+    </ItemGroup>
+
 </Project>

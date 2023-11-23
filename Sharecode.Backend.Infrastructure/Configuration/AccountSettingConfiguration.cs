@@ -10,7 +10,7 @@ public class AccountSettingConfiguration : IEntityTypeConfiguration<AccountSetti
     public void Configure(EntityTypeBuilder<AccountSetting> builder)
     {
         builder.OwnsOne(x => x.Metadata, b => b.ToJson());
-        builder.ToTable(x => x.HasCheckConstraint("CK_AccountSetting_Ensure_Json", "ISJSON([Metadata]) > 0"));
+        builder.ToTable(x => x.HasCheckConstraint("CK_AccountSetting_Ensure_Json", "\"Metadata\"::jsonb IS NOT NULL"));
 
     }
 }

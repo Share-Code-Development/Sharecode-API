@@ -1,7 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Service;
@@ -9,8 +9,10 @@ using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Base;
 using Sharecode.Backend.Infrastructure.Client;
+using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Repositories;
 using Sharecode.Backend.Infrastructure.Service;
+using Sharecode.Backend.Utilities;
 using Sharecode.Backend.Utilities.KeyValue;
 
 namespace Sharecode.Backend.Infrastructure;
@@ -22,20 +24,22 @@ public static class DependencyInjection
         if (nameSpace == null)
             throw new Exception("Failed to fetch data from Key Vault");
         
-        SqlConnectionStringBuilder connectionStringBuilder = new SqlConnectionStringBuilder()
+        NpgsqlConnectionStringBuilder connectionStringBuilder = new NpgsqlConnectionStringBuilder()
         {
-            DataSource = nameSpace.Of("sql-server-data-source")?.Value ?? string.Empty,
-            InitialCatalog = nameSpace.Of("sql-server-initial-catalog")?.Value ?? string.Empty,
-            UserID = nameSpace.Of("sql-server-user-id")?.Value ?? string.Empty,
-            IntegratedSecurity = false,
-            Password = nameSpace.Of("sql-server-password")?.Value ?? string.Empty,
-            MultipleActiveResultSets = true
+            Database = nameSpace.Of(KeyVaultConstants.PsDatabase)?.Value ?? string.Empty,
+            Host = nameSpace.Of(KeyVaultConstants.PsHost)?.Value ?? string.Empty,
+            Username = nameSpace.Of(KeyVaultConstants.PsUserName)?.Value ?? string.Empty,
+            Password = nameSpace.Of(KeyVaultConstants.PsPassword)?.Value ?? string.Empty,
+            Port = int.Parse(nameSpace.Of(KeyVaultConstants.PsPort)?.Value ?? "5432"),
+            ApplicationName = "Sharecode",
+            IncludeErrorDetail = true
         };
+
         collection.AddDbContext<ShareCodeDbContext>(options =>
         {
-            options.UseSqlServer(connectionStringBuilder.ConnectionString)
-                .LogTo(Console.WriteLine, LogLevel.Information);
+            options.UseNpgsql(connectionStringBuilder.ConnectionString);
         });
+        
         collection.AddScoped<IUnitOfWork, UnitOfWork>();
         collection.AddSingleton<ITokenClient, TokenClient>();
         collection.AddSingleton<IJwtClient, JwtClient>();

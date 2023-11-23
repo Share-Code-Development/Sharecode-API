@@ -1,51 +1,35 @@
 using MediatR;
+using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Models;
-using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.SecurityClient;
 
 namespace Sharecode.Backend.Application.Features.Users.Create;
 
-internal class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserCreatedResponse>
+internal class CreateUserCommandHandler(IUnitOfWork unitOfWork, IUserRepository userRepository,
+        IRefreshTokenRepository refreshTokenRepository, ITokenClient tokenClient, ISecurityClient securityClient)
+    : IRequestHandler<CreateUserCommand, UserCreatedResponse>
 {
-    //Inject Repo
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IUserRepository _userRepository;
-    private readonly IRefreshTokenRepository _refreshTokenRepository;
-    private readonly ITokenClient _tokenClient;
-    public CreateUserCommandHandler(IUnitOfWork unitOfWork, IUserRepository userRepository, IRefreshTokenRepository refreshTokenRepository, ITokenClient tokenClient)
-    {
-        _unitOfWork = unitOfWork;
-        _userRepository = userRepository;
-        _refreshTokenRepository = refreshTokenRepository;
-        _tokenClient = tokenClient;
-    }
-
     public async Task<UserCreatedResponse> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
-        var user = new User()
+        securityClient.CreatePasswordHash(command.Password!, out var passwordHash, out var salt);
+        User user = new User()
         {
-            EmailAddress = command.EmailAddress,
-            FirstName = command.FirstName,
-            MiddleName = command.MiddleName,
-            LastName = command.LastName,
-            Salt = command.Salt,
-            PasswordHash = command.PasswordHash,
-            Visibility = AccountVisibility.Private,
+            EmailAddress = command.EmailAddress!,
+            FirstName = command.FirstName!,
+            LastName = command.LastName!,
+            Visibility = AccountVisibility.Public,
+            Salt = salt,
+            PasswordHash = passwordHash,
         };
-        user.AccountSetting = new()
-        {
-            User = user 
-        };
-
-        _userRepository.Register(user);
-        AccessCredentials accessCredentials = _tokenClient.Generate(user);
-        _refreshTokenRepository.Add(accessCredentials.UserRefreshToken);
         
-        await _unitOfWork.CommitAsync(cancellationToken);
-        
-        return UserCreatedResponse.From(user, accessCredentials);
+        userRepository.Register(user);
+        /*AccessCredentials? accessCredentials = tokenClient.Generate(user);
+        await refreshTokenRepository.AddAsync(accessCredentials!.UserRefreshToken, cancellationToken);*/
+        await unitOfWork.CommitAsync(cancellationToken);
+        return UserCreatedResponse.From(user);
     }
 }

@@ -62,6 +62,7 @@ public class User : AggregateRootWithMetadata
         }
     }
 
+    public DateTime LastLogin { get; private set; } = DateTime.UtcNow;
     public byte[]? Salt { get; set; }
     public byte[]? PasswordHash { get; set; }
     [Required]
@@ -71,9 +72,14 @@ public class User : AggregateRootWithMetadata
     public AccountSetting AccountSetting { get; set; }
     [Required]
     public required AccountVisibility Visibility { get; set; }
+    public bool Active { get; private set; }
+    public string? InActiveReason { get; private set; }
     
     public override void RaiseCreatedEvent()
     {
+        if(EmailVerified)
+            return;
+        
         UserCreatedDomainEvent @event = UserCreatedDomainEvent.Create(this);
         RaiseDomainEvent(@event);
     }
@@ -86,5 +92,39 @@ public class User : AggregateRootWithMetadata
         EmailVerified = true;
         RaiseDomainEvent(UserVerifiedDomainEvent.Create(this));
         return true;
+    }
+
+    public bool SetInActive(string reason)
+    {
+        if(!Active)
+            return false;
+
+        InActiveReason = reason;
+        Active = false;
+        RaiseDomainEvent(AccountSetInActiveDomainEvent.Create(this));
+        return true;
+    }
+
+    public bool SetActive()
+    {
+        if (Active)
+            return false;
+
+        InActiveReason = null;
+        Active = true;
+        return true;
+    }
+
+    public void SetLastLogin()
+    {
+        LastLogin = DateTime.UtcNow;
+    }
+
+    public void ResendEmailVerification()
+    {
+        if(EmailVerified)
+            return;
+        
+        RaiseDomainEvent(UserCreatedDomainEvent.Create(this));
     }
 }

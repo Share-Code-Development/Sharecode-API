@@ -3,25 +3,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Quartz;
+using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Domain.Base;
+using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Outbox;
 
 namespace Sharecode.Backend.Infrastructure.Jobs;
 
 [DisallowConcurrentExecution]
-public class ProcessOutboxJob : IJob
+public class ProcessOutboxJob(ShareCodeDbContext dbContext, IPublisher publisher, ILogger<ProcessOutboxJob> logger,
+        IUnitOfWork unitOfWork)
+    : IJob
 {
-
-    private readonly ShareCodeDbContext _dbContext;
-    private readonly IPublisher _publisher;
-    private readonly ILogger<ProcessOutboxJob> _logger;
-
-    public ProcessOutboxJob(ShareCodeDbContext dbContext, IPublisher publisher, ILogger<ProcessOutboxJob> logger)
-    {
-        _dbContext = dbContext;
-        _publisher = publisher;
-        _logger = logger;
-    }
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task Execute(IJobExecutionContext context)
     {
@@ -47,7 +41,7 @@ public class ProcessOutboxJob : IJob
                                       $"Attempt: {outboxMessage.Attempt}. " +
                                       $"Error Message: {e.Message}, " +
                                       $"Error Stacktrace: {e.StackTrace}";
-                _logger.LogCritical(errorMessage);
+                logger.LogCritical(errorMessage);
                 errors ??= JsonConvert.DeserializeObject<List<string>>(outboxMessage.Error) ?? new List<string>();
                 errors.Add(errorMessage);
                 outboxMessage.Error = JsonConvert.SerializeObject(errors);
@@ -62,7 +56,7 @@ public class ProcessOutboxJob : IJob
                                       $"MessageType : {outboxMessage.Type}, " +
                                       $"MessageContent : {outboxMessage.Content}, " +
                                       $"Attempt: {outboxMessage.Attempt}. ";
-                _logger.LogCritical(errorMessage);
+                logger.LogCritical(errorMessage);
                 errors.Add(errorMessage);
                 outboxMessage.Error = JsonConvert.SerializeObject(errors);
                 continue;   
@@ -70,7 +64,7 @@ public class ProcessOutboxJob : IJob
             
             try
             {
-                await _publisher.Publish(domainEvent, context.CancellationToken);
+                await publisher.Publish(domainEvent, context.CancellationToken);
             }
             catch (Exception e)
             {
@@ -80,7 +74,7 @@ public class ProcessOutboxJob : IJob
                                       $"Attempt: {outboxMessage.Attempt}. " +
                                       $"Error Message: {e.Message}, " +
                                       $"Error Stacktrace: {e.StackTrace}";
-                _logger.LogCritical(errorMessage);
+                logger.LogCritical(errorMessage);
                 errors ??= JsonConvert.DeserializeObject<List<string>>(outboxMessage.Error) ?? new List<string>();
                 errors.Add(errorMessage);
                 outboxMessage.Error = JsonConvert.SerializeObject(errors);
@@ -91,12 +85,12 @@ public class ProcessOutboxJob : IJob
             outboxMessage.ProcessedOnUtc = DateTime.UtcNow;
         }
 
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.CommitAsync();
     }
 
     private async Task<List<OutboxMessage>> FetchMessages(CancellationToken token = default)
     {
-        var messages = await _dbContext
+        var messages = await dbContext
             .Set<OutboxMessage>()
             .Where(message => message.ProcessedOnUtc == null && message.Attempt <= 3)
             .Take(20)
