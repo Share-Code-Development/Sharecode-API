@@ -2,7 +2,7 @@ name: .NET 8 CI/CD Pipeline for Sharecode.Backend.Api
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'Sharecode.Backend.Api/**'
       - '**.sln'
@@ -32,17 +32,17 @@ jobs:
     # Docker steps assume you have a Dockerfile set up in your repository
     - name: Build Docker Image
       run: |
-        docker build -t sharecode-backend-api:latest -f Sharecode.Backend.Api/Dockerfile .
+        docker build -t sharecode-api:latest -f Sharecode.Backend.Api/Dockerfile .
 
     - name: Docker Login
       run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/master'
 
     - name: Push Docker Image
       run: |
-        docker tag sharecode-backend-api:latest your-docker-hub-name/sharecode-backend-api:latest
-        docker push your-docker-hub-name/sharecode-backend-api:latest
-      if: github.ref == 'refs/heads/main'
+        docker tag sharecode-api:latest alenalex/sharecode-api:latest
+        docker push alenalex/sharecode-api:develop
+      if: github.ref == 'refs/heads/master'
 
     - name: Deploy to VM
       uses: appleboy/ssh-action@master
