@@ -48,7 +48,7 @@ jobs:
         username: ${{ secrets.VM_USERNAME }}
         password: ${{ secrets.VM_PASSWORD }}
         script: |
-          docker pull your-docker-hub-name/sharecode-backend-api:latest
-          docker stop sharecode-backend-api || true
-          docker rm sharecode-backend-api || true
-          docker run -d --name sharecode-backend-api -p 80:80 your-docker-hub-name/sharecode-backend-api:latest
+          docker pull alenalex/sharecode-api:latest
+          docker stop sharecode-api || true
+          docker rm sharecode-api || true
+          docker run -d --name sharecode-backend-api -p 80:80 alenalex/sharecode-api:latest
