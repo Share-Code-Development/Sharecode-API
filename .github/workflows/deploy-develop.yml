@@ -51,4 +51,4 @@ jobs:
           docker pull alenalex/sharecode-api:latest
           docker stop sharecode-api || true
           docker rm sharecode-api || true
-          docker run -d --name sharecode-backend-api -p 80:80 alenalex/sharecode-api:latest
+          docker run -d --name sharecode-backend-api -p 80:45012 alenalex/sharecode-api:latest
