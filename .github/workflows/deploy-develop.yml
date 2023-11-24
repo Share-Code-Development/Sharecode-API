@@ -62,5 +62,5 @@ jobs:
           fi
           # Run the new container
           echo "Running new container sharecode-backend-api"
-          docker run --platform linux/arm64 -d --name sharecode-backend-api -p 80:45012 alenalex/sharecode-api:master
-          #Use BuildXdocker buildx build --platform linux/amd64,linux/arm64 -t your-image-name:tag --push .
+          docker run -d --name sharecode-backend-api -p 80:45012 alenalex/sharecode-api:master
+          #Use BuildX docker buildx build --platform linux/amd64,linux/arm64 -t your-image-name:tag --push .
