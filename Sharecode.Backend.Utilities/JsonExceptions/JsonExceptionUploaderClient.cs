@@ -18,29 +18,29 @@ public class JsonExceptionUploaderClient
         return new JsonExceptionUploaderClient(assembly.ToList());
     }
 
-    public void CollectErrors(Type collectOf)
+    public void CollectErrors(Type ofErrorType)
     {
         foreach (Assembly assembly in _assemblies)
         {
-            var list = assembly.GetTypes()
-                .Where(x =>
+            var typesWithAttribute = assembly.GetTypes()
+                .Where(type =>
                 {
-                    return !string.IsNullOrEmpty(x.Namespace) &&
-                           x.IsSubclassOf(collectOf);
-                }).ToList();
+                    return !string.IsNullOrEmpty(type.Namespace) &&
+                           type.IsSubclassOf(ofErrorType) &&
+                           type.GetCustomAttributes(typeof(ExceptionDetail), false).Length > 0;
+                })
+                .ToList();
 
-            foreach (var type in list)
+
+            foreach (var type in typesWithAttribute)
             {
-                string className = type.Name;
-                if (_errors.ContainsKey(className))
-                {
-                    Console.WriteLine($"An existing error with the same class exists on {className}!");
-                    continue;
-                }
-                
-                
-                
-                /*_errors[className]*/
+                var exceptionDetailAttribute = (ExceptionDetail)type.GetCustomAttributes(typeof(ExceptionDetail), false)[0];
+
+                long errorCode = exceptionDetailAttribute.ErrorCode;
+                string errorDescription = exceptionDetailAttribute.ErrorDescription;
+
+                // Now you can use errorCode and errorDescription as needed.
+                Console.WriteLine($"Type {type.Name} has ErrorCode: {errorCode}, ErrorDescription: {errorDescription}");
             }
         }
     }

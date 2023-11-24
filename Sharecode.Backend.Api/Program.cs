@@ -1,8 +1,10 @@
 using System.Net;
 using System.Text;
+using System.Threading.RateLimiting;
 using FluentValidation;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -54,7 +56,43 @@ builder.Services
     .RegisterApplicationLayer()
     .RegisterPresentationLayer();
 
-
+builder.Services.AddRateLimiter(rateLimiterOptions =>
+{
+    rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    rateLimiterOptions.AddFixedWindowLimiter("fixed", options =>
+    {
+        options.PermitLimit = 10;
+        options.Window = TimeSpan.FromSeconds(10);
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 5;
+    });
+    
+    rateLimiterOptions.AddSlidingWindowLimiter("sliding", options =>
+    {
+        options.PermitLimit = 10;
+        options.Window = TimeSpan.FromSeconds(10);
+        options.SegmentsPerWindow = 2;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 5;
+    });
+    
+    rateLimiterOptions.AddTokenBucketLimiter("token", options =>
+    {
+        options.TokenLimit = 100;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 5;
+        options.ReplenishmentPeriod = TimeSpan.FromSeconds(10);
+        options.TokensPerPeriod = 20;
+        options.AutoReplenishment = true;
+    });
+    
+    rateLimiterOptions.AddConcurrencyLimiter("concurrency", options =>
+    {
+        options.PermitLimit = 10;
+        options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        options.QueueLimit = 5;
+    });
+});
 
 builder.Services.AddControllers(options =>
     {
@@ -139,6 +177,7 @@ if (app.Environment.IsDevelopment())
     });}
 
 app.UseSerilogRequestLogging();
+app.UseRateLimiter();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseForwardedHeaders();
 app.UseHttpsRedirection();
