@@ -4,6 +4,7 @@ on:
   push:
     branches: [ master ]
 
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -27,9 +28,10 @@ jobs:
       run: dotnet publish Sharecode.Backend.Api/Sharecode.Backend.Api.csproj -c Release -o out/Sharecode.Backend.Api
 
     # Docker steps assume you have a Dockerfile set up in your repository
+# Docker steps assume you have a Dockerfile set up in your repository
     - name: Build Docker Image
       run: |
-        docker build -t sharecode-api:latest -f Sharecode.Backend.Api/Dockerfile .
+        docker build -t alenalex/sharecode-api:master -f Sharecode.Backend.Api/Dockerfile .
 
     - name: Docker Login
       run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
@@ -37,8 +39,7 @@ jobs:
 
     - name: Push Docker Image
       run: |
-        docker tag sharecode-api:latest alenalex/sharecode-api:latest
-        docker push alenalex/sharecode-api:develop
+        docker push alenalex/sharecode-api:master
       if: github.ref == 'refs/heads/master'
 
     - name: Deploy to VM
