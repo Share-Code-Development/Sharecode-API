@@ -26,8 +26,13 @@ jobs:
     - name: Publish
       run: dotnet publish Sharecode.Backend.Api/Sharecode.Backend.Api.csproj -c Release -o out/Sharecode.Backend.Api
 
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+      
     # Docker steps assume you have a Dockerfile set up in your repository
-# Docker steps assume you have a Dockerfile set up in your repository
     - name: Build Docker Image
       run: |
         docker build -t alenalex/sharecode-api:master -f Sharecode.Backend.Api/Dockerfile .
@@ -68,4 +73,4 @@ jobs:
 
           # Run the new container
           echo "Running new container sharecode-backend-api"
-          docker run -d --name sharecode-backend-api -p 80:45012 alenalex/sharecode-api:master
+          docker run -d --name sharecode-backend-api -p 45012:80 alenalex/sharecode-api:master
