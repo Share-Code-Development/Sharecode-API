@@ -6,12 +6,6 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["Sharecode.Backend.Api/Sharecode.Backend.Api.csproj", "Sharecode.Backend.Api/"]
-# Copy other project references (adjust paths as necessary)
-COPY ["Sharecode.Backend.Api/Sharecode.Backend.Application.csproj", "Sharecode.Backend.Application/"]
-COPY ["Sharecode.Backend.Api/Sharecode.Backend.Domain.csproj", "Sharecode.Backend.Domain/"]
-COPY ["Sharecode.Backend.Api/Sharecode.Backend.Infrastructure.csproj", "Sharecode.Backend.Infrastructure/"]
-COPY ["Sharecode.Backend.Api/Sharecode.Backend.Presentation.csproj", "Sharecode.Backend.Presentation/"]
-COPY ["Sharecode.Backend.Api/Sharecode.Backend.Utilities.csproj", "Sharecode.Backend.Utilities/"]
 # ...
 
 # Run restore
