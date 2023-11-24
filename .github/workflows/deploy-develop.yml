@@ -3,9 +3,6 @@ name: .NET 8 CI/CD Pipeline for Sharecode.Backend.Api
 on:
   push:
     branches: [ master ]
-    paths:
-      - 'Sharecode.Backend.Api/**'
-      - '**.sln'
 
 jobs:
   build-and-deploy:
