@@ -48,7 +48,24 @@ jobs:
         username: ${{ secrets.VM_USERNAME }}
         password: ${{ secrets.VM_PASSWORD }}
         script: |
-          docker pull alenalex/sharecode-api:latest
-          docker stop sharecode-api || true
-          docker rm sharecode-api || true
-          docker run -d --name sharecode-backend-api -p 80:45012 alenalex/sharecode-api:latest
+          docker pull alenalex/sharecode-api:master
+
+          # Check if the container is running and stop it
+          if [ $(docker ps -q -f name=sharecode-api) ]; then
+              echo "Stopping running container sharecode-api"
+              docker stop sharecode-api
+          else
+              echo "No running container named sharecode-api found."
+          fi
+
+          # Check if the container exists and remove it
+          if [ $(docker ps -a -q -f name=sharecode-api) ]; then
+              echo "Removing existing container sharecode-api"
+              docker rm sharecode-api
+          else
+              echo "No container named sharecode-api to remove."
+          fi
+
+          # Run the new container
+          echo "Running new container sharecode-backend-api"
+          docker run -d --name sharecode-backend-api -p 80:45012 alenalex/sharecode-api:master
