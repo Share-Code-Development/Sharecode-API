@@ -22,4 +22,6 @@
 /Sharecode.Backend.Utilities/bin/
 /Sharecode.Backend.Application/obj/
 /Sharecode.Backend.Application/bin/
+/Sharecode.Backend.UnitTest.CodeQuality/obj/
+/Sharecode.Backend.UnitTest.CodeQuality/bin/
 

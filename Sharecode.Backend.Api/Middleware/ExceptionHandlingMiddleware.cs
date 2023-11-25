@@ -1,16 +1,17 @@
 using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Sharecode.Backend.Api.Extensions;
 using Sharecode.Backend.Application.Exceptions;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Infrastructure.Exceptions.Jwt;
+using Sharecode.Backend.Utilities.Extensions;
 
 namespace Sharecode.Backend.Api.Middleware;
 
 public class ExceptionHandlingMiddleware
 {
     
-    private static readonly Regex CamelCaseRegex = new Regex("(\\B[A-Z])", RegexOptions.Compiled);
     private static readonly ConcurrentDictionary<string, string> ExceptionNameCache = new ConcurrentDictionary<string, string>();
 
     
@@ -96,13 +97,13 @@ public class ExceptionHandlingMiddleware
     {
         string typeName = appException.GetType().Name;
         string readableName = ExceptionNameCache.GetOrAdd(typeName, key =>
-            CamelCaseRegex.Replace(key, " $1").Replace("Exception", string.Empty)
+            key.ToCapitalized().Replace("Exception", string.Empty).TrimEnd()
         );
         
 
         return new ExceptionDetail(
             (int)appException.StatusCode,
-            readableName.TrimEnd(),
+            readableName,
             appException.PublicMessage == String.Empty ? appException.Message : appException.PublicMessage,
             appException.Errors, 
             appException.InnerException?.Message,

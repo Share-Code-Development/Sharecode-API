@@ -22,6 +22,9 @@ jobs:
 
     - name: Build with dotnet
       run: dotnet build Sharecode.Backend.Api/Sharecode.Backend.Api.csproj --configuration Release --no-restore
+      
+    - name: Run Code Quality Tests
+      run: dotnet test Sharecode.Backend.UnitTest.CodeQuality/Sharecode.Backend.UnitTest.CodeQuality.csproj      
 
     - name: Publish
       run: dotnet publish Sharecode.Backend.Api/Sharecode.Backend.Api.csproj -c Release -o out/Sharecode.Backend.Api
