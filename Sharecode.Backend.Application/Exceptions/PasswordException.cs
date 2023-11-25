@@ -24,7 +24,7 @@ public class InvalidPasswordException : AppException
     }
 }
 
-[ExceptionDetail(34872, $"The authentication service (Google, Facebook) provided invalid token or token doesn't validate the ownership of the account")]
+[ExceptionDetail(32172, $"The authentication service (Google, Facebook) provided invalid token or token doesn't validate the ownership of the account")]
 public class InvalidAuthFromSocialException : AppException 
 {
     public InvalidAuthFromSocialException(AuthorizationType type, string message) : base($"Failed to validate user {type}", 32172, HttpStatusCode.BadRequest)
