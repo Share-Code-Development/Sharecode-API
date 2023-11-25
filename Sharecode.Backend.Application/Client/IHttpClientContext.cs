@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Sharecode.Backend.Domain.Entity.Profile;
 
 namespace Sharecode.Backend.Application.Client;
@@ -15,4 +16,5 @@ public interface IHttpClientContext
     bool HasPermission(Permission key);
     Task<bool> HasPermissionAsync(Permission key, CancellationToken token = default);
     void AddCacheKeyToInvalidate(string module, params string[] keys);
+    bool TryGetHeader(string key, [MaybeNullWhen(false)] out string headerValue);
 }

@@ -178,7 +178,7 @@ public class UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger)
             }
         }
 
-        foreach (var entry in context.ChangeTracker.Entries())
+        /*foreach (var entry in context.ChangeTracker.Entries())
         {
             foreach (var property in entry.Properties)
             {
@@ -188,7 +188,7 @@ public class UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger)
                     Console.WriteLine($"Entity: {entry.Entity.GetType().Name}, Property: {property.Metadata.Name}, DateTimeKind: {currentValue.Kind}");
                 }
             }
-        }
+        }*/
 
     }
 }

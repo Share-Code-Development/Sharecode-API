@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Domain.Base.Primitive;
@@ -8,17 +9,11 @@ namespace Sharecode.Backend.Infrastructure.Db;
 
 public class ShareCodeDbContext : DbContext, IShareCodeDbContext
 {
-    
-    //public DbSet<User> Users { get; private set; } = null!;
-    //public DbSet<AccountSetting> AccountSettings { get; private set; } = null!;
-    //public DbSet<OutboxMessage> OutboxMessages { get; private set; } = null!;
-    //public DbSet<UserRefreshToken> UserRefreshTokens { get; private set; } = null!;
+
     public ShareCodeDbContext(DbContextOptions options) : base(options)
     {
     }
-
-
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         Assembly assemblyWithConfigurations = GetType().Assembly; //get whatever assembly you want
@@ -47,5 +42,6 @@ public class ShareCodeDbContext : DbContext, IShareCodeDbContext
                 }
             }
         }
+
     }
 }

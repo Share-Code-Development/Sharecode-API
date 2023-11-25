@@ -1,8 +1,6 @@
 using System.Net;
 using MediatR;
-using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Data;
-using Sharecode.Backend.Application.Exceptions;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Gateway;
 using Sharecode.Backend.Domain.Entity.Profile;

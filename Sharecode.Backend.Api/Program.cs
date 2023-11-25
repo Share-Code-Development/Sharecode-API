@@ -121,6 +121,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(bearerOptions =>
     {
         var value = keyValueNamespace.Of(KeyVaultConstants.JwtSecretKey)?.Value;
+        var encryptionKey = keyValueNamespace.Of(KeyVaultConstants.JwtAccessTokenEncryptionKey)?.Value;
         if (value != null)
             bearerOptions.TokenValidationParameters = new TokenValidationParameters()
             {
@@ -130,6 +131,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 ValidateLifetime = true,
                 ValidIssuer = builder.Configuration["JWT:Issuer"],
                 ValidAudience = builder.Configuration["JWT:Audience"],
+                TokenDecryptionKey = new SymmetricSecurityKey(Convert.FromBase64String(encryptionKey)),
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
                         Encoding.ASCII.GetBytes(value))

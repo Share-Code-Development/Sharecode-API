@@ -83,6 +83,13 @@ public class ExceptionHandlingMiddleware
                 null,
                 ExtendedMessage: showExtended ? jwtFetchKeySecretException.Message : ""
                 ),
+            UnauthorizedAccessException unauthorizedAccessException => new ExceptionDetail(
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized access",
+                unauthorizedAccessException.Message,
+                null,
+                null
+                ),
             AppException appException => CreateExceptionDetail(appException),
             _ => new ExceptionDetail(
                 StatusCodes.Status500InternalServerError,

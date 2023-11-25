@@ -86,7 +86,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
         return TryGetHeader(CacheControlHeader, out var headerValue) && headerValue.Equals(directive, StringComparison.OrdinalIgnoreCase);
     }
 
-    protected bool TryGetHeader(string header, [MaybeNullWhen(false)] out string response)
+    protected bool TryGetHeader(string header, [MaybeNullWhen(false)] out string? response)
     {
         if (Request.Headers.TryGetValue(header, out var data))
         {

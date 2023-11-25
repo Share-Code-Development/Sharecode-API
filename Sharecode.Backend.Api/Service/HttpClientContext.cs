@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Sharecode.Backend.Api.Exceptions;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Service;
@@ -179,6 +181,20 @@ public class HttpClientContext : IHttpClientContext
         HashSet<string> cacheKeys = new HashSet<string>(keys);
         _cacheInvalidateRecords[module] = cacheKeys;
     }
+
+    public bool TryGetHeader(string header, [MaybeNullWhen(false)] out string response)
+    {
+        response = null;
+        if (_contextAccessor.HttpContext is not { Request.Headers: not null }) return false;
+        if (!_contextAccessor.HttpContext.Request.Headers.TryGetValue(header, out var data)) return false;
+        response = data;
+        #pragma warning disable CS8762 // Parameter must have a non-null value when exiting in some condition.
+        return true;
+        #pragma warning restore CS8762 // Parameter must have a non-null value when exiting in some condition.
+    }
+
+
+
 
     private Guid? GetUserIdentifierFromClaim()
     {

@@ -1,20 +1,22 @@
-using System.Linq.Expressions;
+using System.Data;
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Infrastructure.Db;
-using Sharecode.Backend.Infrastructure.Exceptions;
 
-namespace Sharecode.Backend.Infrastructure.Repositories;
+namespace Sharecode.Backend.Infrastructure.Base;
 
 public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : BaseEntity
 {
 
     protected readonly ShareCodeDbContext DbContext;
     protected DbSet<TEntity> Table => DbContext.Set<TEntity>();
+    
 
     public BaseRepository(ShareCodeDbContext dbContext)
     {
@@ -110,6 +112,14 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
             .ToListAsync(cancellationToken: token);
     }
 
+    public async Task<DbCommand> CreateProceduralCommandAsync(string commandName)
+    {
+        DbCommand? command = DbContext.Database.GetDbConnection().CreateCommand();
+        command.CommandText = commandName;
+        command.CommandType = CommandType.StoredProcedure;
+        return command;
+    }
+
     private static IQueryable<TEntity> ApplySpecification(IQueryable<TEntity> query, ISpecification<TEntity> specification)
     {
         if (specification.Criteria != null)
@@ -132,4 +142,6 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
         return query;
     }
+    
+    
 }

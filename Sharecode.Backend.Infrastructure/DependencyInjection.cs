@@ -39,7 +39,8 @@ public static class DependencyInjection
         {
             options.UseNpgsql(connectionStringBuilder.ConnectionString);
         });
-        
+
+        collection.AddScoped<IShareCodeDbContext, ShareCodeDbContext>();
         collection.AddScoped<IUnitOfWork, UnitOfWork>();
         collection.AddSingleton<ITokenClient, TokenClient>();
         collection.AddSingleton<IJwtClient, JwtClient>();
@@ -48,6 +49,7 @@ public static class DependencyInjection
         collection.AddScoped<IUserRepository, UserRepository>();
         collection.AddScoped<IUserService, UserService>();
         collection.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        collection.AddScoped<IRefreshTokenService, RefreshTokenService>();
         #endregion
 
         #region Gateway

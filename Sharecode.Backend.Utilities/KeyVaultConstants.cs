@@ -7,6 +7,9 @@ public class KeyVaultConstants
     public static string JwtSecretKey => "jwt-secret-key";
     public static string JwtRefreshTokenSecretKey => "jwt-secret-key-refresh";
 
+    public static string JwtAccessTokenEncryptionKey => "access-token-enc-key";
+    public static string JwtRefreshTokenEncryptionKey => "refresh-token-enc-key";
+
     #endregion
 
     #region Redis

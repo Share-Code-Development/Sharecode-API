@@ -14,7 +14,7 @@ using Sharecode.Backend.Utilities.SecurityClient;
 
 namespace Sharecode.Backend.Application.Features.Users.Login;
 
-public class LoginUserCommandHandler(IUserService userService, IUnitOfWork unitOfWork, IUserRepository userRepository, ISecurityClient securityClient, IGatewayService gatewayService, ITokenClient tokenClient, IRefreshTokenRepository refreshTokenRepository, Namespace cloudFlareKeyValue)
+public class LoginUserCommandHandler(IUserService userService, IRefreshTokenService tokenService, IUnitOfWork unitOfWork, IUserRepository userRepository, ISecurityClient securityClient, IGatewayService gatewayService, ITokenClient tokenClient, Namespace cloudFlareKeyValue)
     : IRequestHandler<LoginUserRequest, LoginUserResponse>
 {
     public async Task<LoginUserResponse> Handle(LoginUserRequest request, CancellationToken cancellationToken)
@@ -28,7 +28,8 @@ public class LoginUserCommandHandler(IUserService userService, IUnitOfWork unitO
         
         user.SetLastLogin();
         var accessCredentials = tokenClient.Generate(user);
-        await refreshTokenRepository.AddAsync(accessCredentials.UserRefreshToken, cancellationToken);
+        //await refreshTokenRepository.AddAsync(accessCredentials.UserRefreshToken, cancellationToken);
+        await tokenService.GenerateRefreshTokenAsync(user.Id, false, tokenIdentifier: accessCredentials.RefreshTokenIdentifier, token: cancellationToken);
         await unitOfWork.CommitAsync(cancellationToken);
         return LoginUserResponse.From(user, accessCredentials);
     }

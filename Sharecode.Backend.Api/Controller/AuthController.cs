@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sharecode.Backend.Application.Client;
+using Sharecode.Backend.Application.Features.Refresh.Get;
 using Sharecode.Backend.Application.Features.Users.Create;
 using Sharecode.Backend.Application.Features.Users.Login;
 using Sharecode.Backend.Utilities.RedisCache;
@@ -22,5 +23,21 @@ public class AuthController(IAppCacheClient cache, IHttpClientContext requestCon
     {
         LoginUserResponse userResponse = await mediator.Send(request);
         return Ok(userResponse);
+    }
+
+    [HttpGet(template: "refresh/", Name = "Refresh the access token")]
+    public async Task<ActionResult> Refresh()
+    {
+        if (!TryGetHeader("XCS-Refresh-Token", out string? refreshToken))
+        {
+            return Unauthorized($"No refresh token passed in the header XCS-Refresh-Token");
+        }
+
+        var command = new GetRefreshTokenCommand(refreshToken!);
+        var response = await mediator.Send(command);
+
+        Response.Headers.Authorization = response.RefreshToken;
+        Response.Headers.Expires = response.Expiry.Ticks.ToString();
+        return Ok();
     }
 }

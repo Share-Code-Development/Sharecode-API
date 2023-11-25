@@ -5,4 +5,6 @@ using Sharecode.Backend.Domain.Entity.Gateway;
 namespace Sharecode.Backend.Domain.Repositories;
 
 public interface IGatewayRepository : IBaseRepository<GatewayRequest>
-{ }
+{
+    
+}

@@ -21,20 +21,17 @@ public class TokenClient(Namespace keyVaultNamespace, IOptions<JwtConfiguration>
     {
         KeyValue? accessTokenKeyValue = keyVaultNamespace.Of(KeyVaultConstants.JwtSecretKey);
         KeyValue? refreshTokenKeyValue = keyVaultNamespace.Of(KeyVaultConstants.JwtRefreshTokenSecretKey);
-        if (accessTokenKeyValue == null || refreshTokenKeyValue == null)
+        var accessTokenEncryptionKey = keyVaultNamespace.Of(KeyVaultConstants.JwtAccessTokenEncryptionKey);
+        var refreshTokenEncryptionKey = keyVaultNamespace.Of(KeyVaultConstants.JwtRefreshTokenEncryptionKey);
+        if (accessTokenKeyValue == null || refreshTokenKeyValue == null || accessTokenEncryptionKey == null || refreshTokenEncryptionKey == null)
             throw new JwtFetchKeySecretException($"Failed to fetch the secret-key or refresh-secret-key. Secret Key: {accessTokenKeyValue == null}, Refresh Key: {refreshTokenKeyValue == null}");
-        string? accessToken = _jwtClient.GenerateAccessToken(user, accessTokenKeyValue.Value);
-        string? refreshToken = _jwtClient.GenerateRefreshToken(user.Id, refreshTokenKeyValue.Value, out var tokenIdentifier);
+        string? accessToken = _jwtClient.GenerateAccessToken(user, accessTokenKeyValue.Value, accessTokenEncryptionKey.Value);
+        Guid? tokenIdentifier = null;
+        string? refreshToken = _jwtClient.GenerateRefreshToken(user.Id, refreshTokenKeyValue.Value,refreshTokenEncryptionKey.Value ,ref tokenIdentifier);
 
         if (accessToken == null || refreshToken == null)
             throw new JwtFetchKeySecretException("Failed to generate tokens for user!");
-
-        UserRefreshToken userRefreshToken = new UserRefreshToken()
-        {
-            IssuedFor = user.Id,
-            TokenIdentifier = tokenIdentifier,
-        };
         
-        return new AccessCredentials(accessToken, refreshToken, userRefreshToken);
+        return new AccessCredentials(accessToken, refreshToken, tokenIdentifier!.Value);
     }
 }
