@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Gateway.Validate;
+using Sharecode.Backend.Utilities.RedisCache;
 
 namespace Sharecode.Backend.Api.Controller;
 
-public class GatewayController(IDistributedCache cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
+public class GatewayController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
 {
     [HttpPatch("{id}")]
     public async Task<IActionResult> ValidateGateway(Guid id)

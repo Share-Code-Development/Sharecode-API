@@ -21,14 +21,19 @@ internal class CreateUserCommandHandler(IUnitOfWork unitOfWork, IUserRepository 
             EmailAddress = command.EmailAddress!,
             FirstName = command.FirstName!,
             LastName = command.LastName!,
+            MiddleName = command.MiddleName,
             Visibility = AccountVisibility.Public,
             Salt = salt,
             PasswordHash = passwordHash,
         };
-        
+        user.SetActive();
+        user.AccountSetting = new AccountSetting
+        {
+            UserId = user.Id,
+            User = user
+        };
+        user.AccountSetting.Id = Guid.NewGuid();
         userRepository.Register(user);
-        /*AccessCredentials? accessCredentials = tokenClient.Generate(user);
-        await refreshTokenRepository.AddAsync(accessCredentials!.UserRefreshToken, cancellationToken);*/
         await unitOfWork.CommitAsync(cancellationToken);
         return UserCreatedResponse.From(user);
     }

@@ -6,25 +6,23 @@ using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Application.Features.Users.Login;
 
-public record LoginUserResponse(Guid UserId,
-        string FirstName,
-        string? MiddleName,
-        string LastName,
-        string EmailAddress,
-        bool EmailVerified,
-        List<Meta> Metadata,
-        AccountVisibility Visibility,
-        AccountSettingDto? Settings,
-        DateTime Created,
-        string? AccessToken,
-        string? RefreshToken
-    )
-    : UserDto(UserId, FirstName, MiddleName, LastName, EmailAddress, EmailVerified, Metadata, Visibility, Settings,
-        Created)
+public class LoginUserResponse : UserDto
 {
+    public string? AccessToken { get; set; }
+    public string? RefreshToken { get; set; }
+
+    public LoginUserResponse() { }
+
+    public LoginUserResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, List<Meta> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? accessToken, string? refreshToken)
+        : base(userId, firstName, middleName, lastName, emailAddress, emailVerified, metadata, visibility, settings, created)
+    {
+        AccessToken = accessToken;
+        RefreshToken = refreshToken;
+    }
+
     public static LoginUserResponse From(User user, AccessCredentials? credentials)
     {
-        return new(
+        return new LoginUserResponse(
             user.Id,
             user.FirstName,
             user.MiddleName,

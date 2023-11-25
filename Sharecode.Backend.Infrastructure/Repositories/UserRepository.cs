@@ -45,6 +45,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             return await Table
                 .AsNoTracking()
                 .Include(x => x.AccountSetting)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted, cancellationToken: token);
         }
         else

@@ -16,6 +16,8 @@ public class HttpClientContext : IHttpClientContext
     private bool? _isApiRequest = null;
     private string? _cacheKey = null;
     private string? _emailAddress = null;
+    private string[]? _cacheKeys = null;
+    private readonly Dictionary<string, HashSet<string>> _cacheInvalidateRecords = new();
     
     public HttpClientContext(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
     {
@@ -107,17 +109,52 @@ public class HttpClientContext : IHttpClientContext
 
             return _cacheKey;
         }
-        set
-        {
-            if (_cacheKey == null)
-                _cacheKey = value;
-            
-            var fullRequestUrl = $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host}{_contextAccessor.HttpContext?.Request.Path}{_contextAccessor.HttpContext?.Request.QueryString}";
-            throw new InvalidCacheAccessException(fullRequestUrl, true);
-        }
+        set => _cacheKey = value;
     }
 
     public bool HasCacheKey => !string.IsNullOrEmpty(_cacheKey);
+
+    public string[] CacheKeyBlock
+    {
+        get
+        {
+            if (_cacheKeys == null)
+            {
+                var fullRequestUrl = $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host}{_contextAccessor.HttpContext?.Request.Path}{_contextAccessor.HttpContext?.Request.QueryString}";
+                throw new InvalidCacheAccessException(fullRequestUrl, false);
+            }
+            
+            return _cacheKeys;
+        }
+        set
+        {
+            if (value.Length < 2)
+            {
+                var fullRequestUrl = $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host}{_contextAccessor.HttpContext?.Request.Path}{_contextAccessor.HttpContext?.Request.QueryString}";
+                throw new InvalidCacheAccessException(value, fullRequestUrl);
+            }
+            
+            if (_cacheKeys == null)
+                _cacheKeys = value;
+            
+            _cacheKeys = value;
+            string cacheKey = string.Empty;
+            foreach (var key in _cacheKeys)
+            {
+                if (cacheKey == string.Empty)
+                    cacheKey = key;
+                else
+                    cacheKey += "-" + key;
+            }
+            _cacheKey = cacheKey;
+        }
+    }
+
+    public Dictionary<string, HashSet<string>> CacheInvalidRecords
+    {
+        get => _cacheInvalidateRecords;
+    }
+
     public bool HasPermission(Permission key)
     {
         return true;
@@ -126,6 +163,21 @@ public class HttpClientContext : IHttpClientContext
     public async Task<bool> HasPermissionAsync(Permission key, CancellationToken token = default)
     {
         return true;
+    }
+
+    public void AddCacheKeyToInvalidate(string module, params string[] keys)
+    {
+        if (_cacheInvalidateRecords.TryGetValue(module, out var currentKeys))
+        {
+            foreach (var key in keys)
+            {
+                currentKeys.Add(key);
+            }
+            return;
+        }
+
+        HashSet<string> cacheKeys = new HashSet<string>(keys);
+        _cacheInvalidateRecords[module] = cacheKeys;
     }
 
     private Guid? GetUserIdentifierFromClaim()

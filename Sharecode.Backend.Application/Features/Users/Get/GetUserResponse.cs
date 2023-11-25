@@ -5,11 +5,16 @@ using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Application.Features.Users.Get;
 
-public record GetUserResponse(Guid UserId, string FirstName, string? MiddleName, string LastName, string EmailAddress, bool EmailVerified, List<Meta> Metadata, AccountVisibility Visibility, AccountSettingDto Settings, DateTime Created) : UserDto(UserId, FirstName, MiddleName, LastName, EmailAddress, EmailVerified, Metadata, Visibility, Settings, Created)
+public class GetUserResponse : UserDto
 {
+    public GetUserResponse() { }
+
+    public GetUserResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, List<Meta> metadata, AccountVisibility visibility, AccountSettingDto settings, DateTime created)
+        : base(userId, firstName, middleName, lastName, emailAddress, emailVerified, metadata, visibility, settings, created) { }
+
     public new static GetUserResponse From(User user)
     {
-        return new(
+        return new GetUserResponse(
             user.Id,
             user.FirstName,
             user.MiddleName,

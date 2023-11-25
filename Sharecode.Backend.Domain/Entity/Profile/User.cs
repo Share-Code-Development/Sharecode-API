@@ -12,22 +12,7 @@ public class User : AggregateRootWithMetadata
     public User()
     {
     }
-
-    public User(string emailAddress, string firstName, string? middleName, string lastName, byte[]? salt, byte[]? passwordHash)
-    {
-        EmailAddress = emailAddress;
-        FirstName = firstName;
-        MiddleName = middleName;
-        LastName = lastName;
-        Salt = salt;
-        PasswordHash = passwordHash;
-        AccountSetting = new AccountSetting();
-        AccountSetting.User = this;
-        EmailVerified = false;
-        Visibility = AccountVisibility.Private;
-    }
     
-
     [EmailAddress]
     [Length(minimumLength:5, maximumLength: 100)]
     [Required]

@@ -1,22 +1,27 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Sharecode.Backend.Application.Client;
+using Sharecode.Backend.Utilities.RedisCache;
 
 namespace Sharecode.Backend.Api.Controller;
 
 [Route("v1/api/[controller]")]
 [ApiController]
-public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientContext requestContext,
+public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientContext requestContext,
         ILogger<AbstractBaseEndpoint> logger, IMediator mediator)
     : ControllerBase
 {
-    private readonly IDistributedCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+    private readonly IAppCacheClient _cache = cache ?? throw new ArgumentNullException(nameof(cache));
     private readonly ILogger<AbstractBaseEndpoint> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     protected IHttpClientContext AppRequestContext { get; } = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
-    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(1.5);
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(3);
+    protected CancellationToken RequestCancellationToken => HttpContext.RequestAborted;
+
     
     private const string CacheControlHeader = "Cache-Control";
     private const string NoCache = "no-cache";
@@ -24,7 +29,7 @@ public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientC
     private const string CacheStatusHeader = "X-Cache-Status";
     private const string SkippedDueToDirective = "Skipped due to directive";
 
-    protected async Task<TEntity?> ScanAsync<TEntity>()
+    protected async Task<TEntity?> ScanAsync<TEntity>(bool updateSlidingExpiry = false, CancellationToken token = default)
     {
         try
         {
@@ -36,12 +41,12 @@ public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientC
                 Response.Headers.Add(CacheStatusHeader, SkippedDueToDirective);
                 return default;
             }
-
-            string? cacheObject = await _cache.GetStringAsync(requestContext.CacheKey);
+            
+            string? cacheObject = await _cache.GetCacheAsync(AppRequestContext.CacheKey, updateSlidingExpiry, token);
             if (string.IsNullOrEmpty(cacheObject))
                 return default;
-
-            return JsonConvert.DeserializeObject<TEntity>(cacheObject);
+            
+            return JsonConvert.DeserializeObject<TEntity>(cacheObject, Sharecode.JsonSerializerSettings);
         }
         catch (Exception ex)
         {
@@ -50,7 +55,7 @@ public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientC
         }
     }
 
-    protected async Task StoreCache(object entityResponse, TimeSpan? ttl = null)
+    protected async Task StoreCacheAsync(object entityResponse, TimeSpan? ttl = null, CancellationToken token = default)
     {
         try
         {
@@ -63,13 +68,12 @@ public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientC
                 return;
             }
 
-            string cacheObject = JsonConvert.SerializeObject(entityResponse);
+            string cacheObject = JsonConvert.SerializeObject(entityResponse, Sharecode.JsonSerializerSettings);
             if (string.IsNullOrEmpty(cacheObject))
                 return;
 
             ttl ??= CacheTtl;
-            var cacheEntryOptions = new DistributedCacheEntryOptions().SetSlidingExpiration(ttl.Value);
-            await _cache.SetStringAsync(requestContext.CacheKey, cacheObject, cacheEntryOptions);
+            await _cache.WriteCacheAsync(requestContext.CacheKey, cacheObject, ttl, token: token);
         }
         catch (Exception ex)
         {
@@ -87,24 +91,71 @@ public abstract class AbstractBaseEndpoint(IDistributedCache cache, IHttpClientC
         if (Request.Headers.TryGetValue(header, out var data))
         {
             response = data;
+            #pragma warning disable CS8762 // Parameter must have a non-null value when exiting in some condition.
             return true;
+            #pragma warning restore CS8762 // Parameter must have a non-null value when exiting in some condition.
         }
 
         response = null;
         return false;
     }
     
-    protected string FrameCacheKey(params string[] keys)
+    protected string FrameCacheKey(string module, params string[] keys)
     {
-        string cacheKey = string.Empty;
-        foreach (var key in keys)
+        var finalArray = new string[keys.Length + 1];
+        finalArray[0] = module;
+        Array.Copy(keys, 0, finalArray, 1, keys.Length);
+
+        requestContext.CacheKeyBlock = finalArray;
+        return requestContext.CacheKey;
+    }
+
+    protected string GetQuery()
+    {
+        return Request.QueryString.ToString();
+    }
+
+    protected async Task<string> ClearCacheAsync(CancellationToken token = default)
+    {
+        
+        var identityBuilder = new StringBuilder();
+        try
         {
-            if (cacheKey == string.Empty)
-                cacheKey = key;
-            else
-                cacheKey += "-" + key;
+            if (AppRequestContext.CacheInvalidRecords.Any())
+            {
+                List<string> matchingKeys = new();
+                foreach (var (module, keys) in AppRequestContext.CacheInvalidRecords)
+                {
+                    foreach (var key in keys)
+                    {
+                        string eachKey = $"{module}-{key}-*";
+                        matchingKeys.Add(eachKey);
+                        identityBuilder.Append(eachKey);
+
+                        if (token.IsCancellationRequested)
+                            break;
+                    }
+                    if (token.IsCancellationRequested)
+                        break;
+                }
+                
+                await _cache.DeleteMatchingKeysAsync(matchingKeys, token).ConfigureAwait(false);
+            }
+
+            if (AppRequestContext.HasCacheKey)
+            {
+                var primaryModule = AppRequestContext.CacheKeyBlock[0];
+                var identityBlock = AppRequestContext.CacheKeyBlock[1];
+                string identity = $"{primaryModule}-{identityBlock}-*";
+                await _cache.DeleteCacheAsync(identity, token).ConfigureAwait(false);
+                identityBuilder.Append(identity);   
+            }
         }
-        requestContext.CacheKey = cacheKey;
-        return cacheKey;
+        catch (Exception ex)
+        {
+            _logger.LogError($"An unknown exception occured during cache handling", ex);
+        }
+
+        return identityBuilder.ToString();
     }
 }

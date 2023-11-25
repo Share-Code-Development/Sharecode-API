@@ -143,28 +143,7 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
     // Additional Swagger configuration if needed
 });
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    var connectionStringTask = keyValueClient.GetAsync("redis-connection-string");
-    var passwordTask = keyValueClient.GetAsync("redis-connection-password");
-    var userTask = keyValueClient.GetAsync("redis-connection-user-name");
-    KeyValue?[] values = Task.WhenAll(connectionStringTask, passwordTask, userTask).GetAwaiter().GetResult();
-    if (values.Length != 3)
-    {
-        throw new Exception("Failed to fetch redis connection string");
-
-    }
-    options.Configuration = values[0]?.Value;
-    string[]? strings = values[0]?.Value.Split(":");
-    DnsEndPoint endPoint = new DnsEndPoint(strings[0], Convert.ToInt32(strings[1]));
-    options.ConfigurationOptions = new ConfigurationOptions()
-    {
-        AbortOnConnectFail = false,
-        User = values[2]?.Value,
-        Password = values[1]?.Value,
-        EndPoints = {endPoint}
-    };
-});
+builder.Services.AddRedisClient(keyValueNamespace);
 
 var app = builder.Build();
 

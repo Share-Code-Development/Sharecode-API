@@ -4,39 +4,38 @@ using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Domain.Dto;
 
-public sealed record AccountSettingDto(
-    bool AllowTagging,
-    List<Meta> Metadata
-)
+public class UserDto
 {
-    public static AccountSettingDto From(User user)
-    {
-        AccountSetting setting = user.AccountSetting;
-        if (setting == null)
-            return null;
-        return new AccountSettingDto(
-                setting.AllowTagging,
-                setting.Metadata
-                );
-    }
-}
+    public Guid UserId { get; set; }
+    public string FirstName { get; set; }
+    public string? MiddleName { get; set; }
+    public string LastName { get; set; }
+    public string EmailAddress { get; set; }
+    public bool EmailVerified { get; set; }
+    public List<Meta> Metadata { get; set; }
+    public AccountVisibility Visibility { get; set; }
+    public AccountSettingDto? Settings { get; set; }
+    public DateTime Created { get; set; }
 
-public record UserDto(
-    Guid UserId,
-    string FirstName,
-    string? MiddleName,
-    string LastName,
-    string EmailAddress,
-    bool EmailVerified,
-    List<Meta> Metadata,
-    AccountVisibility Visibility,
-    AccountSettingDto? Settings,
-    DateTime Created
-)
-{
+    public UserDto() { }
+
+    public UserDto(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, List<Meta> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created)
+    {
+        UserId = userId;
+        FirstName = firstName;
+        MiddleName = middleName;
+        LastName = lastName;
+        EmailAddress = emailAddress;
+        EmailVerified = emailVerified;
+        Metadata = metadata;
+        Visibility = visibility;
+        Settings = settings;
+        Created = created;
+    }
+
     public static UserDto From(User user)
     {
-        return new(
+        return new UserDto(
             user.Id,
             user.FirstName,
             user.MiddleName,
@@ -48,5 +47,25 @@ public record UserDto(
             AccountSettingDto.From(user),
             user.CreatedAt
         );
+    }
+}
+
+public sealed class AccountSettingDto
+{
+    public bool AllowTagging { get; set; }
+    public List<Meta> Metadata { get; set; }
+
+    public AccountSettingDto() { }
+
+    public AccountSettingDto(bool allowTagging, List<Meta> metadata)
+    {
+        AllowTagging = allowTagging;
+        Metadata = metadata;
+    }
+
+    public static AccountSettingDto From(User user)
+    {
+        AccountSetting setting = user.AccountSetting;
+        return setting == null ? null : new AccountSettingDto(setting.AllowTagging, setting.Metadata);
     }
 }
