@@ -1,11 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
-using Org.BouncyCastle.Asn1.Ocsp;
 using Sharecode.Backend.Api.Exceptions;
+using Sharecode.Backend.Api.RequestDetail;
 using Sharecode.Backend.Application.Client;
-using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.RequestDetail;
 
 namespace Sharecode.Backend.Api.Service;
 
@@ -19,6 +19,7 @@ public class HttpClientContext : IHttpClientContext
     private string? _cacheKey = null;
     private string? _emailAddress = null;
     private string[]? _cacheKeys = null;
+    private IRequestDetail? _requestDetail;
     private readonly Dictionary<string, HashSet<string>> _cacheInvalidateRecords = new();
     
     public HttpClientContext(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
@@ -193,7 +194,15 @@ public class HttpClientContext : IHttpClientContext
         #pragma warning restore CS8762 // Parameter must have a non-null value when exiting in some condition.
     }
 
+    public IRequestDetail RequestDetail
+    {
+        get
+        {
+            _requestDetail ??= new BaseRequestDetail(_contextAccessor);
 
+            return _requestDetail;
+        }
+    }
 
 
     private Guid? GetUserIdentifierFromClaim()

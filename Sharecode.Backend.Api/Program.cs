@@ -15,6 +15,7 @@ using Serilog;
 using Sharecode.Backend.Api.Extensions;
 using Sharecode.Backend.Api.Filters;
 using Sharecode.Backend.Api.Middleware;
+using Sharecode.Backend.Api.RequestDetail;
 using Sharecode.Backend.Api.Service;
 using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Client;
@@ -23,6 +24,7 @@ using Sharecode.Backend.Infrastructure.Jobs;
 using Sharecode.Backend.Presentation;
 using Sharecode.Backend.Utilities;
 using Sharecode.Backend.Utilities.KeyValue;
+using Sharecode.Backend.Utilities.RequestDetail;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,7 +37,6 @@ builder.Host.UseSerilog((ctx, conf) =>
     conf.ReadFrom.Configuration(ctx.Configuration);
 });
 builder.Services.AddScoped<IHttpClientContext, HttpClientContext>();
-
 //Cheeky way to access KeyValueClient
 ServiceProvider serviceProvider = builder.Services.BuildServiceProvider();
 IKeyValueClient keyValueClient = serviceProvider.GetRequiredService<IKeyValueClient>();

@@ -32,12 +32,12 @@ public class JwtClient : IJwtClient
     public string? GenerateRefreshToken(Guid userId, string secretKey, string encryptingKey, ref Guid? tokenIdentifier)
     {
         tokenIdentifier ??= Guid.NewGuid();
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(secretKey);
         var encryptingCredentials = new EncryptingCredentials(
             new SymmetricSecurityKey(Convert.FromBase64String(encryptingKey)),
-            SecurityAlgorithms.Aes128KW, // Key wrapping algorithm
-            SecurityAlgorithms.Aes128CbcHmacSha256); // Encryption algorithm
+            SecurityAlgorithms.Aes128KW,
+            SecurityAlgorithms.Aes128CbcHmacSha256);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(secretKey);
         SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor();
         List<Claim> claims = new List<Claim>();
         claims.Add(new Claim("nameid", userId.ToString()));
@@ -62,29 +62,18 @@ public class JwtClient : IJwtClient
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(secretKey);
         
-        var encryptingCredentials = new EncryptingCredentials(
-            new SymmetricSecurityKey(Convert.FromBase64String(encryptingKey)),
-            SecurityAlgorithms.Aes128KW, // Key wrapping algorithm
-            SecurityAlgorithms.Aes128CbcHmacSha256); // Encryption algorithm
-
-        
+        var encryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(Convert.FromBase64String(encryptingKey)), SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256);
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, user.FullName),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.EmailAddress)
         };
-
-        // Add any additional claims passed to the method
         if (additionalClaims != null)
         {
             claims.AddRange(additionalClaims);
         }
-
-        // Create a ClaimsIdentity object
         var claimsIdentity = new ClaimsIdentity(claims);
-
-        // Create the SecurityTokenDescriptor
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = claimsIdentity,
@@ -96,11 +85,7 @@ public class JwtClient : IJwtClient
             Audience = _jwtConfiguration.Audience,
             EncryptingCredentials = encryptingCredentials
         };
-
-        // Create the token
         var token = tokenHandler.CreateToken(tokenDescriptor);
-
-        // Return the serialized token
         return tokenHandler.WriteToken(token);
     }
 
