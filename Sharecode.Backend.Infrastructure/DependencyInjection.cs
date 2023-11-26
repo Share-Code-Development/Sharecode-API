@@ -37,7 +37,9 @@ public static class DependencyInjection
 
         collection.AddDbContext<ShareCodeDbContext>(options =>
         {
-            options.UseNpgsql(connectionStringBuilder.ConnectionString);
+            options.UseNpgsql(connectionStringBuilder.ConnectionString)
+                // .LogTo(Console.WriteLine)
+                ;
         });
 
         collection.AddScoped<IShareCodeDbContext, ShareCodeDbContext>();

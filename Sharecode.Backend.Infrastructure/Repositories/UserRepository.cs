@@ -38,40 +38,42 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .AnyAsync(x => x.EmailAddress == emailAddress && !x.IsDeleted, token)) == false;
     }
 
-    public async Task<User?> GetUserByIdIncludingAccountSettings(Guid userId, bool includeAccountSettings = false,
+    public async Task<User?> GetUserByIdIncludingAccountSettings(Guid userId, bool includeAccountSettings = false , bool trackUser = false,
         CancellationToken token = default)
     {
+        var query = Table.Where(x => x.Id == userId && !x.IsDeleted);
+
         if (includeAccountSettings)
         {
-            return await Table
-                .AsNoTracking()
-                .Include(x => x.AccountSetting)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted, cancellationToken: token);
+            query = query.Include(x => x.AccountSetting);
         }
-        else
+
+        if (!trackUser)
         {
-            return await Table
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted, cancellationToken: token);
+            query = query.AsNoTracking();
         }
+
+        return await query.FirstOrDefaultAsync(cancellationToken: token);
     }
 
-    public async Task<User?> GetUserByEmailIncludingAccountSettings(string emailAddress, bool includeAccountSettings = false,
+    public async Task<User?> GetUserByEmailIncludingAccountSettings(
+        string emailAddress, 
+        bool includeAccountSettings = false, 
+        bool trackUser = false,
         CancellationToken token = default)
     {
+        var query = Table.Where(x => x.EmailAddress == emailAddress && !x.IsDeleted);
+
         if (includeAccountSettings)
         {
-            return await Table
-                .AsNoTracking()
-                .Include(x => x.AccountSetting)
-                .FirstOrDefaultAsync(x => x.EmailAddress == emailAddress && !x.IsDeleted, cancellationToken: token);
+            query = query.Include(x => x.AccountSetting);
         }
-        else
+
+        if (!trackUser)
         {
-            return await Table
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.EmailAddress == emailAddress && !x.IsDeleted, cancellationToken: token);
+            query = query.AsNoTracking();
         }
+
+        return await query.FirstOrDefaultAsync(cancellationToken: token);
     }
 }

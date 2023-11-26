@@ -8,5 +8,5 @@ public class ValidateGatewayAppRequest : IAppRequest<ValidateGatewayCommandRespo
     public Guid GatewayId { get; set; }
     public GatewayRequestType Type { get; set; }
     
-    public string NewPassword { get; set; }
+    public string? NewPassword { get; set; }
 }

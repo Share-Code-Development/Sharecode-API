@@ -59,7 +59,7 @@ public class HttpClientContext : IHttpClientContext
                 return _isApiRequest.Value;
 
             _isApiRequest = _contextAccessor.HttpContext?.Request.Headers.ContainsKey("XSC-Api-Key");
-            return _isApiRequest!.Value;
+            return _isApiRequest ?? false;
         }
     }
 

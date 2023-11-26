@@ -12,12 +12,16 @@ public class UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger)
 {
     public void Commit()
     {
+        DateTime unitOfWorkStarted = DateTime.Now;
         SetModified();
         ConvertDomainEvents();
         EnsureTimeZoneForNg();
         try
         {
+            DateTime started = DateTime.Now;
             context.SaveChanges();
+            DateTime ended = DateTime.Now;
+            logger.Log(LogLevel.Information, $"Completed unit of work execution at {ended - unitOfWorkStarted}ms. Database persistence took {ended - started}ms");
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -30,12 +34,16 @@ public class UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger)
     
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
+        DateTime unitOfWorkStarted = DateTime.Now;
         SetModified();
         ConvertDomainEvents();
         EnsureTimeZoneForNg();
         try
         {
+            DateTime started = DateTime.Now;
             await context.SaveChangesAsync(cancellationToken);
+            DateTime ended = DateTime.Now;
+            logger.Log(LogLevel.Information, $"Completed unit of work execution at {ended - unitOfWorkStarted}ms. Database persistence took {ended - started}ms");            
         }
         catch (DbUpdateConcurrencyException ex)
         {

@@ -14,8 +14,11 @@ namespace Sharecode.Backend.Application.Events.User;
 
 public class AccountLockedEventHandler(IRefreshTokenService refreshTokenService, IUserService userService, IEmailClient emailClient , IAppCacheClient cacheClient, IGatewayService gatewayService, IOptions<FrontendConfiguration> configuration) : INotificationHandler<AccountLockedDomainEvent>
 {
+    private readonly FrontendConfiguration _frontendConfiguration = configuration.Value;
     public async Task Handle(AccountLockedDomainEvent notification, CancellationToken cancellationToken)
     {
+        
+        Console.WriteLine(_frontendConfiguration.Base);
         await refreshTokenService.InvalidateAllOfUserAsync(notification.UserId, cancellationToken);
         var matchingCacheKeys = new List<string>
         {
@@ -30,7 +33,9 @@ public class AccountLockedEventHandler(IRefreshTokenService refreshTokenService,
         {
             return;
         }
-        var gatewayUrl = GatewayRequestType.ForgotPassword.CreateGatewayUrl(configuration.Value.Base, gatewayRequest.Id);
+
+        var baseUrl = configuration.Value.Base;
+        var gatewayUrl = GatewayRequestType.ForgotPassword.CreateGatewayUrl(baseUrl, gatewayRequest.Id);
         await emailClient.SendTemplateMailAsync(EmailTemplateKeys.AccountLocked,
             new EmailTargets(notification.EmailAddress),
             new Dictionary<string, string>()

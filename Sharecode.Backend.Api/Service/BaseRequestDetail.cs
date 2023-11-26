@@ -47,7 +47,7 @@ public class BaseRequestDetail : IRequestDetail
     public IReadOnlyList<string> XForwardedFor
     {
         get => _xForwardedFor;
-        set => throw new NotImplementedException();
+        set => _xForwardedFor.AddRange(value);
     }
 
     private void PopulateDefaults()

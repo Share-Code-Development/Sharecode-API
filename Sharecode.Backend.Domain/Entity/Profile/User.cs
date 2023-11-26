@@ -60,9 +60,9 @@ public class User : AggregateRootWithMetadata
     public bool Active { get; private set; }
     public string? InActiveReason { get; private set; }
     public bool AccountLocked { get; private set; } = false;
-    private DateTime? LastUnsuccessfulLoginAttempt { get; set; } = null;
-    private int FailedAttemptCount { get; set; }
-        
+    public DateTime? LastUnsuccessfulLoginAttempt { get; set; } = null;
+    [Required]
+    public int FailedAttemptCount { get; set; }
     
     public override void RaiseCreatedEvent()
     {
