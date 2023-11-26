@@ -1,6 +1,7 @@
 using System.Net;
 using MediatR;
 using Sharecode.Backend.Application.Data;
+using Sharecode.Backend.Application.Exceptions;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Gateway;
 using Sharecode.Backend.Domain.Entity.Profile;
@@ -16,7 +17,7 @@ public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayAppR
     private readonly IUserService _userService;
     private readonly IUnitOfWork _unitOfWork;
 
-    public ValidateGatewayCommandHandler(IGatewayRepository gatewayRepository, IUserService userService, IUnitOfWork unitOfWork)
+    public ValidateGatewayCommandHandler(IGatewayRepository gatewayRepository, IUserService userService, IUnitOfWork unitOfWork, IUserRepository userRepository)
     {
         _gatewayRepository = gatewayRepository;
         _userService = userService;
@@ -25,45 +26,71 @@ public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayAppR
 
     public async Task<ValidateGatewayCommandResponse> Handle(ValidateGatewayAppRequest appRequest, CancellationToken cancellationToken)
     {
-        GatewayRequest? gatewayRequest = await _gatewayRepository.GetAsync(appRequest.GatewayId, token: cancellationToken);
+        GatewayRequest? gatewayRequest =
+            await _gatewayRepository.GetAsync(appRequest.GatewayId, token: cancellationToken);
         if (gatewayRequest == null)
         {
             return ValidateGatewayCommandResponse.NotFound;
         }
-
-        if (gatewayRequest.IsDeleted || gatewayRequest.IsCompleted || !gatewayRequest.IsValid)
-        {
-            return ValidateGatewayCommandResponse.Invalid(gatewayRequest.IsCompleted ? "Already completed" : "Invalid Request");
-        }
-
-        if (DateTime.UtcNow > gatewayRequest.Expiry)
-        {
-            return ValidateGatewayCommandResponse.Expired;
-        }
-
-        GatewayRequestType requestType = gatewayRequest.RequestType;
-        ValidateGatewayCommandResponse? response = null;
-        switch (requestType)
-        {
-            case GatewayRequestType.VerifyUserAccount:
-                response = await HandleVerifyUserRequestAsync(gatewayRequest, cancellationToken);
-                break;
-            case GatewayRequestType.ForgotPassword:
-                response = await HandleForgotPasswordRequestAsync(gatewayRequest, appRequest, cancellationToken);
-                break;
-            default:
-                response = new ValidateGatewayCommandResponse(HttpStatusCode.InternalServerError, "Unknown handler");
-                break;
-        }
         
-        gatewayRequest.SetProcessed();
-        await _unitOfWork.CommitAsync(cancellationToken);
-        return response;
+        try
+        {
+
+
+            if (gatewayRequest.IsDeleted || gatewayRequest.IsCompleted || !gatewayRequest.IsValid)
+            {
+                return ValidateGatewayCommandResponse.Invalid(gatewayRequest.IsCompleted
+                    ? "Already completed"
+                    : "Invalid Request");
+            }
+
+            if (DateTime.UtcNow > gatewayRequest.Expiry)
+            {
+                return ValidateGatewayCommandResponse.Expired;
+            }
+
+            GatewayRequestType requestType = gatewayRequest.RequestType;
+            ValidateGatewayCommandResponse? response = requestType switch
+            {
+                GatewayRequestType.VerifyUserAccount => await HandleVerifyUserRequestAsync(gatewayRequest,
+                    cancellationToken),
+                GatewayRequestType.ForgotPassword => await HandleForgotPasswordRequestAsync(gatewayRequest, appRequest,
+                    cancellationToken),
+                _ => new ValidateGatewayCommandResponse(HttpStatusCode.InternalServerError, "Unknown handler")
+            };
+            return response;
+        }
+        finally
+        {
+            gatewayRequest.SetProcessed();
+            await _unitOfWork.CommitAsync(cancellationToken);
+        }
+
     }
 
     private async Task<ValidateGatewayCommandResponse> HandleForgotPasswordRequestAsync(GatewayRequest gatewayRequest, ValidateGatewayAppRequest appRequest, CancellationToken token = default)
     {
-        return null;
+        var userId = gatewayRequest.SourceId;
+        try
+        {
+            bool success = await _userService.ResetPasswordAsync(userId, appRequest.NewPassword, token);
+            if (success)
+                return ValidateGatewayCommandResponse.Success;
+
+            return ValidateGatewayCommandResponse.Invalid("An unknown error occured");
+        }
+        catch (Exception e)
+        {
+            switch (e)
+            {
+                case EntityNotFoundException notFoundException when notFoundException?.EntityType == typeof(User):
+                    return ValidateGatewayCommandResponse.UserNotFound;
+                case AccountTemporarilySuspendedException:
+                    return ValidateGatewayCommandResponse.AccountSuspended;
+                default:
+                    throw;
+            }
+        }
     }
 
     private async Task<ValidateGatewayCommandResponse> HandleVerifyUserRequestAsync(GatewayRequest gatewayRequest, CancellationToken token = default)
@@ -75,17 +102,19 @@ public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayAppR
             if (!verifyUserAsync)
                 return ValidateGatewayCommandResponse.AlreadyVerified;
             
-            return ValidateGatewayCommandResponse.Verified;
+            return ValidateGatewayCommandResponse.Success;
         }
         catch (Exception e)
         {
-            if (e is EntityNotFoundException notFoundException)
+            switch (e)
             {
-                if(notFoundException?.EntityType == typeof(User))
+                case EntityNotFoundException notFoundException when notFoundException?.EntityType == typeof(User):
                     return ValidateGatewayCommandResponse.UserNotFound;
+                case AccountTemporarilySuspendedException:
+                    return ValidateGatewayCommandResponse.AccountSuspended;
+                default:
+                    throw;
             }
-
-            throw;
         }
     }
 }

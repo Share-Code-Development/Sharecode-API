@@ -14,21 +14,20 @@ using Sharecode.Backend.Utilities.SecurityClient;
 
 namespace Sharecode.Backend.Application.Features.Users.Login;
 
-public class LoginUserCommandHandler(IUserService userService, IRefreshTokenService tokenService, IUnitOfWork unitOfWork, IUserRepository userRepository, ISecurityClient securityClient, IGatewayService gatewayService, ITokenClient tokenClient, Namespace cloudFlareKeyValue)
+public class LoginUserCommandHandler(IUserService userService, IHttpClientContext context ,IRefreshTokenService tokenService, IUnitOfWork unitOfWork, IUserRepository userRepository, ISecurityClient securityClient, IGatewayService gatewayService, ITokenClient tokenClient, Namespace cloudFlareKeyValue)
     : IRequestHandler<LoginUserRequest, LoginUserResponse>
 {
     public async Task<LoginUserResponse> Handle(LoginUserRequest request, CancellationToken cancellationToken)
     {
-        User user = await GetOrRegisterUser(request, cancellationToken);
+        var user = await GetOrRegisterUser(request, cancellationToken);
         
         if (!user.Active)
         {
-            throw new AccountLockedException(user.EmailAddress, user.InActiveReason!);
+            throw new AccountTemporarilySuspendedException(user.EmailAddress, user.InActiveReason!);
         }
         
-        user.SetLastLogin();
+        user.SetSuccessfulLoginAttempt(context.RequestDetail);
         var accessCredentials = tokenClient.Generate(user);
-        //await refreshTokenRepository.AddAsync(accessCredentials.UserRefreshToken, cancellationToken);
         await tokenService.GenerateRefreshTokenAsync(user.Id, false, tokenIdentifier: accessCredentials.RefreshTokenIdentifier, token: cancellationToken);
         await unitOfWork.CommitAsync(cancellationToken);
         return LoginUserResponse.From(user, accessCredentials);
@@ -70,14 +69,19 @@ public class LoginUserCommandHandler(IUserService userService, IRefreshTokenServ
             throw new InvalidAuthFromSocialException(AuthorizationType.Google, "Authentication failed due to invalid token");
         }
 
-        string emailAddress = payload.Email;
-        User? user = await userRepository.GetUserByEmailIncludingAccountSettings(emailAddress, true, token);
+        var emailAddress = payload.Email;
+        var user = await userRepository.GetUserByEmailIncludingAccountSettings(emailAddress, true, token);
         if (user == null)
         {
             user = await RegisterFromGoogle(payload, token);
         }
         else
         {
+            if (!user.AccountLocked)
+            {
+                throw new AccountLockedException();
+            }
+            
             user.ProfilePicture = payload.Picture;
             var names = GetNameFromGooglePayload(payload);
             user.FirstName = names.Item1;
@@ -117,34 +121,54 @@ public class LoginUserCommandHandler(IUserService userService, IRefreshTokenServ
     
     private async Task<User> FromRegular(LoginUserRequest request, CancellationToken token = default)
     {
-        var user = await userRepository.GetUserByEmailIncludingAccountSettings(request.EmailAddress!, true, token);
-        if (user == null)
-            throw new EntityNotFoundException(typeof(User), request.EmailAddress!);
-        
-        if (user.Salt == null || user.PasswordHash == null)
+        try
         {
-            throw new PasswordNotYetGeneratedException();
-        }
+            var user = await userRepository.GetUserByEmailIncludingAccountSettings(request.EmailAddress!, true, token);
+            if (user == null)
+                throw new EntityNotFoundException(typeof(User), request.EmailAddress!);
 
-        var isPasswordMatching = securityClient.VerifyPasswordHash(request.Password!, user.PasswordHash!, user.Salt!);
-        if (!isPasswordMatching)
-        {
-            throw new InvalidPasswordException();
-        }
-
-        if (!user.EmailVerified)
-        {
-            var limitReached = await gatewayService.IsLimitReachedAsync(user.Id, GatewayRequestType.VerifyUserAccount, token);
-            if (limitReached)
+            if (user.AccountLocked)
             {
-                throw new EmailNotVerifiedException(user.EmailAddress, "Please check your email for pending verifications!");
+                throw new AccountLockedException();
             }
 
-            user.ResendEmailVerification();
-            throw new EmailNotVerifiedException(user.EmailAddress, "We have send a verification email to your address, Please check your email");
+            if (user.Salt == null || user.PasswordHash == null)
+            {
+                throw new PasswordNotYetGeneratedException();
+            }
+
+            var isPasswordMatching =
+                securityClient.VerifyPasswordHash(request.Password!, user.PasswordHash!, user.Salt!);
+            if (!isPasswordMatching)
+            {
+                user.SetUnsuccessfulLoginAttempt(context.RequestDetail);
+                throw new InvalidPasswordException();
+            }
+
+            if (!user.EmailVerified)
+            {
+                var limitReached =
+                    await gatewayService.IsLimitReachedAsync(user.Id, GatewayRequestType.VerifyUserAccount, token);
+                if (limitReached)
+                {
+                    throw new EmailNotVerifiedException(user.EmailAddress,
+                        "Please check your email for pending verifications!");
+                }
+
+                user.ResendEmailVerification();
+                throw new EmailNotVerifiedException(user.EmailAddress,
+                    "We have send a verification email to your address, Please check your email");
+            }
+
+            return user;
         }
-        
-        return user;
+        finally
+        {
+            //Commit the transaction no matter what,
+            //bcs invalid attempts and stuff like that should be saved,
+            //also domain events for such events should be raised too
+            await unitOfWork.CommitAsync(token);
+        }
     }
 
     private (string, string?, string) GetNameFromGooglePayload(GoogleJsonWebSignature.Payload payload)

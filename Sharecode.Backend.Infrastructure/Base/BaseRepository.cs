@@ -120,6 +120,18 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return command;
     }
 
+    public async Task<long> DeleteBatchAsync(ISpecification<TEntity>? specification = null, CancellationToken token = default)
+    {
+        IQueryable<TEntity> baseEntities = Table.AsQueryable();
+        if (specification != null)
+        {
+            baseEntities = ApplySpecification(baseEntities, specification);
+        }
+
+        return await baseEntities
+            .ExecuteDeleteAsync(token);
+    }
+
     private static IQueryable<TEntity> ApplySpecification(IQueryable<TEntity> query, ISpecification<TEntity> specification)
     {
         if (specification.Criteria != null)

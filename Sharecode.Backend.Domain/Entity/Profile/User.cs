@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Domain.Events.Users;
+using Sharecode.Backend.Utilities.RequestDetail;
 
 namespace Sharecode.Backend.Domain.Entity.Profile;
 
@@ -58,7 +58,11 @@ public class User : AggregateRootWithMetadata
     [Required]
     public required AccountVisibility Visibility { get; set; }
     public bool Active { get; private set; }
-    public InactiveReason? InActiveReason { get; private set; }
+    public string? InActiveReason { get; private set; }
+    public bool AccountLocked { get; private set; } = false;
+    private DateTime? LastUnsuccessfulLoginAttempt { get; set; } = null;
+    private int FailedAttemptCount { get; set; }
+        
     
     public override void RaiseCreatedEvent()
     {
@@ -99,11 +103,7 @@ public class User : AggregateRootWithMetadata
         Active = true;
         return true;
     }
-
-    public void SetLastLogin()
-    {
-        LastLogin = DateTime.UtcNow;
-    }
+    
 
     public void ResendEmailVerification()
     {
@@ -115,39 +115,54 @@ public class User : AggregateRootWithMetadata
 
     public bool RequestPasswordReset(bool verifyAccountStatus = true)
     {
-        if (verifyAccountStatus && !Active && InActiveReason! == InactiveReasons.InvalidPassword)
-        {
+        if (!Active)
             return false;
-        }
 
         RaiseDomainEvent(RequestPasswordResetDomainEvent.Create(this));
         return true;
     }
-}
 
-#region Inactive Reasons
-
-public class InactiveReason
-{
-    public string Value { get; private set; }
-
-    private InactiveReason() { } // EF Core uses this
-
-    public InactiveReason(string value)
+    public void SetUnsuccessfulLoginAttempt(IRequestDetail requestDetail)
     {
-        Value = value ?? throw new ArgumentNullException(nameof(value));
+        //Assign if the user has not failed a single attempt
+        //after sign up
+        LastUnsuccessfulLoginAttempt ??= DateTime.UtcNow;
+
+        var lastAttempt = LastUnsuccessfulLoginAttempt.Value;
+        var hasCountExceeded = FailedAttemptCount >= 5;
+        
+        LastUnsuccessfulLoginAttempt = DateTime.UtcNow;
+        FailedAttemptCount++;
+        
+        var minutes = (DateTime.UtcNow - lastAttempt).TotalMinutes;
+        
+        if (minutes <= 10 && hasCountExceeded)
+        {
+            AccountLocked = true;
+            PasswordHash = null;
+            Salt = null;
+            RaiseDomainEvent(AccountLockedDomainEvent.Create(this, requestDetail));
+        }
     }
 
-    public static implicit operator string(InactiveReason reason) => reason.Value;
-    public static implicit operator InactiveReason(string reason) => new InactiveReason(reason);
+    public void SetSuccessfulLoginAttempt(IRequestDetail requestDetail)
+    {
+        FailedAttemptCount = 0;
+        LastLogin = DateTime.UtcNow;
+    }
+
+    public void UpdatePassword(byte[] passwordHash, byte[] salt, IRequestDetail detail)
+    {
+        bool wasAccountLocked = AccountLocked;
+
+        PasswordHash = passwordHash;
+        Salt = salt;
+        
+        RaiseDomainEvent(PasswordResetSuccessDomainEvent.Create(this, detail, wasAccountLocked));
+        if (!AccountLocked) return;
+        //Reset those parameters only if the account was locked and this is a reset
+        LastUnsuccessfulLoginAttempt = null;
+        FailedAttemptCount = 0;
+        AccountLocked = false;
+    }
 }
-
-public static class InactiveReasons
-{
-    public static InactiveReason InvalidPassword => "Wrong password limit reached";
-
-    public static InactiveReason ContactSupport => "Your account has been temporarily suspended, Please contact support!";
-}
-
-
-#endregion

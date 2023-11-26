@@ -53,4 +53,10 @@ public class RefreshTokenService(IRefreshTokenRepository tokenRepository, IShare
         }
         return refreshToken;
     }
+
+    public async Task InvalidateAllOfUserAsync(Guid issuedFor, CancellationToken token = default)
+    {
+        var deleteSpecification = new EntitySpecification<UserRefreshToken>(x => x.IssuedFor == issuedFor);
+        await tokenRepository.DeleteBatchAsync(deleteSpecification, token);
+    }
 }

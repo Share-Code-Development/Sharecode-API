@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Gateway;
 using Sharecode.Backend.Domain.Enums;
+using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Utilities.Configuration;
 
@@ -16,11 +17,13 @@ public class GatewayService : IGatewayService
     private readonly ShareCodeDbContext _dbContext;
     private readonly GatewayLimitConfiguration _gatewayLimitConfiguration;
     private readonly ILogger<GatewayService> _logger;
+    private readonly IGatewayRepository _repository;
 
-    public GatewayService(ShareCodeDbContext dbContext, IOptions<GatewayLimitConfiguration> gatewayLimitConfiguration, ILogger<GatewayService> logger)
+    public GatewayService(ShareCodeDbContext dbContext, IOptions<GatewayLimitConfiguration> gatewayLimitConfiguration, ILogger<GatewayService> logger, IGatewayRepository repository)
     {
         _dbContext = dbContext;
         _logger = logger;
+        _repository = repository;
         _gatewayLimitConfiguration = gatewayLimitConfiguration.Value;
     }
 
@@ -55,6 +58,21 @@ public class GatewayService : IGatewayService
                 , token);
         
         return currentCount >= limit;
+    }
+
+    public async Task<GatewayRequest?> CreateGatewayRequestAsync(Guid sourceId, GatewayRequestType requestType, bool overrideLimit = false,
+        DateTime? expiry = null, CancellationToken token = default)
+    {
+        if (!overrideLimit)
+        {
+            bool limitReached = await IsLimitReachedAsync(sourceId, requestType , token);
+            if (limitReached)
+                return null;
+        }
+
+        var gatewayRequest = GatewayRequest.CreateRequest(requestType, sourceId, expiry);
+        await _repository.AddAsync(gatewayRequest, token);
+        return gatewayRequest;
     }
 
     private int? GetLimit(GatewayRequestType requestType, GatewayLimitConfiguration config)

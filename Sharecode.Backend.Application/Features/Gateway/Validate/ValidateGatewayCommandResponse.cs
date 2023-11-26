@@ -18,7 +18,10 @@ public record ValidateGatewayCommandResponse(
     public static ValidateGatewayCommandResponse AlreadyVerified => new ValidateGatewayCommandResponse(HttpStatusCode.BadRequest, "Already Verified");
     public static ValidateGatewayCommandResponse Invalid(string message) => new ValidateGatewayCommandResponse(HttpStatusCode.BadRequest, message);
 
-    public static ValidateGatewayCommandResponse Verified => new ValidateGatewayCommandResponse(HttpStatusCode.OK, "Success");
+    public static ValidateGatewayCommandResponse Success => new ValidateGatewayCommandResponse(HttpStatusCode.OK, "Success");
+
+    public static ValidateGatewayCommandResponse AccountSuspended =>
+        new ValidateGatewayCommandResponse(HttpStatusCode.BadRequest, "Account has been suspended, Contact support!");
 }
     
     

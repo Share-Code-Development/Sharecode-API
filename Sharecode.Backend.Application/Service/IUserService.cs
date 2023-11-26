@@ -5,4 +5,6 @@ public interface IUserService
     Task<bool> IsEmailAddressUnique(string emailAddress, CancellationToken token = default);
     Task<bool> VerifyUserAsync(Guid userId, CancellationToken token = default);
     Task<bool> RequestForgotPassword(string emailAddress, CancellationToken token = default);
+    Task<bool> ResetPasswordAsync(Guid userId, string password, CancellationToken token = default);
+
 }

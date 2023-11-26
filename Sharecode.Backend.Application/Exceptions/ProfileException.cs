@@ -23,11 +23,20 @@ public class EmailNotVerifiedException : AppException
     }
 }
 
-[ExceptionDetail(1212367, "The account is locked, Either check your email address or contact support!")]
+[ExceptionDetail(1212367, "The account is suspended, Either check your email address or contact support!")]
+public class AccountTemporarilySuspendedException : AppException
+{
+    public AccountTemporarilySuspendedException(string emailAddress, string reason) : base($"This account associated with the email {emailAddress} has been suspended", 1212367, HttpStatusCode.BadRequest)
+    {
+        SetMessage($"This account has been suspended. Contact support. Reason: {reason}");
+    }
+}
+
+[ExceptionDetail(9999, "The account has been locked due to being multiple incorrect login attempts")]
 public class AccountLockedException : AppException
 {
-    public AccountLockedException(string emailAddress, string reason) : base($"This account has been locked", 1212367, HttpStatusCode.BadRequest)
+    public AccountLockedException() : base($"The account has been locked due to being multiple incorrect login attempts", 9999, HttpStatusCode.BadRequest)
     {
-        SetMessage($"This account has been locked. Contact support. Reason: {reason}");
+        SetMessage($"The account has been locked due to being multiple incorrect login attempts");
     }
 }

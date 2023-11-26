@@ -51,4 +51,4 @@ jobs:
           docker pull alenalex/sharecode-api:master
           docker stop sharecode-backend-api || true
           docker rm sharecode-backend-api || true
-          docker run -d --name sharecode-backend-api -e ${{ secrets.DEV_ENV }} -v ${{ secrets.DEV_CONFIGURATION }}:/app/appsettings.json -p ${{ secrets.DEV_NETWORK }}:80 alenalex/sharecode-api:master --restart=always
+          docker run -d --name sharecode-backend-api -e ${{ secrets.DEV_ENV }} -v ${{ secrets.DEV_CONFIGURATION }}:/app/appsettings.json -v ${{ secrets.DEV_EMAIL_TEMPLATES}}:/app/email-templates/ -p ${{ secrets.DEV_NETWORK }}:80 alenalex/sharecode-api:master --restart=always

@@ -30,4 +30,5 @@ public static class EmailTemplateKeys
     public static readonly EmailTemplateKey EmailValidation = new EmailTemplateKey("validate-email.html", "Welcome to Sharecode! Verify your email address");
     public static readonly EmailTemplateKey WelcomeUser = new EmailTemplateKey("welcome-email.html", "Welcome onboard {(WELCOME_USER)}");
     public static readonly EmailTemplateKey ResetPassword = new EmailTemplateKey("reset-password.html", "Forgot your password? Here is your reset request {(USER)}");
+    public static readonly EmailTemplateKey AccountLocked = new EmailTemplateKey("account-locked.html", "Your sharecode account has been locked!");
 }

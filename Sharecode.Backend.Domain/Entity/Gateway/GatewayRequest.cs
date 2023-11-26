@@ -13,15 +13,15 @@ public class GatewayRequest : BaseEntity
     public bool IsCompleted { get; private set; } = false;
     public DateTime? ProcessedAt { get; private set; }
 
-    public static GatewayRequest CreateRequest(GatewayRequestType requestType, Guid sourceId)
+    public static GatewayRequest CreateRequest(GatewayRequestType requestType, Guid sourceId, DateTime? expiry = null)
     {
-        var expiry = GetExpiry(requestType);
+        expiry ??= GetExpiry(requestType);
         return new GatewayRequest()
         {
             Id = Guid.NewGuid(),
             RequestType = requestType,
             SourceId = sourceId,
-            Expiry = expiry
+            Expiry = expiry.Value
         };
     }
 
