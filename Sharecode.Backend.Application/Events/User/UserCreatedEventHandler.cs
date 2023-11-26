@@ -1,18 +1,24 @@
 using MediatR;
+using Microsoft.Extensions.Options;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Gateway;
 using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Domain.Events;
 using Sharecode.Backend.Domain.Events.Users;
+using Sharecode.Backend.Domain.Extensions;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.Configuration;
 using Sharecode.Backend.Utilities.Email;
 
 namespace Sharecode.Backend.Application.Events.User;
 
 public class UserCreatedEventHandler(IEmailClient emailClient, IGatewayRepository gatewayRepository,
-        IGatewayService gatewayService)
+        IGatewayService gatewayService, IOptions<FrontendConfiguration> configuration)
     : INotificationHandler<UserCreatedDomainEvent>
 {
+
+    private readonly FrontendConfiguration _configuration = configuration.Value;
+    
     public async Task Handle(UserCreatedDomainEvent notification, CancellationToken cancellationToken)
     {
         await SendVerificationEmailAsync(notification, cancellationToken);
@@ -26,8 +32,10 @@ public class UserCreatedEventHandler(IEmailClient emailClient, IGatewayRepositor
             return;
         
         await gatewayRepository.AddAsync(requestAsync, cancellationToken);
-        
-        var placeholders = new Dictionary<string, string> { { "VERIFICATION_URL", $"{requestAsync.Id}" }, {"USER_NAME", notification.FullName} };
+
+        var gatewayUrl = GatewayRequestType.VerifyUserAccount.CreateGatewayUrl(_configuration.Base, requestAsync.Id);
+
+        var placeholders = new Dictionary<string, string> { { "VERIFICATION_URL", $"{gatewayUrl}" }, {"USER_NAME", notification.FullName} };
         await emailClient.SendTemplateMailAsync(
             EmailTemplateKeys.EmailValidation,
             new EmailTargets(notification.EmailAddress),
@@ -43,4 +51,6 @@ public class UserCreatedEventHandler(IEmailClient emailClient, IGatewayRepositor
 
         return GatewayRequest.CreateRequest(GatewayRequestType.VerifyUserAccount, notification.UserId);
     }
+    
+    
 }

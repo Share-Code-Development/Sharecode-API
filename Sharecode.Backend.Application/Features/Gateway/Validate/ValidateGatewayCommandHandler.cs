@@ -43,15 +43,27 @@ public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayAppR
 
         GatewayRequestType requestType = gatewayRequest.RequestType;
         ValidateGatewayCommandResponse? response = null;
-        if (requestType == GatewayRequestType.VerifyUserAccount)
+        switch (requestType)
         {
-             response = await HandleVerifyUserRequestAsync(gatewayRequest, cancellationToken);
+            case GatewayRequestType.VerifyUserAccount:
+                response = await HandleVerifyUserRequestAsync(gatewayRequest, cancellationToken);
+                break;
+            case GatewayRequestType.ForgotPassword:
+                response = await HandleForgotPasswordRequestAsync(gatewayRequest, appRequest, cancellationToken);
+                break;
+            default:
+                response = new ValidateGatewayCommandResponse(HttpStatusCode.InternalServerError, "Unknown handler");
+                break;
         }
-
-        response ??= new ValidateGatewayCommandResponse(HttpStatusCode.InternalServerError, "Unknown handler");
+        
         gatewayRequest.SetProcessed();
         await _unitOfWork.CommitAsync(cancellationToken);
         return response;
+    }
+
+    private async Task<ValidateGatewayCommandResponse> HandleForgotPasswordRequestAsync(GatewayRequest gatewayRequest, ValidateGatewayAppRequest appRequest, CancellationToken token = default)
+    {
+        return null;
     }
 
     private async Task<ValidateGatewayCommandResponse> HandleVerifyUserRequestAsync(GatewayRequest gatewayRequest, CancellationToken token = default)

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Refresh.Get;
 using Sharecode.Backend.Application.Features.Users.Create;
+using Sharecode.Backend.Application.Features.Users.ForgotPassword;
 using Sharecode.Backend.Application.Features.Users.Login;
 using Sharecode.Backend.Utilities.RedisCache;
 
@@ -41,5 +42,15 @@ public class AuthController(IAppCacheClient cache, IHttpClientContext requestCon
         Response.Headers.Authorization = response.RefreshToken;
         Response.Headers.Expires = response.Expiry.Ticks.ToString();
         return Ok();
+    }
+
+    [HttpPost("forgot-password/", Name = "Request a password forgot")]
+    public async Task<ActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+    {
+        var send = await mediator.Send(command);
+        if (send)
+            return Ok();
+        
+        return BadRequest();
     }
 }

@@ -26,6 +26,16 @@ public class GatewayService : IGatewayService
 
     public async Task<bool> IsLimitReachedAsync(Guid sourceId, GatewayRequestType type, CancellationToken token = default)
     {
+        var limit = GetLimit(type, _gatewayLimitConfiguration);
+        if (!limit.HasValue)
+        {
+            _logger.LogCritical($"Failed to get the limit of {type.ToString()} from configuration");
+            return true;
+        }
+
+        if (limit <= 0)
+            return false;
+        
         //Get the count of requests of a source where
         // 1) its of the same request type
         // 2) the request is still valid
@@ -43,14 +53,7 @@ public class GatewayService : IGatewayService
                 x.ProcessedAt == null && //Its still not processed
                 !x.IsCompleted //Not completed
                 , token);
-
-        var limit = GetLimit(type, _gatewayLimitConfiguration);
-        if (!limit.HasValue)
-        {
-            _logger.LogCritical($"Failed to get the limit of {type.ToString()} from configuration");
-            return true;
-        }
-
+        
         return currentCount >= limit;
     }
 

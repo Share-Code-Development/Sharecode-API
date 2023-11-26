@@ -20,8 +20,6 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
     
-    
-
     public async Task<bool> IsEmailAddressUnique(string emailAddress, CancellationToken token = default)
     {
         return await (_dbContext.Set<User>()
@@ -37,5 +35,20 @@ public class UserService : IUserService
             throw new EntityNotFoundException(typeof(User), userId);
 
         return user.VerifyUser();
+    }
+
+    public async Task<bool> RequestForgotPassword(string emailAddress, CancellationToken token = default)
+    {
+        var user = await _userRepository.GetUserByEmailIncludingAccountSettings(emailAddress, false, token);
+        if (user == null)
+            return false;
+        
+        if (user is { Active: false, InActiveReason: not null,  } && user.InActiveReason == InactiveReasons.InvalidPassword)
+        {
+            throw new AccountLockedException(user.EmailAddress, user.InActiveReason!);
+        }
+
+        var requestPasswordReset = user.RequestPasswordReset(false);
+        return requestPasswordReset;
     }
 }

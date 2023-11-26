@@ -38,7 +38,8 @@ public class GatewayRequest : BaseEntity
         return requestType switch
         {
             GatewayRequestType.VerifyUserAccount => DateTime.UtcNow.AddMinutes(10),
-            _ => DateTime.UtcNow
+            GatewayRequestType.ForgotPassword => DateTime.UtcNow.AddMinutes(10),
+            _ => DateTime.UtcNow.AddMinutes(10)
         };
     }
     #endregion

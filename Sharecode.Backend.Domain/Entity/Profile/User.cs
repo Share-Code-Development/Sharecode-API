@@ -58,7 +58,7 @@ public class User : AggregateRootWithMetadata
     [Required]
     public required AccountVisibility Visibility { get; set; }
     public bool Active { get; private set; }
-    public string? InActiveReason { get; private set; }
+    public InactiveReason? InActiveReason { get; private set; }
     
     public override void RaiseCreatedEvent()
     {
@@ -112,4 +112,42 @@ public class User : AggregateRootWithMetadata
         
         RaiseDomainEvent(UserCreatedDomainEvent.Create(this));
     }
+
+    public bool RequestPasswordReset(bool verifyAccountStatus = true)
+    {
+        if (verifyAccountStatus && !Active && InActiveReason! == InactiveReasons.InvalidPassword)
+        {
+            return false;
+        }
+
+        RaiseDomainEvent(RequestPasswordResetDomainEvent.Create(this));
+        return true;
+    }
 }
+
+#region Inactive Reasons
+
+public class InactiveReason
+{
+    public string Value { get; private set; }
+
+    private InactiveReason() { } // EF Core uses this
+
+    public InactiveReason(string value)
+    {
+        Value = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    public static implicit operator string(InactiveReason reason) => reason.Value;
+    public static implicit operator InactiveReason(string reason) => new InactiveReason(reason);
+}
+
+public static class InactiveReasons
+{
+    public static InactiveReason InvalidPassword => "Wrong password limit reached";
+
+    public static InactiveReason ContactSupport => "Your account has been temporarily suspended, Please contact support!";
+}
+
+
+#endregion

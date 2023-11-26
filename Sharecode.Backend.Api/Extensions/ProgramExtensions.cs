@@ -18,6 +18,7 @@ public static class ProgramExtensions
         service.Configure<GatewayLimitConfiguration>(options =>
             configurationManager.GetSection("GatewayLimit").Bind(options)
         );
+        service.Configure<FrontendConfiguration>(options => configurationManager.GetSection("Frontend").Bind(options));
         return service;
     }
 
