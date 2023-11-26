@@ -8,5 +8,6 @@ public record CreateUserCommand(
     string? FirstName, 
     string? MiddleName,
     string? LastName,
-    string? Password
+    string? Password,
+    string? ProfileUrl
     ) : IAppRequest<UserCreatedResponse>;

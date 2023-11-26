@@ -25,14 +25,15 @@ internal class CreateUserCommandHandler(IUnitOfWork unitOfWork, IUserRepository 
             Visibility = AccountVisibility.Public,
             Salt = salt,
             PasswordHash = passwordHash,
+            ProfilePicture = command.ProfileUrl
         };
         user.SetActive();
         user.AccountSetting = new AccountSetting
         {
             UserId = user.Id,
-            User = user
+            User = user,
+            Id = Guid.NewGuid()
         };
-        user.AccountSetting.Id = Guid.NewGuid();
         userRepository.Register(user);
         await unitOfWork.CommitAsync(cancellationToken);
         return UserCreatedResponse.From(user);
