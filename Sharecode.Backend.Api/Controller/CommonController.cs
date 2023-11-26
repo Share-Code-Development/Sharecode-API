@@ -22,7 +22,13 @@ public class CommonController(IAppCacheClient cache, IHttpClientContext requestC
     [HttpGet]
     public ActionResult Health()
     {
-        return Ok();
+        List<string> headers = new();
+        foreach (var (key, value) in Request.Headers)
+        {
+            headers.Add($"{key} - {value}");
+        }
+
+        return Ok(headers);
     }
 
     [HttpGet("exceptions")]
