@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using Sharecode.Backend.Api.Exceptions;
-using Sharecode.Backend.Api.RequestDetail;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Repositories;

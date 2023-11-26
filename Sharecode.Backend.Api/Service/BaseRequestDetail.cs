@@ -1,6 +1,6 @@
 using Sharecode.Backend.Utilities.RequestDetail;
 
-namespace Sharecode.Backend.Api.RequestDetail;
+namespace Sharecode.Backend.Api.Service;
 
 public class BaseRequestDetail : IRequestDetail
 {
@@ -71,7 +71,7 @@ public class BaseRequestDetail : IRequestDetail
             _originCountry = country;
         }
         
-        if (_contextAccessor?.HttpContext?.Request.Headers.TryGetValue(IsCloudflareEnvironment ? CfIpCountry : XLocalAddress, out var value) ?? false)
+        if (_contextAccessor?.HttpContext?.Request.Headers.TryGetValue(IsCloudflareEnvironment ? CfConnectingIpHeader : XLocalAddress, out var value) ?? false)
         {
             _connectingAddress = value;
         }

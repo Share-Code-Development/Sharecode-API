@@ -22,12 +22,6 @@ public class CommonController(IAppCacheClient cache, IHttpClientContext requestC
     [HttpGet]
     public ActionResult Health()
     {
-        /*List<string> headers = new();
-        foreach (var (key, value) in Request.Headers)
-        {
-            headers.Add($"{key} - {value}");
-        }*/
-
         return Ok(requestContext.RequestDetail);
     }
 

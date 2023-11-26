@@ -15,7 +15,6 @@ using Serilog;
 using Sharecode.Backend.Api.Extensions;
 using Sharecode.Backend.Api.Filters;
 using Sharecode.Backend.Api.Middleware;
-using Sharecode.Backend.Api.RequestDetail;
 using Sharecode.Backend.Api.Service;
 using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Client;
