@@ -45,7 +45,7 @@ jobs:
         file: Sharecode.Backend.Api/Dockerfile
         push: true
         tags: alenalex/sharecode-api:master
-        platforms: linux/amd64,linux/arm64,linux/arm/v7
+        platforms: linux/arm64
       if: github.ref == 'refs/heads/master'
     
     - name: Deploy to VM
