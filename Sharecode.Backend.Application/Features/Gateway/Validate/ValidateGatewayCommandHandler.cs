@@ -35,8 +35,6 @@ public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayAppR
         
         try
         {
-
-
             if (gatewayRequest.IsDeleted || gatewayRequest.IsCompleted || !gatewayRequest.IsValid)
             {
                 return ValidateGatewayCommandResponse.Invalid(gatewayRequest.IsCompleted
