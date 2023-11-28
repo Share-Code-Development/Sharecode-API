@@ -19,7 +19,7 @@ jobs:
 
     - name: Inject the latest email-templates
       run: |
-        git clone –single-branch --branch master https://github.com/Share-Code-Development/Email-templates.git email-templates
+        git clone –single-branch --branch main https://github.com/Share-Code-Development/Email-templates.git email-templates
         cp -r email-templates Sharecode.Backend.Api/email-templates
 
     - name: Restore Dependencies
