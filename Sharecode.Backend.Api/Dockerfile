@@ -20,5 +20,8 @@ RUN dotnet publish "Sharecode.Backend.Api.csproj" -c Release -o /app/publish /p:
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-    
+
+# Copy the email templates
+COPY email-templates /app/email-templates/
+
 ENTRYPOINT ["dotnet", "Sharecode.Backend.Api.dll"]

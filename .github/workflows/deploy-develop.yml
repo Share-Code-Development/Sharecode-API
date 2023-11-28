@@ -15,7 +15,12 @@ jobs:
     - name: Set up .NET 8
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '8.0' # Set to .NET 8
+        dotnet-version: '8.0'
+
+    - name: Inject the latest email-templates
+      run: |
+        git clone –single-branch --branch master https://github.com/Share-Code-Development/Email-templates.git email-templates
+        cp -r email-templates Sharecode.Backend.Api/email-templates
 
     - name: Restore Dependencies
       run: dotnet restore Sharecode.Backend.Api/Sharecode.Backend.Api.csproj
@@ -51,4 +56,4 @@ jobs:
           docker pull alenalex/sharecode-api:master
           docker stop sharecode-backend-api || true
           docker rm sharecode-backend-api || true
-          docker run -d --name sharecode-backend-api -e ${{ secrets.DEV_ENV }} -v ${{ secrets.DEV_CONFIGURATION }}:/app/appsettings.json -v ${{ secrets.DEV_EMAIL_TEMPLATES}}:/app/email-templates/ -p ${{ secrets.DEV_NETWORK }}:80 alenalex/sharecode-api:master --restart=always
+          docker run -d --name sharecode-backend-api -e ${{ secrets.DEV_ENV }} -v ${{ secrets.DEV_CONFIGURATION }}:/app/appsettings.json -p ${{ secrets.DEV_NETWORK }}:80 alenalex/sharecode-api:master --restart=always
