@@ -123,17 +123,10 @@ public static class BootstrapExtensions
         {
             options.AddPolicy("DeployedLink", builder =>
             {
-                builder.WithOrigins("https://sharecodeapp.onrender.com/")
+                builder.WithOrigins("https://sharecodeapp.onrender.com/", "http://localhost:4000/")
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });
-            
-            options.AddPolicy("LocalLink", builder =>
-            {
-                builder.WithOrigins("http://localhost:4000/")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-            });            
         });
         return service;
     }

@@ -55,7 +55,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCustomCors();
+app.UseCors();
 app.UseSerilogRequestLogging();
 app.UseRateLimiter();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
