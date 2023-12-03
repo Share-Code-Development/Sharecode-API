@@ -35,8 +35,8 @@ public class AccountTemporarilySuspendedException : AppException
 [ExceptionDetail(9999, "The account has been locked due to being multiple incorrect login attempts")]
 public class AccountLockedException : AppException
 {
-    public AccountLockedException() : base($"The account has been locked due to being multiple incorrect login attempts", 9999, HttpStatusCode.BadRequest)
+    public AccountLockedException() : base($"The account has been locked due to being multiple incorrect login attempts. If you have access to the email address, please reset your password", 9999, HttpStatusCode.BadRequest)
     {
-        SetMessage($"The account has been locked due to being multiple incorrect login attempts");
+        SetMessage($"The account has been locked due to being multiple incorrect login attempts. If you have access to the email address, please reset your password");
     }
 }
