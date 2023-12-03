@@ -15,8 +15,6 @@ public class ProcessOutboxJob(ShareCodeDbContext dbContext, IPublisher publisher
         IUnitOfWork unitOfWork)
     : IJob
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
-
     public async Task Execute(IJobExecutionContext context)
     {
         List<OutboxMessage> messages = await FetchMessages(context.CancellationToken);
@@ -85,7 +83,7 @@ public class ProcessOutboxJob(ShareCodeDbContext dbContext, IPublisher publisher
             outboxMessage.ProcessedOnUtc = DateTime.UtcNow;
         }
 
-        await _unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync();
     }
 
     private async Task<List<OutboxMessage>> FetchMessages(CancellationToken token = default)

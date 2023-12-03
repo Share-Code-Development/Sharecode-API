@@ -158,4 +158,13 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
 
         return identityBuilder.ToString();
     }
+
+    protected bool HasFiles => Request.Form.Files.Any();
+    protected bool HasFilesWithName(string fileName) => Request.Form.Files.Any(x => x.Name == fileName);
+
+    protected Stream? GetFileAsStream(string fileName)
+    {
+        var formFile = Request.Form.Files.GetFile(fileName);
+        return formFile?.OpenReadStream();
+    }
 }

@@ -18,17 +18,11 @@ public class KeyController : ControllerBase
     {
         _mediator = mediator;
     }
-
-    [HttpGet("{id}")]
-    public IActionResult Get(Guid id)
-    {
-        return Ok(1);
-    }
+    
 
     [HttpPost]
-    public async Task<IActionResult> Result([FromBody] CreateUserCommand command)
+    public async Task<IActionResult> Result()
     {
-        UserCreatedResponse response = await _mediator.Send(command);
-        return CreatedAtAction(nameof(Get), new {id = response.UserId}, response);
+        return Ok();
     }
 }
