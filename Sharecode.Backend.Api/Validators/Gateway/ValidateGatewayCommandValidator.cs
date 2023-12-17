@@ -13,7 +13,7 @@ public class ValidateGatewayCommandValidator : AbstractValidator<ValidateGateway
             .WithMessage($"Should provide a valid gateway identifier");
 
         RuleFor(x => x.Type)
-            .NotEmpty()
+            .NotNull()
             .WithMessage($"Unknown gateway type has been provided");
 
         #region ResetPassword
