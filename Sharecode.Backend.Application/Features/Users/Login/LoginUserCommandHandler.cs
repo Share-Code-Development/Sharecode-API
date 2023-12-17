@@ -77,7 +77,7 @@ public class LoginUserCommandHandler(IUserService userService, IHttpClientContex
         }
         else
         {
-            if (!user.AccountLocked)
+            if (user.AccountLocked)
             {
                 throw new AccountLockedException();
             }

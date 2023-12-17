@@ -57,3 +57,10 @@ jobs:
           docker stop sharecode-backend-api || true
           docker rm sharecode-backend-api || true
           docker run -d --name sharecode-backend-api -e ${{ secrets.DEV_ENV }} -v ${{ secrets.DEV_CONFIGURATION }}:/app/appsettings.json -p ${{ secrets.DEV_NETWORK }}:80 alenalex/sharecode-api:master --restart=always
+          
+    - name: Clear the existing cache of the application
+      run: |
+        apt-get update
+        apt-get install redis-tools -y
+        redis-cli -u ${{ secrets.REDIS_CLI_SECRET }} FLUSHALL
+

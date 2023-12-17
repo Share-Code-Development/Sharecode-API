@@ -25,7 +25,7 @@ internal class CreateUserCommandHandler(IUnitOfWork unitOfWork, IUserRepository 
             Visibility = AccountVisibility.Public,
             Salt = salt,
             PasswordHash = passwordHash,
-            ProfilePicture = command.ProfileUrl
+            ProfilePicture = command.ProfilePicture
         };
         user.SetActive();
         user.AccountSetting = new AccountSetting
