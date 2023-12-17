@@ -60,7 +60,7 @@ jobs:
           
     - name: Clear the existing cache of the application
       run: |
-        apt-get update
-        apt-get install redis-tools -y
+        sudo apt-get update
+        sudo apt-get install redis-tools -y
         redis-cli -u ${{ secrets.REDIS_CLI_SECRET }} FLUSHALL
 
