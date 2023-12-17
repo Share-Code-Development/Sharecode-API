@@ -12,6 +12,7 @@ public class UserDto
     public string LastName { get; set; }
     public string EmailAddress { get; set; }
     public bool EmailVerified { get; set; }
+    public string? ProfilePicture { get; set; }
     public List<Meta> Metadata { get; set; }
     public AccountVisibility Visibility { get; set; }
     public AccountSettingDto? Settings { get; set; }
@@ -19,7 +20,7 @@ public class UserDto
 
     public UserDto() { }
 
-    public UserDto(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, List<Meta> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created)
+    public UserDto(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, List<Meta> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture)
     {
         UserId = userId;
         FirstName = firstName;
@@ -31,6 +32,7 @@ public class UserDto
         Visibility = visibility;
         Settings = settings;
         Created = created;
+        ProfilePicture = profilePicture;
     }
 
     public static UserDto From(User user)
@@ -45,7 +47,8 @@ public class UserDto
             user.Metadata,
             user.Visibility,
             AccountSettingDto.From(user),
-            user.CreatedAt
+            user.CreatedAt,
+            user.ProfilePicture
         );
     }
 }
@@ -63,7 +66,7 @@ public sealed class AccountSettingDto
         Metadata = metadata;
     }
 
-    public static AccountSettingDto From(User user)
+    public static AccountSettingDto? From(User user)
     {
         AccountSetting setting = user.AccountSetting;
         return setting == null ? null : new AccountSettingDto(setting.AllowTagging, setting.Metadata);

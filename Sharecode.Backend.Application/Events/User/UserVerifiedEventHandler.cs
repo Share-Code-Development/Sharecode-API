@@ -14,8 +14,8 @@ public class UserVerifiedEventHandler(IEmailClient emailClient, ILogger<UserVeri
         await emailClient.SendTemplateMailAsync(
             EmailTemplateKeys.WelcomeUser, 
             new EmailTargets(notification.EmailAddress),
-            new Dictionary<string, string>() {{"USER", notification.FullName}},
-            new Dictionary<string, string>() {{"WELCOME_USER", notification.FullName}}
+            new Dictionary<string, string>() {{EmailPlaceholderKeys.UserNameKey, notification.FullName}},
+            new Dictionary<string, string>() {{EmailPlaceholderKeys.UserNameKey, notification.FullName}}
         );
         logger.LogInformation($"Welcome email has been sent to user {notification.EmailAddress}");
     }

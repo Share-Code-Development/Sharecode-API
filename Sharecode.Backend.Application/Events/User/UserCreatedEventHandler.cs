@@ -35,7 +35,7 @@ public class UserCreatedEventHandler(IEmailClient emailClient, IGatewayRepositor
 
         var gatewayUrl = GatewayRequestType.VerifyUserAccount.CreateGatewayUrl(_configuration.Base, requestAsync.Id);
 
-        var placeholders = new Dictionary<string, string> { { "VERIFICATION_URL", $"{gatewayUrl}" }, {"USER_NAME", notification.FullName} };
+        var placeholders = new Dictionary<string, string> { { EmailPlaceholderKeys.GatewayUrlKey, $"{gatewayUrl}" }, {EmailPlaceholderKeys.UserNameKey, notification.FullName} };
         await emailClient.SendTemplateMailAsync(
             EmailTemplateKeys.EmailValidation,
             new EmailTargets(notification.EmailAddress),

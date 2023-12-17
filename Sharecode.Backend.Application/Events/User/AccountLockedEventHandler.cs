@@ -40,13 +40,11 @@ public class AccountLockedEventHandler(IRefreshTokenService refreshTokenService,
             new EmailTargets(notification.EmailAddress),
             new Dictionary<string, string>()
             {
-                { "RESET_URL", gatewayUrl },
-                { "USER_NAME", notification.FullName },
-                {
-                    "LAST_ATTEMPT_OCCURENCE", $"{notification.LastOccurence.ToString(CultureInfo.InvariantCulture)} UTC"
-                },
-                { "COUNTRY", notification.RequestDetail.OriginCountry ?? string.Empty },
-                { "IP_ADDRESS", notification.RequestDetail.ConnectingAddress ?? string.Empty }
+                { EmailPlaceholderKeys.GatewayUrlKey, gatewayUrl },
+                { EmailPlaceholderKeys.UserNameKey, notification.FullName },
+                { EmailPlaceholderKeys.AccountLockedLastAttemptKey, $"{notification.LastOccurence.ToString(CultureInfo.InvariantCulture)} UTC" },
+                { EmailPlaceholderKeys.AccountLockedCountry, notification.RequestDetail.OriginCountry ?? string.Empty },
+                { EmailPlaceholderKeys.AccountLockedIpAddress, notification.RequestDetail.ConnectingAddress ?? string.Empty }
             },
             null
         );

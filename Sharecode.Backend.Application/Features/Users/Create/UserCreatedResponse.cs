@@ -9,10 +9,10 @@ public class UserCreatedResponse : UserDto
 {
     public UserCreatedResponse() { }
 
-    public UserCreatedResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, List<Meta> metadata, AccountVisibility visibility, AccountSettingDto settings, DateTime created)
-        : base(userId, firstName, middleName, lastName, emailAddress, emailVerified, metadata, visibility, settings, created) { }
+    public UserCreatedResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, List<Meta> metadata, AccountVisibility visibility, AccountSettingDto settings, DateTime created, string? profilePicture)
+        : base(userId, firstName, middleName, lastName, emailAddress, emailVerified, metadata, visibility, settings, created, profilePicture) { }
 
-    public static UserCreatedResponse From(User user)
+    public new static UserCreatedResponse From(User user)
     {
         return new UserCreatedResponse(
             user.Id,
@@ -24,7 +24,8 @@ public class UserCreatedResponse : UserDto
             user.Metadata,
             user.Visibility,
             AccountSettingDto.From(user),
-            user.CreatedAt
+            user.CreatedAt,
+            user.ProfilePicture
         );
     }
 }

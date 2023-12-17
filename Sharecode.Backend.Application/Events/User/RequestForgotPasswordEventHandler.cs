@@ -23,8 +23,8 @@ public class RequestForgotPasswordEventHandler(IEmailClient emailClient, IGatewa
         
         var gatewayUrl = GatewayRequestType.ForgotPassword.CreateGatewayUrl(configuration.Value.Base, gatewayRequest.Id);
 
-        var placeholders = new Dictionary<string, string> { { "RESET_PASSWORD_URL", $"{gatewayUrl}" }, {"USER_NAME", notification.FullName} };
-        var subjectPlaceholders = new Dictionary<string, string>() { { "USER", notification.FullName } };
+        var placeholders = new Dictionary<string, string> { { EmailPlaceholderKeys.GatewayUrlKey, $"{gatewayUrl}" }, {EmailPlaceholderKeys.UserNameKey, notification.FullName} };
+        var subjectPlaceholders = new Dictionary<string, string>() { { EmailPlaceholderKeys.UserNameKey, notification.FullName } };
         await emailClient.SendTemplateMailAsync(
             EmailTemplateKeys.ResetPassword,
             new EmailTargets(notification.EmailAddress),

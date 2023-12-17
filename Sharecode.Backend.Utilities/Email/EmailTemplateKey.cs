@@ -46,7 +46,7 @@ public class EmailTemplateKey(string key, string subject)
 public static class EmailTemplateKeys
 {
     public static readonly EmailTemplateKey EmailValidation = new("validate-email.html", "Welcome to Sharecode! Verify your email address");
-    public static readonly EmailTemplateKey WelcomeUser = new("welcome-email.html", "Welcome onboard {(WELCOME_USER)}");
+    public static readonly EmailTemplateKey WelcomeUser = new("welcome-email.html", "Welcome onboard {(USER)}");
     public static readonly EmailTemplateKey ResetPassword = new("reset-password.html", "Forgot your password? Here is your reset request {(USER)}");
     public static readonly EmailTemplateKey AccountLocked = new("account-locked.html", "Your sharecode account has been locked!");
 }
