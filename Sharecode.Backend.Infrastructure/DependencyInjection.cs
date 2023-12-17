@@ -81,6 +81,12 @@ public static class DependencyInjection
         collection.AddScoped<IGatewayRepository, GatewayRepository>();
         #endregion
 
+        #region Snippet
+
+        collection.AddScoped<ISnippetService, SnippetService>();
+        collection.AddScoped<ISnippetRepository, SnippetRepository>();
+
+        #endregion
         
         return collection;
     }
