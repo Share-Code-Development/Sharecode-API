@@ -4,13 +4,11 @@ using Sharecode.Backend.Domain.Entity.Snippet;
 
 namespace Sharecode.Backend.Infrastructure.Configuration.Snippet;
 
-public class SnippetCommentConfiguration : IEntityTypeConfiguration<SnippetComment>
+public class SnippetLineCommentConfiguration : IEntityTypeConfiguration<SnippetLineComment>
 {
-    public void Configure(EntityTypeBuilder<SnippetComment> builder)
+    public void Configure(EntityTypeBuilder<SnippetLineComment> builder)
     {
-
-        builder.ToTable("SnippetComments", "snippet");
-
+        builder.ToTable("SnippetLineComments", "snippet");
         builder.Property(x => x.Text)
             .IsRequired()
             .HasMaxLength(1000);
@@ -21,13 +19,8 @@ public class SnippetCommentConfiguration : IEntityTypeConfiguration<SnippetComme
             .WithMany()
             .HasForeignKey(x => x.SnippetId)
             .IsRequired();
-        
-        //Link child comments to parent comments
-        builder.HasOne<SnippetComment>(x => x.ParentComment)
-            .WithMany()
-            .HasForeignKey(x => x.ParentCommentId);
 
-        //Link the comment to the user
+        //Link the line comment to user
         builder.HasOne(x => x.User)
             .WithMany()
             .HasForeignKey(x => x.UserId)
@@ -46,12 +39,7 @@ public class SnippetCommentConfiguration : IEntityTypeConfiguration<SnippetComme
         //To get all the users comment
         builder.HasIndex(x => x.UserId)
             .HasMethod("BTREE");
-
-        //To get the responses of a comment
-        builder.HasIndex(x => new {x.ParentCommentId, x.SnippetId})
-            .HasMethod("BTREE");
-
+        
         #endregion
-
     }
 }

@@ -2,6 +2,7 @@ using System.Data;
 using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Profile;

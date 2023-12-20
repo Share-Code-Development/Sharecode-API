@@ -38,6 +38,8 @@ public static class DependencyInjection
             ApplicationName = development ? "Sharecode-dev" : "Sharecode"
         };
 
+        collection.AddSingleton<NpgsqlConnectionStringBuilder>(connectionStringBuilder);
+        
         if (development)
         {
             connectionStringBuilder.IncludeErrorDetail = true;

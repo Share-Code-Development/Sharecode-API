@@ -2,11 +2,10 @@ using MediatR;
 using Serilog;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Data;
-using Sharecode.Backend.Domain.Dto.Snippet;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Repositories;
 
-namespace Sharecode.Backend.Application.Features.Snippet;
+namespace Sharecode.Backend.Application.Features.Snippet.Create;
 
 public class CreateSnippetCommandHandler(IHttpClientContext context, IUserRepository userRepository, ISnippetRepository snippetRepository, IUnitOfWork unitOfWork, ILogger logger) : IRequestHandler<CreateSnippetCommand, SnippetCreatedResponse>
 {

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Sharecode.Backend.Domain.Entity;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Repositories;
@@ -11,7 +12,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 {
 
     private readonly ShareCodeDbContext _dbContext;
-    public UserRepository(ShareCodeDbContext dbContext) : base(dbContext)
+    public UserRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder) : base(dbContext, connectionStringBuilder)
     {
         _dbContext = dbContext;
     }

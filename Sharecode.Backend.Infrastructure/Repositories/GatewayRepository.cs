@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Sharecode.Backend.Domain.Entity.Gateway;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Base;
@@ -8,7 +9,7 @@ namespace Sharecode.Backend.Infrastructure.Repositories;
 
 public class GatewayRepository : BaseRepository<GatewayRequest> , IGatewayRepository
 {
-    public GatewayRepository(ShareCodeDbContext dbContext) : base(dbContext)
+    public GatewayRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder) : base(dbContext, connectionStringBuilder)
     {
     }
 }

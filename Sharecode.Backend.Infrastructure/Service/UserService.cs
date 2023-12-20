@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Client;
+using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Exceptions;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Profile;
@@ -75,5 +77,23 @@ public class UserService : IUserService
         _securityClient.CreatePasswordHash(password, out var passwordHash, out var passwordSalt);
         user.UpdatePassword(passwordHash, passwordSalt, _context.RequestDetail);
         return true;
+    }
+
+    public Task<List<User>> GetUsersToTag(string searchQuery, int take, int skip, bool includeDeleted = false,
+        bool shouldEnableTagging = true)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<IReadOnlyList<User>> GetUsersToTagAsync(string searchQuery, int take, int skip, bool includeDeleted = false, bool shouldEnableTagging = true, CancellationToken token = default)
+    {
+        EntitySpecification<User> userListSpecification = new EntitySpecification<User>(x => 
+            EF.Functions.ILike($"{x.EmailAddress} {x.NormalizedFullName}", $"%{searchQuery}%") &&
+            shouldEnableTagging ? x.AccountSetting.AllowTagging == shouldEnableTagging : true
+            );
+
+        userListSpecification.Include(x => x.AccountSetting);
+        var users = await _userRepository.ListAsync(skip, take, false, userListSpecification, token, includeDeleted);
+        return users;
     }
 }

@@ -1,3 +1,4 @@
+using System.Data;
 using System.Data.Common;
 using Sharecode.Backend.Domain.Base.Primitive;
 
@@ -15,5 +16,6 @@ public interface IBaseRepository<TEntity>  where TEntity : BaseEntity
     Task<IReadOnlyList<TEntity>> ListAsync(int skip = 0, int take = 50, bool track = true, ISpecification<TEntity>? specification = null, CancellationToken token = default, bool includeSoftDeleted = false);
     Task<DbCommand> CreateProceduralCommandAsync(string commandName);
     Task<long> DeleteBatchAsync(ISpecification<TEntity>? specification = null, CancellationToken token = default);
+    IDbConnection CreateDapperContext();
 
 }

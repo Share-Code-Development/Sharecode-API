@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Users.Get;
+using Sharecode.Backend.Application.Features.Users.TagSearch;
 using Sharecode.Backend.Utilities.RedisCache;
 
 namespace Sharecode.Backend.Api.Controller;
@@ -46,5 +47,24 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
         await StoreCacheAsync(userResponse,token: RequestCancellationToken);
         return Ok(userResponse);
     }
+
+    [HttpGet("tag-search", Name = "Get users to tag")]
+    [Authorize]
+    public async Task<ActionResult> GetUsersToTag([FromQuery] SearchUsersForTagCommand command)
+    {
+        FrameCacheKey("user", "search", GetQuery());
+        var response = await ScanAsync<SearchUserForTagResponse>();
+        if (response != null)
+        {
+            return Ok(response);
+        }
+
+        var tagResponse = await mediator.Send(command);
+        await StoreCacheAsync(tagResponse, TimeSpan.FromMinutes(5), token: RequestCancellationToken);
+        return Ok(tagResponse);
+    }
+    //
+    // [HttpPost("get-by-ids", Name = "Get All the users Name and Email based on Ids")]
+    // [Authorize]
     
 }

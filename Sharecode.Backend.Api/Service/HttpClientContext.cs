@@ -19,6 +19,7 @@ public class HttpClientContext : IHttpClientContext
     private string? _emailAddress = null;
     private string[]? _cacheKeys = null;
     private IRequestDetail? _requestDetail;
+    private bool? _hasAuthorizationBearer = null;
     private readonly Dictionary<string, HashSet<string>> _cacheInvalidateRecords = new();
     
     public HttpClientContext(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
@@ -203,6 +204,23 @@ public class HttpClientContext : IHttpClientContext
         }
     }
 
+    public bool HasAuthorizationBearer
+    {
+        get
+        {
+            if (!_hasAuthorizationBearer.HasValue)
+            {
+                if (_contextAccessor?.HttpContext?.User == null)
+                {
+                    _hasAuthorizationBearer = false;
+                    return false;
+                }
+            }
+
+            return _hasAuthorizationBearer!.Value;
+        }
+    }
+
 
     private Guid? GetUserIdentifierFromClaim()
     {
@@ -215,6 +233,7 @@ public class HttpClientContext : IHttpClientContext
             return null;
         }
 
+        _userIdentifier = identifier;
         return identifier;
     }
 

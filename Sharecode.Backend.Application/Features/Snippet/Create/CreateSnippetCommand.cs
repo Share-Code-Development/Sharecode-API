@@ -1,6 +1,6 @@
 using Sharecode.Backend.Application.Base;
 
-namespace Sharecode.Backend.Application.Features.Snippet;
+namespace Sharecode.Backend.Application.Features.Snippet.Create;
 
 public class CreateSnippetCommand : IAppRequest<SnippetCreatedResponse>
 {

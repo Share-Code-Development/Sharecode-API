@@ -1,9 +1,8 @@
 using System.Data;
 using System.Data.Common;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
-using Sharecode.Backend.Domain.Base;
+using Npgsql;
 using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Domain.Exceptions;
@@ -15,12 +14,21 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 {
 
     protected readonly ShareCodeDbContext DbContext;
+    private string? _connectionString = null;
+    private NpgsqlConnectionStringBuilder _connectionStringBuilder;
     protected DbSet<TEntity> Table => DbContext.Set<TEntity>();
     
 
-    public BaseRepository(ShareCodeDbContext dbContext)
+    public BaseRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder)
     {
         DbContext = dbContext;
+        _connectionStringBuilder = connectionStringBuilder;
+    }
+
+    public IDbConnection CreateDapperContext()
+    {
+        _connectionString ??= _connectionStringBuilder.ToString();
+        return new NpgsqlConnection(_connectionString);
     }
 
     public void Add(TEntity entity)
@@ -98,15 +106,13 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
     public async Task<IReadOnlyList<TEntity>> ListAsync(int skip = 0, int take = 50, bool track = true, ISpecification<TEntity>? specification = null, CancellationToken token = default, bool includeSoftDeleted = false)
     {
-        IQueryable<TEntity> baseEntities = Table.AsQueryable();
-
+        var baseEntities = Table.AsQueryable();
         baseEntities = baseEntities.Where(x => (includeSoftDeleted) || !x.IsDeleted);
-        
         if (specification != null)
         {
             baseEntities = ApplySpecification(baseEntities, specification);
         }
-
+        
         return await baseEntities.Skip(skip)
             .Take(take)
             .ToListAsync(cancellationToken: token);
@@ -154,6 +160,4 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
         return query;
     }
-    
-    
 }

@@ -1,7 +1,8 @@
+using System.Linq;
 using System.Linq.Expressions;
 using Sharecode.Backend.Domain.Base.Primitive;
 
-namespace Sharecode.Backend.Domain.Base;
+namespace Sharecode.Backend.Domain.Base.Interfaces;
 
 public interface ISpecification<TEntity> where TEntity : BaseEntity 
 {

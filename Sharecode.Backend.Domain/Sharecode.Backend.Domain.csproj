@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <Folder Include="Base\Exceptions\" />
+      <Folder Include="Entity\Defaults\" />
     </ItemGroup>
 
     <ItemGroup>

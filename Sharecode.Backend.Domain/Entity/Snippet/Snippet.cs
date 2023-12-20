@@ -27,4 +27,5 @@ public class Snippet : AggregateRootWithMetadata
 
     public List<SnippetReactions> Reactions { get; private set; } = [];
     public List<SnippetComment> Comments { get; private set; } = [];
+    public List<SnippetAccessControl> AccessControls { get; private set; } = [];
 }

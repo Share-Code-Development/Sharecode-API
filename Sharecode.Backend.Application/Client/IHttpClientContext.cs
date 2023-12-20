@@ -19,4 +19,5 @@ public interface IHttpClientContext
     void AddCacheKeyToInvalidate(string module, params string[] keys);
     bool TryGetHeader(string key, [MaybeNullWhen(false)] out string headerValue);
     IRequestDetail RequestDetail { get; }
+    bool HasAuthorizationBearer { get; }
 }
