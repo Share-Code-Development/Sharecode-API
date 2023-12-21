@@ -32,7 +32,6 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
         
         if (user != null)
         {
-            snippet.Owner = user;
             snippet.OwnerId = user.Id;
             //Create owner access
             var ownerAccessControl = new SnippetAccessControl
@@ -40,7 +39,8 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
                 Snippet = snippet,
                 SnippetId = snippet.Id
             };
-            ownerAccessControl.CreateForOwner(user);
+            ownerAccessControl.SetOwnership(snippet);
+            snippet.AccessControls.Add(ownerAccessControl);
         }
 
         await snippetRepository.AddAsync(snippet, cancellationToken);

@@ -3,7 +3,7 @@ using Sharecode.Backend.Domain.Entity.Profile;
 
 namespace Sharecode.Backend.Domain.Entity.Interactions;
 
-public class AccessControl : BaseEntityWithMetadata
+public abstract class AccessControl<TEntity> : BaseEntityWithMetadata
 {
     public bool Read { get; private set; }
     public bool Write { get; private set; }
@@ -12,11 +12,12 @@ public class AccessControl : BaseEntityWithMetadata
     public Guid UserId { get; private set; }
     public User User { get; private set; }
 
-    public void CreateForOwner(User user)
+    protected void CreateForOwner(Guid userId)
     {
-        User = user;
-        UserId = user.Id;
+        UserId = userId;
         Read = Write = Manage = true;
     }
+
+    public abstract void SetOwnership(TEntity entity);
 }
 

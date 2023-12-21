@@ -34,7 +34,10 @@ public class SnippetAccessControlConfiguration : IEntityTypeConfiguration<Snippe
         });
         builder.ToTable(x => x.HasCheckConstraint("CK_SAC_Ensure_Json", "\"Metadata\"::jsonb IS NOT NULL"));
 
+        builder.HasIndex(x => new { x.UserId, x.SnippetId })
+            .IsUnique();
+
         #endregion
-        
+
     }
 }

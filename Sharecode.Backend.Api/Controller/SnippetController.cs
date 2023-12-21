@@ -69,12 +69,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
         if (string.IsNullOrEmpty(command.PreviewCode))
         {
             string preview;
-            if (command.Content.Length > 1000)
-                preview = Encoding.Default.GetString(command.Content, 0, 300);
-            else
-            {
-                preview = Encoding.Default.GetString(command.Content).Substring(0, 50);
-            }
+            preview = command.Content.Length > 1000 ? Encoding.Default.GetString(command.Content, 0, 300) : Encoding.Default.GetString(command.Content).Substring(0, 50);
             command.PreviewCode = preview;
         }
         
