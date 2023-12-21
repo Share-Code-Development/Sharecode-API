@@ -12,23 +12,29 @@ namespace Sharecode.Backend.Infrastructure.Base;
 
 public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : BaseEntity
 {
-
-    protected readonly ShareCodeDbContext DbContext;
+    private readonly ShareCodeDbContext _dbContext;
     private string? _connectionString = null;
     private NpgsqlConnectionStringBuilder _connectionStringBuilder;
-    protected DbSet<TEntity> Table => DbContext.Set<TEntity>();
-    
+    protected DbSet<TEntity> Table => _dbContext.Set<TEntity>();
+    private NpgsqlConnection? _dbConnection = null;
 
-    public BaseRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder)
+
+    protected BaseRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder)
     {
-        DbContext = dbContext;
+        _dbContext = dbContext;
         _connectionStringBuilder = connectionStringBuilder;
     }
 
     public IDbConnection CreateDapperContext()
     {
-        _connectionString ??= _connectionStringBuilder.ToString();
-        return new NpgsqlConnection(_connectionString);
+        if (_dbConnection == null)
+        {
+            _connectionString ??= _connectionStringBuilder.ToString();
+            _dbConnection = new NpgsqlConnection(_connectionString);
+            
+        }
+
+        return _dbConnection;
     }
 
     public void Add(TEntity entity)
@@ -71,8 +77,8 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
             {
                 DbSet<TEntity> entities = Table;
                 Console.WriteLine(Table.Count());
-                List<TEntity> listAsync = DbContext.Set<TEntity>().ToList();
-                return await DbContext.Set<TEntity>().FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken: token);
+                List<TEntity> listAsync = _dbContext.Set<TEntity>().ToList();
+                return await _dbContext.Set<TEntity>().FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken: token);
             }
             
             return await Table.FirstOrDefaultAsync(x => x.Id == id, cancellationToken: token);
@@ -120,7 +126,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
     public async Task<DbCommand> CreateProceduralCommandAsync(string commandName)
     {
-        DbCommand? command = DbContext.Database.GetDbConnection().CreateCommand();
+        DbCommand? command = _dbContext.Database.GetDbConnection().CreateCommand();
         command.CommandText = commandName;
         command.CommandType = CommandType.StoredProcedure;
         return command;

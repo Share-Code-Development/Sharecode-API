@@ -1,7 +1,9 @@
 ﻿using System.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Npgsql;
+using Serilog;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Service;
@@ -44,6 +46,9 @@ public static class DependencyInjection
         {
             connectionStringBuilder.IncludeErrorDetail = true;
         }
+
+        var loggerFactory = LoggerFactory.Create(b => b.AddSerilog());
+        NpgsqlLoggingConfiguration.InitializeLogging(loggerFactory);
 
         collection.AddDbContext<ShareCodeDbContext>(options =>
         {

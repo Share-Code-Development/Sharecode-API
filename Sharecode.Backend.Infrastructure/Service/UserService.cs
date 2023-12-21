@@ -1,14 +1,16 @@
+using System.Data;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Sharecode.Backend.Application;
+using NpgsqlTypes;
 using Sharecode.Backend.Application.Client;
-using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Exceptions;
-using Sharecode.Backend.Application.Service;
+using Sharecode.Backend.Application.Service;    
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Utilities.SecurityClient;
+using CommandDefinition = Dapper.CommandDefinition;
 
 namespace Sharecode.Backend.Infrastructure.Service;
 
@@ -79,21 +81,22 @@ public class UserService : IUserService
         return true;
     }
 
-    public Task<List<User>> GetUsersToTag(string searchQuery, int take, int skip, bool includeDeleted = false,
-        bool shouldEnableTagging = true)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<IReadOnlyList<User>> GetUsersToTagAsync(string searchQuery, int take, int skip, bool includeDeleted = false, bool shouldEnableTagging = true, CancellationToken token = default)
     {
-        EntitySpecification<User> userListSpecification = new EntitySpecification<User>(x => 
-            EF.Functions.ILike($"{x.EmailAddress} {x.NormalizedFullName}", $"%{searchQuery}%") &&
-            shouldEnableTagging ? x.AccountSetting.AllowTagging == shouldEnableTagging : true
-            );
-
-        userListSpecification.Include(x => x.AccountSetting);
-        var users = await _userRepository.ListAsync(skip, take, false, userListSpecification, token, includeDeleted);
-        return users;
+        using var connectionContext = _userRepository.CreateDapperContext();
+        var functionParams = new DynamicParameters();
+        functionParams.Add("searchquery", searchQuery, dbType: (DbType?)NpgsqlDbType.Varchar);
+        functionParams.Add("skip", skip);
+        functionParams.Add("take", take);
+        functionParams.Add("onlyenabled", shouldEnableTagging);
+        functionParams.Add("includedeleted", includeDeleted);
+        var mentionableUsers = await connectionContext.QueryAsync<User>(
+            UserSqlQueries.FunctionGetUsersToTag, functionParams, commandTimeout: 1000);
+        return mentionableUsers.ToList();
     }
+}
+
+internal static class UserSqlQueries
+{
+    public static string FunctionGetUsersToTag => $"SELECT \"EmailAddress\", \"FirstName\", \"MiddleName\", \"LastName\", \"Id\", \"ProfilePicture\" FROM get_users_to_tag(@searchquery::character varying, @skip, @take, @onlyenabled, @includedeleted)";
 }

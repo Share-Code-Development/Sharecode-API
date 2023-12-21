@@ -1,6 +1,6 @@
 #Riders
 /.idea
-
+/.vs
 #Ignore env settings to keep it as private
 /Sharecode.Backend.Api/appsettings.json
 

@@ -9,7 +9,7 @@ using Sharecode.Backend.Utilities.RedisCache;
 
 namespace Sharecode.Backend.Api.Controller;
 
-[Authorize]
+
 public class UserController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
 {
 
@@ -49,9 +49,9 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
     }
 
     [HttpGet("tag-search", Name = "Get users to tag")]
-    [Authorize]
     public async Task<ActionResult> GetUsersToTag([FromQuery] SearchUsersForTagCommand command)
     {
+        //TODO Add admin role to the cache
         FrameCacheKey("user", "search", GetQuery());
         var response = await ScanAsync<SearchUserForTagResponse>();
         if (response != null)

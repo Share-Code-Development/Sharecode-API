@@ -9,7 +9,11 @@ namespace Sharecode.Backend.Application.Features.Users.TagSearch
         {
             AddUsers(users);
         }
-        
+
+        public SearchUserForTagResponse()
+        {
+        }
+
         private void AddUsers(IEnumerable<User> users)
         {
             HashSet<TagUserResponse> responses = new HashSet<TagUserResponse>();
@@ -21,15 +25,25 @@ namespace Sharecode.Backend.Application.Features.Users.TagSearch
         }
     }
 
-    public sealed class TagUserResponse(User user)
+    public class TagUserResponse
     {
-        private Guid UserId { get; set; } = user.Id;
+        public Guid? UserId { get; set; }
+        public string Name { get; set; }
+        public string EmailAddress { get; set; }
+        public string? ProfilePicture { get; set; }
 
-        public string Name { get; set; } = user.FullName;
+        public TagUserResponse()
+        {
+            // parameterless constructor
+        }
 
-        public string EmailAddress { get; set; } = user.EmailAddress;
-
-        public string? ProfilePicture { get; set; } = user.ProfilePicture;
+        public TagUserResponse(User? user)
+        {
+            UserId = user?.Id;
+            Name = user.FullName;
+            EmailAddress = user.EmailAddress;
+            ProfilePicture = user.ProfilePicture;
+        }
 
         public override bool Equals(object? obj)
         {
@@ -37,14 +51,13 @@ namespace Sharecode.Backend.Application.Features.Users.TagSearch
             {
                 return false;
             }
-
-            var other = (TagUserResponse) obj;
-            return UserId.Equals(other.UserId);
+            var other = (TagUserResponse)obj;
+            return EmailAddress.Equals(other.EmailAddress);
         }
 
         public override int GetHashCode()
         {
-            return UserId.GetHashCode();
+            return EmailAddress.GetHashCode();
         }
     }
 }
