@@ -12,6 +12,7 @@ using Sharecode.Backend.Api.Service;
 using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Infrastructure;
+using Sharecode.Backend.Infrastructure.Client;
 using Sharecode.Backend.Infrastructure.Jobs;
 using Sharecode.Backend.Presentation;
 using Sharecode.Backend.Utilities;
@@ -82,10 +83,14 @@ public static class BootstrapExtensions
             var section = configurationManager.GetSection("Frontend");
             section.Bind(options);
         });
+        service.Configure<FileClientConfiguration>(options =>
+        {
+            configurationManager.GetSection("FileClient").Bind(options);
+        });
         return service;
     }
 
-    public static IServiceCollection RegisterCoreServices(this IServiceCollection service, IWebHostEnvironment environment)
+    public static IServiceCollection RegisterCoreServices(this IServiceCollection service, IWebHostEnvironment environment, IConfiguration configuration)
     {
         service.AddSingleton<IKeyValueClient, KeyValueClient>();
         service.AddSingleton<IEmailClient, EmailClient>();
@@ -104,7 +109,23 @@ public static class BootstrapExtensions
             IdentityModelEventSource.ShowPII = true;
             Console.WriteLine($"Enabled to show details for authentication schema with in development env");
         }
-        
+
+        var clientType = configuration["FileClient:ClientType"] ?? string.Empty;
+        if (string.IsNullOrEmpty(clientType))
+        {
+            throw new ApplicationException("No valid FileClient:ClientType is provided");
+        }
+
+        if (clientType.Equals("local", StringComparison.OrdinalIgnoreCase))
+        {
+            service.AddSingleton<IFileClient, LocalFileClient>();
+            Console.WriteLine($"Loaded LocalFileClient");
+        }
+        else
+        {
+            throw new ApplicationException("Found configuration, but no implementation found!");
+        }
+
         return service;
     }
 

@@ -11,5 +11,12 @@ public class AccessControl : BaseEntityWithMetadata
     
     public Guid UserId { get; private set; }
     public User User { get; private set; }
+
+    public void CreateForOwner(User user)
+    {
+        User = user;
+        UserId = user.Id;
+        Read = Write = Manage = true;
+    }
 }
 

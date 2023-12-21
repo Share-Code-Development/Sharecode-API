@@ -10,6 +10,7 @@ public class CreateSnippetCommand : IAppRequest<SnippetCreatedResponse>
     public List<string> Tags { get; set; }
     public bool Public { get; set; }
     public byte[] Content { get; set; }
+    public string PreviewCode { get; set; }
     
     public CreateSnippetCommand(string title, string? description, string language, List<string> tags, bool isPublic, byte[]? content)
     {

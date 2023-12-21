@@ -66,7 +66,7 @@ public class ExceptionHandlingMiddleware
                 StatusCodes.Status400BadRequest,
                 "Validation Error",
                 "Failed to validate properties provided",
-                validationException.Errors,
+                validationException.Errors.GroupBy(x => x.PropertyName).ToHashSet(),
                 ErrorCode: 400
             ),
             JwtGenerationException jwtGenerationException => new ExceptionDetail(

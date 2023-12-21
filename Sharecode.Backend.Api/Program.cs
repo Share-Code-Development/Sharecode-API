@@ -15,10 +15,11 @@ builder.Host.UseSerilog((ctx, conf) =>
 builder.Services.BindConfigurationEntries(builder.Configuration);
 //Adds KeyValueClient  Singleton
 //Adds EmailClient - Singleton
+//Adds FileClient - FileClient would be responsible to handle the files
 //Enables HttpContextAccessor and Adds Scoped HttpClientContext
 //Add Validators on the API Layer
 //Register Controllers, Newtonsoft JSON etc
-builder.Services.RegisterCoreServices(builder.Environment);
+builder.Services.RegisterCoreServices(builder.Environment, builder.Configuration);
 
 //Cheeky way to access KeyValueClient
 var keyValueClient = builder.Services.GetKeyValueClient();

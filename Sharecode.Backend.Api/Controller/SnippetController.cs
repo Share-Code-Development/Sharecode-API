@@ -1,3 +1,4 @@
+using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -16,7 +17,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// </summary> <param name="id">The ID of the snippet to retrieve.
     /// </param> <returns>The snippet with the specified ID, if found. Otherwise, a NotFound status is returned.</returns>
     /// /
-    [HttpGet("{id}", Name = "View a snippet")]
+    [HttpGet("{id}", Name = "Get a snippet")]
     public async Task<IActionResult> GetSnippet([FromRoute] Guid id)
     {
         var snippetQuery = new GetSnippetQuery()
@@ -42,10 +43,9 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// <summary>
     /// Creates a new snippet with the given ID.
     /// </summary>
-    /// <param name="id">The ID of the snippet.</param>
     /// <returns>The IActionResult representing the result of the operation.</returns>
     [HttpPost(Name = "Create a new snippet")]
-    public async Task<IActionResult> CreateSnippet(Guid id)
+    public async Task<IActionResult> CreateSnippet()
     {
         var formCollection = await Request.ReadFormAsync();
         var file = formCollection.Files.FirstOrDefault();
@@ -66,8 +66,20 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
         await file.CopyToAsync(ms);
         command.Content = ms.ToArray();
 
+        if (string.IsNullOrEmpty(command.PreviewCode))
+        {
+            string preview;
+            if (command.Content.Length > 1000)
+                preview = Encoding.Default.GetString(command.Content, 0, 300);
+            else
+            {
+                preview = Encoding.Default.GetString(command.Content).Substring(0, 50);
+            }
+            command.PreviewCode = preview;
+        }
+        
         var response = await mediator.Send(command);
-        return CreatedAtRoute("Create a new snippet", response);
+        return CreatedAtAction("GetSnippet", new {id = response.SnippetId} , response);
     }
 
     [HttpGet("{id}/comments",Name = "Get the comments of snippets")]

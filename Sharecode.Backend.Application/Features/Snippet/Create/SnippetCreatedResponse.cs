@@ -28,13 +28,13 @@ public class SnippetCreatedResponse(
             snippet.Description,
             snippet.Language,
             snippet.PreviewCode,
-            snippet.Tags ?? new List<string>(),
+            snippet.Tags ?? [],
             snippet.Public,
             snippet.Views,
             snippet.Copy,
             snippet.OwnerId,
-            snippet.Reactions ?? new List<SnippetReactions>(),
-            snippet.Comments ?? new List<SnippetComment>()
+            snippet.Reactions ?? [],
+            snippet.Comments ?? []
         );
     }
     

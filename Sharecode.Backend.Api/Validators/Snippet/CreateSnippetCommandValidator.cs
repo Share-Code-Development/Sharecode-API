@@ -24,7 +24,13 @@ public class CreateSnippetCommandValidator : AbstractValidator<CreateSnippetComm
         RuleFor(x => x.Title)
             .NotNull()
             .WithMessage("Title should not be empty");
-        
-        
+
+        When(x => x.Content.Length > 0, () =>
+        {
+            RuleFor(x => x.PreviewCode)
+                .NotNull()
+                .NotEmpty()
+                .WithMessage("Please provide the preview code.");
+        });
     }
 }
