@@ -27,21 +27,27 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
             Public = request.Public,
             Id = Guid.NewGuid(),
             Language = request.Language,
-            PreviewCode = request.PreviewCode
+            PreviewCode = request.PreviewCode,
         };
         
+        snippet.CreateTags(request.Tags);
         if (user != null)
         {
             snippet.OwnerId = user.Id;
-            //Create owner access
-            var ownerAccessControl = new SnippetAccessControl
+            //Create owner access if the snippet is not 
+            if (!snippet.Public)
             {
-                Snippet = snippet,
-                SnippetId = snippet.Id
-            };
-            ownerAccessControl.SetOwnership(snippet);
-            snippet.AccessControls.Add(ownerAccessControl);
+                var ownerAccessControl = new SnippetAccessControl
+                {
+                    Snippet = snippet,
+                    SnippetId = snippet.Id
+                };
+                ownerAccessControl.SetOwnership(snippet);
+                snippet.AccessControls.Add(ownerAccessControl);
+            }
         }
+        
+        snippet.Tags.Add(request.Language);
 
         await snippetRepository.AddAsync(snippet, cancellationToken);
         await unitOfWork.CommitAsync(cancellationToken);
@@ -50,6 +56,9 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
         if (blob.Item1 == false || blob.Item2 == null)
             throw new FailedSnippetCreation("Failed to create the snippet. An unknown error occured!");
 
-        return SnippetCreatedResponse.From(snippet);
+        return new SnippetCreatedResponse()
+        {
+            SnippetId = snippet.Id
+        };
     }
 }

@@ -5,7 +5,37 @@ namespace Sharecode.Backend.Application.Features.Snippet.Get;
 
 public class GetSnippetResponse : SnippetDto
 {
-    public GetSnippetResponse(Guid snippetId, string title, string? description, string language, string previewCode, List<string> tags, bool @public, long views, long copy, Guid? ownerId, List<SnippetReactions> reactions, List<SnippetComment> comments) : base(snippetId, title, description, language, previewCode, tags, @public, views, copy, ownerId, reactions, comments)
+    public static GetSnippetResponse From(Domain.Entity.Snippet.Snippet snippet)
     {
+        return new GetSnippetResponse()
+        {
+            Id = snippet.Id,
+            Title = snippet.Title,
+            Description = snippet.Description,
+            Language = snippet.Language,
+            PreviewCode = snippet.PreviewCode,
+            Tags = snippet.Tags,
+            Public = snippet.Public,
+            Views = snippet.Views,
+            Copy = snippet.Copy,
+            OwnerId = snippet.OwnerId
+        };
+    }
+    
+    public static GetSnippetResponse From(SnippetDto snippet)
+    {
+        return new GetSnippetResponse()
+        {
+            Id = snippet.Id,
+            Title = snippet.Title,
+            Description = snippet.Description,
+            Language = snippet.Language,
+            PreviewCode = snippet.PreviewCode,
+            Tags = snippet.Tags,
+            Public = snippet.Public,
+            Views = snippet.Views,
+            Copy = snippet.Copy,
+            OwnerId = snippet.OwnerId
+        };
     }
 }

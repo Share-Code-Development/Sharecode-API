@@ -12,11 +12,4 @@ public class SnippetRepository : BaseRepository<Snippet>, ISnippetRepository
     public SnippetRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder) : base(dbContext, connectionStringBuilder)
     {
     }
-    public async Task<Snippet?> GetSnippetById(Guid snippetId)
-    {
-        using var dapperContext = CreateDapperContext();
-        var query = await dapperContext.QueryFirstAsync($"SELECT * FROM snippet.\"Snippets\" LIMIT 1;");
-        Console.WriteLine(query.Id);
-        return null;
-    }
 }

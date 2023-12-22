@@ -3,7 +3,7 @@ using Sharecode.Backend.Domain.Entity.Snippet;
 
 namespace Sharecode.Backend.Domain.Repositories;
 
-public interface ISnippetRepository : IBaseRepository<Snippet>
+public interface ISnippetLineCommentRepository : IBaseRepository<SnippetLineComment>
 {
     
 }

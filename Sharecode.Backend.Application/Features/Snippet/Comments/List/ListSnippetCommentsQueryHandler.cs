@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace Sharecode.Backend.Application.Features.Snippet.Comments;
+namespace Sharecode.Backend.Application.Features.Snippet.Comments.List;
 
 public class ListSnippetCommentsQueryHandler() : IRequestHandler<ListSnippetCommentsQuery, ListSnippetCommentsResponse>
 {

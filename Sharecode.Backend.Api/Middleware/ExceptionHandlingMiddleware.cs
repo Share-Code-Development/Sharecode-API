@@ -113,7 +113,7 @@ public class ExceptionHandlingMiddleware
             readableName,
             appException.PublicMessage == String.Empty ? appException.Message : appException.PublicMessage,
             appException.Errors, 
-            appException.InnerException?.Message,
+            appException.ExtendedMessage ?? appException.InnerException?.Message,
             ErrorCode: appException.ErrorCode
         );
     }

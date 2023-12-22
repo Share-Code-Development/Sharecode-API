@@ -1,9 +1,11 @@
 using System.Text;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Snippet;
+using Sharecode.Backend.Application.Features.Snippet.Comments.Create;
 using Sharecode.Backend.Application.Features.Snippet.Create;
 using Sharecode.Backend.Application.Features.Snippet.Get;
 using Sharecode.Backend.Utilities.RedisCache;
@@ -81,5 +83,13 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     public async Task<IActionResult> GetSnippetComments()
     {
         return Ok();
+    }
+
+    [HttpPost("{id}/comments", Name = "Create a comment for snippet")]
+    [Authorize]
+    public async Task<IActionResult> CreateSnippetComments([FromBody] CreateSnippetCommentCommand command)
+    {
+        var response = await mediator.Send(command);
+        return CreatedAtAction("GetSnippetComments", new { id = response.Id }, response);
     }
 }

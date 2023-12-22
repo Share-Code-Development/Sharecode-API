@@ -7,9 +7,9 @@ using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Api.Validators.User;
 
-public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+public class UserValidator : AbstractValidator<CreateUserCommand>
 {
-    public CreateUserCommandValidator()
+    public UserValidator()
     {
         RuleFor(x => x.EmailAddress)
             .NotEmpty()

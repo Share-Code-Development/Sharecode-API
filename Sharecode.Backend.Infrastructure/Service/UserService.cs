@@ -9,6 +9,7 @@ using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Db;
+using Sharecode.Backend.Infrastructure.Exceptions;
 using Sharecode.Backend.Utilities.SecurityClient;
 using CommandDefinition = Dapper.CommandDefinition;
 
@@ -84,6 +85,9 @@ public class UserService : IUserService
     public async Task<IReadOnlyList<User>> GetUsersToTagAsync(string searchQuery, int take, int skip, bool includeDeleted = false, bool shouldEnableTagging = true, CancellationToken token = default)
     {
         using var connectionContext = _userRepository.CreateDapperContext();
+        if(connectionContext == null)
+            throw new InfrastructureDownException("Failed to get the users",
+                $"Failed to create the dapper context for user search");
         var functionParams = new DynamicParameters();
         functionParams.Add("searchquery", searchQuery, dbType: (DbType?)NpgsqlDbType.Varchar);
         functionParams.Add("skip", skip);

@@ -4,9 +4,9 @@ using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Api.Validators.Gateway;
 
-public class ValidateGatewayCommandValidator : AbstractValidator<ValidateGatewayAppRequest>
+public class GatewayValidator : AbstractValidator<ValidateGatewayAppRequest>
 {
-    public ValidateGatewayCommandValidator()
+    public GatewayValidator()
     {
         RuleFor(x => x.GatewayId)
             .NotEmpty()

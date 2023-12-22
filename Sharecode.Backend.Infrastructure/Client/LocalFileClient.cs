@@ -34,7 +34,7 @@ public class LocalFileClient(IOptions<FileClientConfiguration> fileClientConfigu
         return (false, null);
     }
 
-    public async Task<byte[]?> GetFileAsync(string fileName)
+    public async Task<byte[]?> GetFileAsync(string fileName, CancellationToken token = default)
     {
         var consolidatedFileName = GetFullPath(fileName);
         if (!File.Exists(consolidatedFileName))
@@ -42,10 +42,10 @@ public class LocalFileClient(IOptions<FileClientConfiguration> fileClientConfigu
             return null;
         }
 
-        return await File.ReadAllBytesAsync(consolidatedFileName);
+        return await File.ReadAllBytesAsync(consolidatedFileName, token);
     }
 
-    public async Task<bool> DeleteFileAsync(string fileName)
+    public async Task<bool> DeleteFileAsync(string fileName, CancellationToken token = default)
     {
         try
         {
@@ -58,6 +58,17 @@ public class LocalFileClient(IOptions<FileClientConfiguration> fileClientConfigu
             _logger.Error(e, "Failed to delete file {FileName}", fileName);
             return false;
         }
+    }
+
+    public async Task<string?> GetFileAsStringAsync(string fileName, CancellationToken token = default)
+    {
+        var consolidatedFileName = GetFullPath(fileName);
+        if (!File.Exists(consolidatedFileName))
+        {
+            return null;
+        }
+
+        return await File.ReadAllTextAsync(consolidatedFileName, token);
     }
 
     private string GetFullPath(string fileName)

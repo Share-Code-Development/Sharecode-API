@@ -3,6 +3,7 @@ using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Serilog;
 using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Domain.Exceptions;
@@ -25,13 +26,20 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         _connectionStringBuilder = connectionStringBuilder;
     }
 
-    public IDbConnection CreateDapperContext()
+    public IDbConnection? CreateDapperContext()
     {
         if (_dbConnection == null)
         {
             _connectionString ??= _connectionStringBuilder.ToString();
-            _dbConnection = new NpgsqlConnection(_connectionString);
-            
+            try
+            {
+                _dbConnection = new NpgsqlConnection(_connectionString);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Failed to open up a new connection from the creds for Dapper");
+                return null;
+            }
         }
 
         return _dbConnection;

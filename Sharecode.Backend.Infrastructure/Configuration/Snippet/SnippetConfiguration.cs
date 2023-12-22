@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Sharecode.Backend.Domain.Entity.Snippet;
+using Sharecode.Backend.Infrastructure.Db.Extensions;
 
 namespace Sharecode.Backend.Infrastructure.Configuration.Snippet;
 
@@ -12,7 +13,11 @@ public class SnippetConfiguration : IEntityTypeConfiguration<Domain.Entity.Snipp
         builder.OwnsOne(x => x.Metadata, b => b.ToJson());
         builder.ToTable(x => x.HasCheckConstraint("CK_Snippet_Meta_Ensure_Json", "\"Metadata\"::jsonb IS NOT NULL"));
         
-        builder.OwnsOne(x => x.Tags, b => b.ToJson());
+        /*builder.OwnsOne(x => x.Tags, b => b.ToJson());*/
+        builder.Property(x => x.Tags)
+            .HasColumnType("jsonb")
+            .HasJsonConversion();
+        
         builder.ToTable(x => x.HasCheckConstraint("CK_Snippet_Tags_Ensure_Json", "\"Tags\"::jsonb IS NOT NULL"));
 
         builder.HasMany<SnippetComment>(s => s.Comments)

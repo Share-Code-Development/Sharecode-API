@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -59,6 +60,8 @@ public static class DependencyInjection
             Console.WriteLine($"Adding Relational database log to Console for development.");
         });
 
+        SqlMapper.AddTypeHandler(typeof(Dictionary<int, object>), new JsonObjectTypeHandler ());
+        SqlMapper.AddTypeHandler(typeof(List<string>), new JsonObjectTypeHandler ());
         #endregion
 
         #region Redis
@@ -88,11 +91,14 @@ public static class DependencyInjection
         collection.AddScoped<IGatewayRepository, GatewayRepository>();
         #endregion
 
-        #region Snippet
+        #region Snippet & Snippet Comments
 
         collection.AddScoped<ISnippetService, SnippetService>();
         collection.AddScoped<ISnippetRepository, SnippetRepository>();
 
+        collection.AddScoped<ISnippetCommentService, SnippetCommentService>();
+        collection.AddScoped<ISnippetCommentRepository, SnippetCommentRepository>();
+        collection.AddScoped<ISnippetLineCommentRepository, SnippetLineCommentRepository>();
         #endregion
         
         return collection;
