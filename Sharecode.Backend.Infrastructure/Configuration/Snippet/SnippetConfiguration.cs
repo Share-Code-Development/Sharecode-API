@@ -10,10 +10,11 @@ public class SnippetConfiguration : IEntityTypeConfiguration<Domain.Entity.Snipp
     public void Configure(EntityTypeBuilder<Domain.Entity.Snippet.Snippet> builder)
     {
         builder.ToTable("Snippets", "snippet");
-        builder.OwnsOne(x => x.Metadata, b => b.ToJson());
-        builder.ToTable(x => x.HasCheckConstraint("CK_Snippet_Meta_Ensure_Json", "\"Metadata\"::jsonb IS NOT NULL"));
+        builder.Property(x => x.Metadata)
+            .HasColumnType("jsonb")
+            .HasJsonConversion();
         
-        /*builder.OwnsOne(x => x.Tags, b => b.ToJson());*/
+        builder.ToTable(x => x.HasCheckConstraint("CK_Snippet_Meta_Ensure_Json", "\"Metadata\"::jsonb IS NOT NULL"));
         builder.Property(x => x.Tags)
             .HasColumnType("jsonb")
             .HasJsonConversion();

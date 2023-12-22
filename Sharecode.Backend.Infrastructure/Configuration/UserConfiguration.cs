@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Sharecode.Backend.Domain.Entity;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Enums;
+using Sharecode.Backend.Infrastructure.Db.Extensions;
 
 namespace Sharecode.Backend.Infrastructure.Configuration;
 
@@ -17,11 +18,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMethod("btree");
         
         //Configure the meta data column to be a JSON
+
+        builder.Property(x => x.Metadata)
+            .HasColumnType("jsonb")
+            .HasJsonConversion();
         
-        builder.OwnsOne(x => x.Metadata, b =>
-        {
-            b.ToJson();
-        });
         builder.ToTable(x => x.HasCheckConstraint("CK_User_Ensure_Json", "\"Metadata\"::jsonb IS NOT NULL"));
 
         builder.HasOne(user => user.AccountSetting)

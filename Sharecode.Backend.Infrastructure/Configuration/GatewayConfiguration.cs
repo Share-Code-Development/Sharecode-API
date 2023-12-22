@@ -20,5 +20,6 @@ public class GatewayConfiguration : IEntityTypeConfiguration<GatewayRequest>
         // Partial index for Completed
         builder.HasIndex(p => p.IsCompleted)
             .HasFilter("\"IsCompleted\" = true");
+        
     }
 } 

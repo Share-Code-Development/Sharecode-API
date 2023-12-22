@@ -28,10 +28,10 @@ public class SnippetAccessControlConfiguration : IEntityTypeConfiguration<Snippe
         #region Constraints
         
         //Always ensure meta data is a Json
-        builder.OwnsOne(x => x.Metadata, b =>
+        /*builder.OwnsOne(x => x.Metadata, b =>
         {
             b.ToJson();
-        });
+        });*/
         builder.ToTable(x => x.HasCheckConstraint("CK_SAC_Ensure_Json", "\"Metadata\"::jsonb IS NOT NULL"));
 
         builder.HasIndex(x => new { x.UserId, x.SnippetId })
