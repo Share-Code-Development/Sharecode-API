@@ -7,6 +7,8 @@ public static class StringExtensions
     private static readonly Regex CamelCaseRegex = new Regex("(\\B[A-Z])", RegexOptions.Compiled);
     private static readonly Regex HyphenatedRegex = new Regex("(?<!^)([A-Z])", RegexOptions.Compiled);
 
+    private static readonly Regex MentionRegex = new Regex(@"<@([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})>", RegexOptions.Compiled);
+
     public static string ToCapitalized(this string input)
     {
         return CamelCaseRegex.Replace(input, " $1");
@@ -39,6 +41,50 @@ public static class StringExtensions
                 nonNulls.Add(s);
         }
         return string.Join(separator, nonNulls);
+    }
+
+    public static HashSet<Guid> ExtractMentionableUsers(this string? text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return new HashSet<Guid>();
+
+        HashSet<Guid> mentionableUsers = new();
+        var matches = MentionRegex.Matches(text);
+        foreach (Match match in matches)
+        {
+            var value = match.Groups[1].Value;
+            if (Guid.TryParse(value, out Guid guid))
+            {
+                mentionableUsers.Add(guid);    
+            }
+        }
+        
+        return mentionableUsers;
+    }
+    
+    public static HashSet<Guid> ExtractMentionableUsers(this IEnumerable<string>? texts)
+    {
+        var mentionableUsers = new HashSet<Guid>();
+
+        if (texts == null) return mentionableUsers;
+        
+        foreach (var text in texts)
+        {
+            if(string.IsNullOrEmpty(text))
+                continue;
+            
+            var matches = MentionRegex.Matches(text);
+            foreach (Match match in matches)
+            {
+                var value = match.Groups[1].Value;
+                if (Guid.TryParse(value, out Guid guid))
+                {
+                    mentionableUsers.Add(guid);
+                }
+            }
+        }
+
+        return mentionableUsers;
     }
 
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Sharecode.Backend.Domain.Entity;
 using Sharecode.Backend.Domain.Entity.Profile;
+using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Base;
 using Sharecode.Backend.Infrastructure.Db;
@@ -76,5 +77,21 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         }
 
         return await query.FirstOrDefaultAsync(cancellationToken: token);
+    }
+
+    public async Task<List<User>> GetNotificationEnabledUserAsync(HashSet<Guid> userIds, CancellationToken token = default)
+    {
+        return await Table.AsNoTracking()
+            .Include(x => x.AccountSetting)
+            .Where(x => x.AccountSetting.EnableNotificationsForMentions && !x.IsDeleted && userIds.Contains(x.Id))
+            .Select(x => new User
+            {
+                Id = x.Id,
+                EmailAddress = x.EmailAddress,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                MiddleName = x.MiddleName,
+                Visibility = AccountVisibility.Public
+            }).ToListAsync(token);
     }
 }

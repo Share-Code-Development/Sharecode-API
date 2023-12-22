@@ -35,7 +35,11 @@ public class GetSnippetResponse : SnippetDto
             Public = snippet.Public,
             Views = snippet.Views,
             Copy = snippet.Copy,
-            OwnerId = snippet.OwnerId
+            OwnerId = snippet.OwnerId,
+            CommentCount = snippet.CommentCount,
+            AccessControl = snippet.AccessControl,
+            LineComments = snippet.LineComments,
+            Reactions = snippet.Reactions
         };
     }
 }

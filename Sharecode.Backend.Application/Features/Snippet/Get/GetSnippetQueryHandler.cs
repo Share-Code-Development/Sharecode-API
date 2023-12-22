@@ -11,7 +11,8 @@ public class GetSnippetQueryHandler(IHttpClientContext clientContext, ISnippetSe
 {
     public async Task<GetSnippetResponse?> Handle(GetSnippetQuery request, CancellationToken cancellationToken)
     {
-        var aggregatedData = await service.GetAggregatedData(request.SnippetId);
+        var userId = await clientContext.GetUserIdentifierAsync();
+        var aggregatedData = await service.GetAggregatedData(request.SnippetId, userId);
         if (aggregatedData == null)
             return null;
 

@@ -1,6 +1,8 @@
+using System.ComponentModel;
 using System.Data;
 using Npgsql;
 using Serilog;
+using Sharecode.Backend.Application.Exceptions.Snippet;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Dto.Snippet;
 using Sharecode.Backend.Domain.Repositories;
@@ -11,7 +13,7 @@ namespace Sharecode.Backend.Infrastructure.Service;
 
 public class SnippetService(ISnippetRepository snippetRepository, ILogger logger) : ISnippetService
 {
-    public async Task<SnippetDto?> GetAggregatedData(Guid snippetId)
+    public async Task<SnippetDto?> GetAggregatedData(Guid snippetId, Guid? requestedUser)
     {
         using var dapperContext = snippetRepository.CreateDapperContext();
         if (dapperContext == null)
@@ -22,18 +24,19 @@ public class SnippetService(ISnippetRepository snippetRepository, ILogger logger
         try
         {
             using var transaction = dapperContext.BeginTransaction();
-            var cursor = await ((NpgsqlConnection)dapperContext).QueryRefcursorsAsync((NpgsqlTransaction)transaction, $"SELECT * FROM get_snippet(@snippetid)", CommandType.Text,new { snippetid = snippetId });
+            var cursor = await ((NpgsqlConnection)dapperContext).QueryRefcursorsAsync((NpgsqlTransaction)transaction, $"SELECT * FROM get_snippet(@snippetid, @requestedby)", CommandType.Text,new { snippetid = snippetId, requestedby = requestedUser });
 
             var snippetDto = cursor.ReadSingleOrDefault<SnippetDto>();
             if (snippetDto == null)
                 return null;
         
-            var totalCommentCountData = cursor.ReadFirst<long>();
+            var totalCommentCountData = cursor.ReadFirst<dynamic>();
             var lineCommentData = cursor.Read<SnippetLineCommentDto>().ToList();
             var reactionsData = cursor.Read<ReactionCommonDto>().ToList();
             var accessControlsData = cursor.Read<SnippetAccessControlDto>().ToList();
         
-            snippetDto.CommentCount = totalCommentCountData;
+            
+            snippetDto.CommentCount = ((int) totalCommentCountData.count);
             snippetDto.AccessControl = accessControlsData;
             snippetDto.Reactions = reactionsData;
             snippetDto.LineComments = lineCommentData;
@@ -41,6 +44,11 @@ public class SnippetService(ISnippetRepository snippetRepository, ILogger logger
         }
         catch (Exception e)
         {
+            if (e is PostgresException { MessageText: "No Access" })
+            {
+                throw new NoSnippetAccessException(snippetId);
+            }
+            
             logger.Error(e, "Failed to get the snippet of Id {Id} due to {Message}", snippetId, e.Message);
             throw;
         }

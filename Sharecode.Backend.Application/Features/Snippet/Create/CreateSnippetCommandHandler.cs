@@ -6,6 +6,7 @@ using Sharecode.Backend.Application.Exceptions.Snippet;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Entity.Snippet;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.MetaKeys;
 
 namespace Sharecode.Backend.Application.Features.Snippet.Create;
 
@@ -29,6 +30,8 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
             Language = request.Language,
             PreviewCode = request.PreviewCode,
         };
+
+        snippet.SetMeta(MetaKeys.SnippetKeys.LimitComments, false);
         
         snippet.CreateTags(request.Tags);
         if (user != null)

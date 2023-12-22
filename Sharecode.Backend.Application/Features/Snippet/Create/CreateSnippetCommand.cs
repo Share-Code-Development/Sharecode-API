@@ -11,6 +11,7 @@ public class CreateSnippetCommand : IAppRequest<SnippetCreatedResponse>
     public bool Public { get; set; }
     public byte[] Content { get; set; }
     public string PreviewCode { get; set; }
+    public bool LimitComment { get; set; } = false;
     
     public CreateSnippetCommand(string title, string? description, string language, List<string> tags, bool isPublic, byte[]? content)
     {

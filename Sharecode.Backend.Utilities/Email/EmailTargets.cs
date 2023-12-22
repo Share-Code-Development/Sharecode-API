@@ -2,9 +2,18 @@ namespace Sharecode.Backend.Utilities.Email;
 
 public class EmailTargets
 {
-    public readonly string Target;
-    public EmailTargets(string target)
+    private readonly Dictionary<string, string> _userNameEmailTargets = new();
+    public IReadOnlyDictionary<string, string> Targets => _userNameEmailTargets;
+    public EmailTargets()
     {
-        Target = target;
+    }
+
+    public EmailTargets AddTarget(string email, string? name = null)
+    {
+        if (name == null)
+            name = email;
+
+        _userNameEmailTargets[email] = name;
+        return this;
     }
 }

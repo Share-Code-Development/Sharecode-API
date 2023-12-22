@@ -98,6 +98,11 @@ public class UserService : IUserService
             UserSqlQueries.FunctionGetUsersToTag, functionParams, commandTimeout: 1000);
         return mentionableUsers.ToList();
     }
+
+    public async Task<List<User>> GetNotificationEnabledUsersAsync(HashSet<Guid> users, CancellationToken token = default)
+    {
+        return await _userRepository.GetNotificationEnabledUserAsync(users, token);
+    }
 }
 
 internal static class UserSqlQueries

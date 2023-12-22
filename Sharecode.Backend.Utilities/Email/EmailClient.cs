@@ -71,7 +71,10 @@ public class EmailClient(IOptions<LocalDirectoryConfiguration> directoryConfigur
         bodyBuilder.HtmlBody = emailTemplate.TemplateHtml;
         var mailMessage = new MimeMessage();
         mailMessage.From.Add(new MailboxAddress("Sharecode", _from));
-        mailMessage.To.Add(new MailboxAddress("Alen Geo Alex", targets.Target));
+        foreach (KeyValuePair<string,string> target in targets.Targets)
+        {
+            mailMessage.To.Add(new MailboxAddress(target.Value, target.Key));
+        }
         mailMessage.Subject = subject;
         mailMessage.Body = bodyBuilder.ToMessageBody();
 

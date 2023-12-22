@@ -37,7 +37,8 @@ public class AccountLockedEventHandler(IRefreshTokenService refreshTokenService,
         var baseUrl = configuration.Value.Base;
         var gatewayUrl = GatewayRequestType.ForgotPassword.CreateGatewayUrl(baseUrl, gatewayRequest.Id);
         await emailClient.SendTemplateMailAsync(EmailTemplateKeys.AccountLocked,
-            new EmailTargets(notification.EmailAddress),
+            new EmailTargets().AddTarget(notification.EmailAddress, notification.FullName)
+            ,
             new Dictionary<string, string>()
             {
                 { EmailPlaceholderKeys.GatewayUrlKey, gatewayUrl },

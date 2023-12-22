@@ -11,4 +11,5 @@ public interface IUserService
 
     Task<IReadOnlyList<User>> GetUsersToTagAsync(string searchQuery, int take, int skip, bool includeDeleted = false,
         bool shouldEnableTagging = true, CancellationToken token = default);
+    Task<List<User>> GetNotificationEnabledUsersAsync(HashSet<Guid> users, CancellationToken token = default);
 }

@@ -4,5 +4,5 @@ namespace Sharecode.Backend.Application.Service;
 
 public interface ISnippetService
 {
-    Task<SnippetDto?> GetAggregatedData(Guid snippetId);
+    Task<SnippetDto?> GetAggregatedData(Guid snippetId, Guid? requestedUser);
 }

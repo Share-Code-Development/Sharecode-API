@@ -5,5 +5,4 @@ namespace Sharecode.Backend.Domain.Repositories;
 
 public interface ISnippetCommentRepository : IBaseRepository<SnippetComment>
 {
-    
 }

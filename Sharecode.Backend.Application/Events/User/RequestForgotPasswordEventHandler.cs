@@ -27,7 +27,7 @@ public class RequestForgotPasswordEventHandler(IEmailClient emailClient, IGatewa
         var subjectPlaceholders = new Dictionary<string, string>() { { EmailPlaceholderKeys.UserNameKey, notification.FullName } };
         await emailClient.SendTemplateMailAsync(
             EmailTemplateKeys.ResetPassword,
-            new EmailTargets(notification.EmailAddress),
+            new EmailTargets().AddTarget(notification.EmailAddress, notification.FullName),
             placeholders,
             subjectPlaceholders
         );

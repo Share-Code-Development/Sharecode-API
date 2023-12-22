@@ -38,7 +38,7 @@ public class UserCreatedEventHandler(IEmailClient emailClient, IGatewayRepositor
         var placeholders = new Dictionary<string, string> { { EmailPlaceholderKeys.GatewayUrlKey, $"{gatewayUrl}" }, {EmailPlaceholderKeys.UserNameKey, notification.FullName} };
         await emailClient.SendTemplateMailAsync(
             EmailTemplateKeys.EmailValidation,
-            new EmailTargets(notification.EmailAddress),
+            new EmailTargets().AddTarget(notification.EmailAddress, notification.FullName),
             placeholders
         );
     }

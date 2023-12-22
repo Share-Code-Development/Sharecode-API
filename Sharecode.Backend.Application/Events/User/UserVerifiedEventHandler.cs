@@ -13,7 +13,7 @@ public class UserVerifiedEventHandler(IEmailClient emailClient, ILogger<UserVeri
     {
         await emailClient.SendTemplateMailAsync(
             EmailTemplateKeys.WelcomeUser, 
-            new EmailTargets(notification.EmailAddress),
+            new EmailTargets().AddTarget(notification.EmailAddress, notification.FullName),
             new Dictionary<string, string>() {{EmailPlaceholderKeys.UserNameKey, notification.FullName}},
             new Dictionary<string, string>() {{EmailPlaceholderKeys.UserNameKey, notification.FullName}}
         );

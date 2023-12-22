@@ -1,15 +1,16 @@
 using MediatR;
 using Sharecode.Backend.Application.Client;
+using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Exceptions.Snippet;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Snippet;
 using Sharecode.Backend.Domain.Enums;
-using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.MetaKeys;
 
 namespace Sharecode.Backend.Application.Features.Snippet.Comments.Create;
 
-public class CreateSnippetCommentCommandHandler(IHttpClientContext context, ISnippetRepository snippetRepository ,ISnippetService service ,ISnippetService snippetService, ISnippetCommentRepository snippetCommentRepository, ISnippetLineCommentRepository snippetLineCommentRepository) : IRequestHandler<CreateSnippetCommentCommand, CreateSnippetCommentResponse> 
+public class CreateSnippetCommentCommandHandler(IHttpClientContext context, IUnitOfWork unitOfWork ,ISnippetRepository snippetRepository ,ISnippetService service ,ISnippetService snippetService, ISnippetCommentRepository snippetCommentRepository, ISnippetLineCommentRepository snippetLineCommentRepository) : IRequestHandler<CreateSnippetCommentCommand, CreateSnippetCommentResponse> 
 {
     public async Task<CreateSnippetCommentResponse> Handle(CreateSnippetCommentCommand request, CancellationToken cancellationToken)
     {
@@ -31,17 +32,37 @@ public class CreateSnippetCommentCommandHandler(IHttpClientContext context, ISni
     {
         var snippet = await snippetRepository.GetAsync(request.SnippetId, includeSoftDeleted: false, track: true, token: cancellationToken);
         if (snippet == null)
-            throw new FailedCommentCreationException("Unknown snippet has been said to create comment on!");
+            throw new FailedCommentCreationException("Unknown snippet has been send to create comment on!");
+
+        var limitComments = snippet.ReadMeta<bool?>(MetaKeys.SnippetKeys.LimitComments);
+        if (!limitComments.HasValue)
+        {
+            snippet.SetMeta(MetaKeys.SnippetKeys.LimitComments, false);
+            limitComments = false;
+        }
         
+        if (limitComments.Value)
+        {
+            throw new FailedCommentCreationException("Commenting on this snippet is currently disabled.");
+        }
+
         var snippetComment = new SnippetComment()
         {
             SnippetId = request.SnippetId,
             Text = request.Text,
             UserId = userId,
-            ParentCommentId = null
+            ParentCommentId = null,
+            Reactions = [],
+            Id = Guid.NewGuid()
         };
 
-        return null;
+        await snippetCommentRepository.AddAsync(snippetComment, token: cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
+        context.AddCacheKeyToInvalidate("snippet-comment", request.SnippetId.ToString());
+        return new CreateSnippetCommentResponse()
+        {
+            Id = snippetComment.Id
+        };
     }
 
     private async Task<CreateSnippetCommentResponse> CreateSnippetReplyCommentAsync(CreateSnippetCommentCommand request,

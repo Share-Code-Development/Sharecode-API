@@ -16,5 +16,7 @@ public interface IUserRepository : IBaseRepository<User>
     
     Task<User?> GetUserByEmailIncludingAccountSettings(string emailAddress, bool includeAccountSettings = false,
         bool trackUser = false, CancellationToken token = default);
-    
+
+    Task<List<User>> GetNotificationEnabledUserAsync(HashSet<Guid> userIds, CancellationToken token = default);
+
 }

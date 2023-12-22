@@ -28,5 +28,17 @@ public class SnippetConfiguration : IEntityTypeConfiguration<Domain.Entity.Snipp
         builder.HasMany<SnippetReactions>(s => s.Reactions)
             .WithOne(x => x.Snippet)
             .HasForeignKey(x => x.SnippetId);
+
+        builder.Property(x => x.Title)
+            .HasMaxLength(100);
+
+        builder.Property(x => x.Description)
+            .HasMaxLength(500);
+
+        builder.Property(x => x.Language)
+            .HasMaxLength(20);
+
+        builder.Property(x => x.PreviewCode)
+            .HasMaxLength(500);
     }
 }

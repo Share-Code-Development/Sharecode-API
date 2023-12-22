@@ -49,4 +49,5 @@ public static class EmailTemplateKeys
     public static readonly EmailTemplateKey WelcomeUser = new("welcome-email.html", "Welcome onboard {(USER)}");
     public static readonly EmailTemplateKey ResetPassword = new("reset-password.html", "Forgot your password? Here is your reset request {(USER)}");
     public static readonly EmailTemplateKey AccountLocked = new("account-locked.html", "Your sharecode account has been locked!");
+    public static readonly EmailTemplateKey MentionedInComment = new("mention-user-snippet-comment.html", "You have been mentioned by {(COMMENT_OWNER)} - Sharecode");
 }

@@ -83,9 +83,6 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         {
             if (!includeSoftDeleted)
             {
-                DbSet<TEntity> entities = Table;
-                Console.WriteLine(Table.Count());
-                List<TEntity> listAsync = _dbContext.Set<TEntity>().ToList();
                 return await _dbContext.Set<TEntity>().FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken: token);
             }
             

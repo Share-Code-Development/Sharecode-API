@@ -27,7 +27,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
             SnippetId = id
         };
         
-        FrameCacheKey("snippet","by_id", id.ToString());
+        FrameCacheKey("snippet", id.ToString());
         var cacheValue = await ScanAsync<GetSnippetResponse>();
         if (cacheValue != null)
         {
@@ -71,7 +71,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
         if (string.IsNullOrEmpty(command.PreviewCode))
         {
             string preview;
-            preview = command.Content.Length > 1000 ? Encoding.Default.GetString(command.Content, 0, 300) : Encoding.Default.GetString(command.Content).Substring(0, 50);
+            preview = command.Content.Length > 1200 ? Encoding.Default.GetString(command.Content, 0, 1200) : Encoding.Default.GetString(command.Content);
             command.PreviewCode = preview;
         }
         
@@ -79,17 +79,19 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
         return CreatedAtAction("GetSnippet", new {id = response.SnippetId} , response);
     }
 
-    [HttpGet("{id}/comments",Name = "Get the comments of snippets")]
-    public async Task<IActionResult> GetSnippetComments()
+    [HttpGet("{snippetId}/comments",Name = "Get the comments of snippets")]
+    public async Task<IActionResult> GetSnippetComments(Guid snippetId)
     {
+        FrameCacheKey("snippet-comment", snippetId.ToString());
         return Ok();
     }
 
-    [HttpPost("{id}/comments", Name = "Create a comment for snippet")]
+    [HttpPost("{snippetId}/comments", Name = "Create a comment for snippet")]
     [Authorize]
-    public async Task<IActionResult> CreateSnippetComments([FromBody] CreateSnippetCommentCommand command)
+    public async Task<IActionResult> CreateSnippetComments([FromRoute]Guid snippetId, [FromBody] CreateSnippetCommentCommand command)
     {
+        command.SnippetId = snippetId;
         var response = await mediator.Send(command);
-        return CreatedAtAction("GetSnippetComments", new { id = response.Id }, response);
+        return CreatedAtAction("GetSnippetComments", new { snippetId = response.Id }, response);
     }
 }
