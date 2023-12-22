@@ -13,7 +13,7 @@ namespace Sharecode.Backend.Infrastructure.Service;
 
 public class SnippetService(ISnippetRepository snippetRepository, ILogger logger) : ISnippetService
 {
-    public async Task<SnippetDto?> GetAggregatedData(Guid snippetId, Guid? requestedUser)
+    public async Task<SnippetDto?> GetAggregatedData(Guid snippetId, Guid? requestedUser, bool updateRecent = false)
     {
         using var dapperContext = snippetRepository.CreateDapperContext();
         if (dapperContext == null)
@@ -24,7 +24,7 @@ public class SnippetService(ISnippetRepository snippetRepository, ILogger logger
         try
         {
             using var transaction = dapperContext.BeginTransaction();
-            var cursor = await ((NpgsqlConnection)dapperContext).QueryRefcursorsAsync((NpgsqlTransaction)transaction, $"SELECT * FROM get_snippet(@snippetid, @requestedby)", CommandType.Text,new { snippetid = snippetId, requestedby = requestedUser });
+            var cursor = await ((NpgsqlConnection)dapperContext).QueryRefcursorsAsync((NpgsqlTransaction)transaction, $"SELECT * FROM get_snippet(@snippetid, @requestedby, @updaterecent)", CommandType.Text,new { snippetid = snippetId, requestedby = requestedUser, updaterecent = updateRecent });
 
             var snippetDto = cursor.ReadSingleOrDefault<SnippetDto>();
             if (snippetDto == null)

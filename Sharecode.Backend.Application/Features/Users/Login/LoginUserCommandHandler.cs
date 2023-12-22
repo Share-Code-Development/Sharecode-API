@@ -10,6 +10,7 @@ using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Utilities;
 using Sharecode.Backend.Utilities.KeyValue;
+using Sharecode.Backend.Utilities.MetaKeys;
 using Sharecode.Backend.Utilities.SecurityClient;
 
 namespace Sharecode.Backend.Application.Features.Users.Login;
@@ -74,6 +75,8 @@ public class LoginUserCommandHandler(IUserService userService, IHttpClientContex
         if (user == null)
         {
             user = await RegisterFromGoogle(payload, token);
+
+            user.SetMeta(MetaKeys.UserKeys.RecentlyVisitedSnippets, new List<Guid>());
         }
         else
         {

@@ -6,7 +6,7 @@ namespace Sharecode.Backend.Domain.Base.Primitive;
 
 public abstract class BaseEntityWithMetadata : BaseEntity
 {
-    public Dictionary<string, string> Metadata { get; set; } = new();
+    public Dictionary<string, object> Metadata { get; set; } = new();
 
     public bool SetMeta(MetaKey key, object value)
     {
@@ -24,7 +24,7 @@ public abstract class BaseEntityWithMetadata : BaseEntity
         return true;
     }
 
-    public T? ReadMeta<T>(MetaKey key, T? defaultValue = default)
+    /*public T? ReadMeta<T>(MetaKey key, T? defaultValue = default)
     {
         if (Metadata.TryGetValue(key.Key, out var value))
         {
@@ -33,6 +33,24 @@ public abstract class BaseEntityWithMetadata : BaseEntity
                 return key.ValueType is { IsPrimitive: true, IsArray: false }
                     ? (T) Convert.ChangeType(value, key.ValueType)
                     : JsonConvert.DeserializeObject<T>(value);
+            }
+            catch (JsonException)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to get the metadata of {key}. Current value is {value} and expected type is {key.ValueType.Name}");
+            }
+        }
+
+        return defaultValue;
+    }*/
+
+    public T? ReadMeta<T>(MetaKey key, T? defaultValue = default)
+    {
+        if (Metadata.TryGetValue(key.Key, out var value))
+        {
+            try
+            {
+                return value is T value1 ? value1 : default;
             }
             catch (JsonException)
             {

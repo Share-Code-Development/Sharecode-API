@@ -63,8 +63,13 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
         await StoreCacheAsync(tagResponse, TimeSpan.FromMinutes(5), token: RequestCancellationToken);
         return Ok(tagResponse);
     }
-    //
-    // [HttpPost("get-by-ids", Name = "Get All the users Name and Email based on Ids")]
-    // [Authorize]
+
+    [HttpGet("{userId}/snippets")]
+    public async Task<ActionResult> GetMySnippets([FromRoute] Guid userId)
+    {
+        FrameCacheKey("user-snippets", userId.ToString(), GetQuery());
+
+        return Ok();
+    }
     
 }

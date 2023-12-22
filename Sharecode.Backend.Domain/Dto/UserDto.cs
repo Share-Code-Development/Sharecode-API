@@ -13,14 +13,14 @@ public class UserDto
     public string EmailAddress { get; set; }
     public bool EmailVerified { get; set; }
     public string? ProfilePicture { get; set; }
-    public Dictionary<string, string> Metadata { get; set; }
+    public Dictionary<string, object> Metadata { get; set; }
     public AccountVisibility Visibility { get; set; }
     public AccountSettingDto? Settings { get; set; }
     public DateTime Created { get; set; }
 
     public UserDto() { }
 
-    public UserDto(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, string> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture)
+    public UserDto(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, object> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture)
     {
         UserId = userId;
         FirstName = firstName;
@@ -56,11 +56,11 @@ public class UserDto
 public sealed class AccountSettingDto
 {
     public bool AllowTagging { get; set; }
-    public Dictionary<string, string> Metadata { get; set; }
+    public Dictionary<string, object> Metadata { get; set; }
 
     public AccountSettingDto() { }
 
-    public AccountSettingDto(bool allowTagging, Dictionary<string, string> metadata)
+    public AccountSettingDto(bool allowTagging, Dictionary<string, object> metadata)
     {
         AllowTagging = allowTagging;
         Metadata = metadata;

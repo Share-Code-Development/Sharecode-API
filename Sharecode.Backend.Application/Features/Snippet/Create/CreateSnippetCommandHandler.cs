@@ -59,6 +59,10 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
         if (blob.Item1 == false || blob.Item2 == null)
             throw new FailedSnippetCreation("Failed to create the snippet. An unknown error occured!");
 
+        //For My Snippets
+        if(userIdentifier.HasValue)
+            context.AddCacheKeyToInvalidate("user-snippets", userIdentifier.Value.ToString());
+        
         return new SnippetCreatedResponse()
         {
             SnippetId = snippet.Id

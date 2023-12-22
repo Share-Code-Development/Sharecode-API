@@ -91,6 +91,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                 FirstName = x.FirstName,
                 LastName = x.LastName,
                 MiddleName = x.MiddleName,
+                ProfilePicture = x.ProfilePicture,
                 Visibility = AccountVisibility.Public
             }).ToListAsync(token);
     }

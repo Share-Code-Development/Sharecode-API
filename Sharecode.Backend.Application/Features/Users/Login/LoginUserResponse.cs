@@ -13,7 +13,7 @@ public class LoginUserResponse : UserDto
 
     public LoginUserResponse() { }
 
-    public LoginUserResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, string> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture ,string? accessToken, string? refreshToken)
+    public LoginUserResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, object> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture ,string? accessToken, string? refreshToken)
         : base(userId, firstName, middleName, lastName, emailAddress, emailVerified, metadata, visibility, settings, created, profilePicture)
     {
         AccessToken = accessToken;

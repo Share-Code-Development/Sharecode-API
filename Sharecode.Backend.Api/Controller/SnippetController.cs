@@ -17,16 +17,14 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// <summary>
     /// GetSnippet method retrieves a snippet by its ID.
     /// </summary> <param name="id">The ID of the snippet to retrieve.
-    /// </param> <returns>The snippet with the specified ID, if found. Otherwise, a NotFound status is returned.</returns>
+    /// </param>
+    /// <param name="snippetQuery"></param>
+    /// <returns>The snippet with the specified ID, if found. Otherwise, a NotFound status is returned.</returns>
     /// /
     [HttpGet("{id}", Name = "Get a snippet")]
-    public async Task<IActionResult> GetSnippet([FromRoute] Guid id)
+    public async Task<IActionResult> GetSnippet([FromRoute] Guid id, [FromQuery] GetSnippetQuery snippetQuery)
     {
-        var snippetQuery = new GetSnippetQuery()
-        {
-            SnippetId = id
-        };
-        
+        snippetQuery.SnippetId = id;
         FrameCacheKey("snippet", id.ToString());
         var cacheValue = await ScanAsync<GetSnippetResponse>();
         if (cacheValue != null)
@@ -46,8 +44,36 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// Creates a new snippet with the given ID.
     /// </summary>
     /// <returns>The IActionResult representing the result of the operation.</returns>
-    [HttpPost(Name = "Create a new snippet")]
+    [HttpPost("public", Name = "Create a new snippet publicly")]
     public async Task<IActionResult> CreateSnippet()
+    {
+        return await CreateInternal();
+    }
+    
+    [HttpPost(Name = "Create a new snippet securely")]
+    [Authorize]
+    public async Task<IActionResult> CreateSnippetSecure()
+    {
+        return await CreateInternal();
+    }
+
+    [HttpGet("{snippetId}/comments",Name = "Get the comments of snippets")]
+    public async Task<IActionResult> GetSnippetComments(Guid snippetId)
+    {
+        FrameCacheKey("snippet-comment", snippetId.ToString());
+        return Ok();
+    }
+
+    [HttpPost("{snippetId}/comments", Name = "Create a comment for snippet")]
+    [Authorize]
+    public async Task<IActionResult> CreateSnippetComments([FromRoute]Guid snippetId, [FromBody] CreateSnippetCommentCommand command)
+    {
+        command.SnippetId = snippetId;
+        var response = await mediator.Send(command);
+        return CreatedAtAction("GetSnippetComments", new { snippetId = response.Id }, response);
+    }
+
+    private async Task<IActionResult> CreateInternal()
     {
         var formCollection = await Request.ReadFormAsync();
         var file = formCollection.Files.FirstOrDefault();
@@ -77,21 +103,5 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
         
         var response = await mediator.Send(command);
         return CreatedAtAction("GetSnippet", new {id = response.SnippetId} , response);
-    }
-
-    [HttpGet("{snippetId}/comments",Name = "Get the comments of snippets")]
-    public async Task<IActionResult> GetSnippetComments(Guid snippetId)
-    {
-        FrameCacheKey("snippet-comment", snippetId.ToString());
-        return Ok();
-    }
-
-    [HttpPost("{snippetId}/comments", Name = "Create a comment for snippet")]
-    [Authorize]
-    public async Task<IActionResult> CreateSnippetComments([FromRoute]Guid snippetId, [FromBody] CreateSnippetCommentCommand command)
-    {
-        command.SnippetId = snippetId;
-        var response = await mediator.Send(command);
-        return CreatedAtAction("GetSnippetComments", new { snippetId = response.Id }, response);
     }
 }

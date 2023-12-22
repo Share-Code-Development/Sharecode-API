@@ -5,6 +5,7 @@ using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.MetaKeys;
 using Sharecode.Backend.Utilities.SecurityClient;
 
 namespace Sharecode.Backend.Application.Features.Users.Create;
@@ -34,6 +35,7 @@ internal class CreateUserCommandHandler(IUnitOfWork unitOfWork, IUserRepository 
             User = user,
             Id = Guid.NewGuid()
         };
+        user.SetMeta(MetaKeys.UserKeys.RecentlyVisitedSnippets, new List<Guid>());
         userRepository.Register(user);
         await unitOfWork.CommitAsync(cancellationToken);
         return UserCreatedResponse.From(user);
