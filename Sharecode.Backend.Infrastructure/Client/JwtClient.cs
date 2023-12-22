@@ -59,15 +59,21 @@ public class JwtClient : IJwtClient
 
     public string? GenerateAccessToken(User user, string secretKey, string encryptingKey, List<Claim>? additionalClaims  = null)
     {
+        return GenerateAccessToken(user.Id, user.EmailAddress, user.FullName, secretKey, encryptingKey, additionalClaims);
+    }
+
+    public string? GenerateAccessToken(Guid userId, string emailAddress, string fullName, string secretKey, string encryptingKey,
+        List<Claim>? additionalClaims = null)
+    {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(secretKey);
         
         var encryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(Convert.FromBase64String(encryptingKey)), SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256);
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.FullName),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.EmailAddress)
+            new Claim(ClaimTypes.Name, fullName),
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim(ClaimTypes.Email, emailAddress)
         };
         if (additionalClaims != null)
         {

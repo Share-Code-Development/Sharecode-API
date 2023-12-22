@@ -34,4 +34,21 @@ public class TokenClient(Namespace keyVaultNamespace, IOptions<JwtConfiguration>
         
         return new AccessCredentials(accessToken, refreshToken, tokenIdentifier!.Value);
     }
+
+    public AccessCredentials Generate(Guid userId, string emailAddress, string fullName, ref Guid? refreshTokenIdentifier)
+    {
+        KeyValue? accessTokenKeyValue = keyVaultNamespace.Of(KeyVaultConstants.JwtSecretKey);
+        KeyValue? refreshTokenKeyValue = keyVaultNamespace.Of(KeyVaultConstants.JwtRefreshTokenSecretKey);
+        var accessTokenEncryptionKey = keyVaultNamespace.Of(KeyVaultConstants.JwtAccessTokenEncryptionKey);
+        var refreshTokenEncryptionKey = keyVaultNamespace.Of(KeyVaultConstants.JwtRefreshTokenEncryptionKey);
+        if (accessTokenKeyValue == null || refreshTokenKeyValue == null || accessTokenEncryptionKey == null || refreshTokenEncryptionKey == null)
+            throw new JwtFetchKeySecretException($"Failed to fetch the secret-key or refresh-secret-key. Secret Key: {accessTokenKeyValue == null}, Refresh Key: {refreshTokenKeyValue == null}");
+        string? accessToken = _jwtClient.GenerateAccessToken(userId, emailAddress, fullName, accessTokenKeyValue.Value, accessTokenEncryptionKey.Value);
+        string? refreshToken = _jwtClient.GenerateRefreshToken(userId, refreshTokenKeyValue.Value,refreshTokenEncryptionKey.Value ,ref refreshTokenIdentifier);
+
+        if (accessToken == null || refreshToken == null)
+            throw new JwtFetchKeySecretException("Failed to generate tokens for user!");
+        
+        return new AccessCredentials(accessToken, refreshToken, refreshTokenIdentifier!.Value);
+    }
 }

@@ -27,4 +27,18 @@ public static class StringExtensions
         return HyphenatedRegex.Replace(input, "-$1").ToUpper();
     }
 
+    public static string CombineNonNulls(this string? input, string separator, params string?[] combinations)
+    { 
+        List<string?> nonNulls = new List<string?>();
+        if(!string.IsNullOrWhiteSpace(input))
+            nonNulls.Add(input);
+
+        foreach(var s in combinations)
+        {
+            if(!string.IsNullOrWhiteSpace(s))
+                nonNulls.Add(s);
+        }
+        return string.Join(separator, nonNulls);
+    }
+
 }

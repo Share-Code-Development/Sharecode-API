@@ -12,7 +12,7 @@ namespace Sharecode.Backend.Api.Controller;
 public class AuthController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
 {
 
-    private const string ExposeHeadersString = $"Authorization, Expires";
+    private const string ExposeHeadersString = $"Authorization, Expires, RefreshToken";
 
     [HttpPost(template: "register/", Name = "Register User")]
     public async Task<ActionResult> Register([FromBody] CreateUserCommand command)
@@ -39,8 +39,9 @@ public class AuthController(IAppCacheClient cache, IHttpClientContext requestCon
         var command = new GetRefreshTokenCommand(refreshToken!);
         var response = await mediator.Send(command);
         Response.Headers.AccessControlExposeHeaders = ExposeHeadersString;
-        Response.Headers.Authorization = response.RefreshToken;
-        Response.Headers.Expires = response.Expiry.Ticks.ToString();
+        Response.Headers.Authorization = response.AccessToken;
+        Response.Headers.Append("RefreshToken", response.RefreshToken);
+        Response.Headers.Expires = response.RefreshTokenExpiry.Ticks.ToString();
         return Ok();
     }
 

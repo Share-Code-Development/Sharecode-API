@@ -1,5 +1,6 @@
 using System.Data;
 using System.Data.Common;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Sharecode.Backend.Application;
@@ -7,32 +8,29 @@ using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Infrastructure.Exceptions;
 
 namespace Sharecode.Backend.Infrastructure.Service;
 
-public class RefreshTokenService(IRefreshTokenRepository tokenRepository, IShareCodeDbContext dbContext, IUnitOfWork unitOfWork) : IRefreshTokenService
+public class RefreshTokenService(IRefreshTokenRepository tokenRepository, IUnitOfWork unitOfWork) : IRefreshTokenService
 {
-    
-    public async Task<Guid?> ValidateTokenIfPresent(Guid tokenIdentifier, Guid issuedFor)
+    public async Task<(Guid?, string?, string?, string?, string?)?> ValidateTokenIfPresent(Guid tokenIdentifier, Guid issuedFor)
     {
         var newExpiry = DateTime.UtcNow.AddDays(2);
-        await using var connection = dbContext.Database.GetDbConnection();
-        if (connection.State != System.Data.ConnectionState.Open)
-        {
-            await connection.OpenAsync();
-        }
-        await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT sharecode.validate_token(@token, @issuedFor, @newExpiry)";
-        command.CommandType = CommandType.Text;
-        command.Parameters.Add(new NpgsqlParameter("token", tokenIdentifier));
-        command.Parameters.Add(new NpgsqlParameter("issuedFor", issuedFor));
-        command.Parameters.Add(new NpgsqlParameter("newExpiry", newExpiry));
-        var result = await command.ExecuteScalarAsync();
-        if (connection.State == System.Data.ConnectionState.Open)
-        {
-            await connection.CloseAsync();
-        }
-        return result == DBNull.Value ? null : (Guid?)result;
+        using var dapperContext = tokenRepository.CreateDapperContext();
+        if(dapperContext == null)
+            throw new InfrastructureDownException("Failed to validate the token", $"Failed to create the dapper context for token validation");
+
+        var parameters = new DynamicParameters();
+        parameters.Add("token", tokenIdentifier);
+        parameters.Add("issuedfor", issuedFor);
+        parameters.Add("newexpiry", newExpiry);
+        var token = dapperContext.QueryFirstOrDefault<dynamic>("SELECT * FROM validate_token(@token, @issuedfor, @newexpiry)", parameters,
+            commandTimeout: 1000);
+        if (token == null)
+            return null;
+        
+        return (token?.TokenIdentifier, token?.EmailAddress, token?.FirstName, token?.MiddleName, token?.LastName);
     }
 
     public async Task<UserRefreshToken> GenerateRefreshTokenAsync(Guid issuedFor, bool saveWithUnitOfWork = false, Guid? tokenIdentifier = null, DateTime? expiry = null, CancellationToken token = default)

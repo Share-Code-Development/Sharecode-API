@@ -3,6 +3,7 @@ using MediatR;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Utilities;
+using Sharecode.Backend.Utilities.Extensions;
 using Sharecode.Backend.Utilities.KeyValue;
 
 namespace Sharecode.Backend.Application.Features.Refresh.Get;
@@ -11,6 +12,7 @@ public class GetRefreshTokenCommandHandler
     (
         IHttpClientContext context,
         IJwtClient jwtClient,
+        ITokenClient tokenClient,
         Namespace keyValueNamespace,
         IRefreshTokenService refreshTokenService
     )
@@ -20,7 +22,8 @@ public class GetRefreshTokenCommandHandler
     {
         var refreshTokenSecretKey = keyValueNamespace.Of(KeyVaultConstants.JwtRefreshTokenSecretKey)?.Value ?? string.Empty;
         var refreshTokenSecretEncryption = keyValueNamespace.Of(KeyVaultConstants.JwtRefreshTokenEncryptionKey)?.Value ?? string.Empty;
-        
+
+        var accessTokenEncryptionKey = keyValueNamespace.Of(KeyVaultConstants.JwtAccessTokenEncryptionKey)?.Value ?? string.Empty;        
         if (string.IsNullOrEmpty(refreshTokenSecretKey) ||
             string.IsNullOrEmpty(refreshTokenSecretKey))
             throw new UnauthorizedAccessException($"Failed to validate the authority of the user from server!");
@@ -48,21 +51,29 @@ public class GetRefreshTokenCommandHandler
             throw new UnauthorizedAccessException("Invalid token data provided!");
 
         var newToken = await refreshTokenService.ValidateTokenIfPresent(identifier, issuedFor);
-        if (!newToken.HasValue)
+        if (!newToken.HasValue || !newToken.HasValue)
         {
             throw new UnauthorizedAccessException("Failed to validate the identity of the token!");
         }
 
-        string? refreshToken = jwtClient.GenerateRefreshToken(issuedFor, refreshTokenSecretKey, refreshTokenSecretEncryption, ref newToken);
-        if (string.IsNullOrEmpty(refreshToken))
+        string fullName = newToken.Value.Item3.CombineNonNulls(" ", newToken.Value.Item4, newToken.Value.Item5);
+        string? emailAddress = newToken.Value.Item2;
+        Guid? refreshTokenIdentifier = newToken.Value.Item1;
+        if (string.IsNullOrEmpty(emailAddress) || string.IsNullOrEmpty(fullName) || !refreshTokenIdentifier.HasValue)
         {
-            throw new UnauthorizedAccessException("Failed to create a new identity with the token!");
+            throw new UnauthorizedAccessException("Failed to create a new identity from the token!");
         }
-        
+        var accessCredentials = tokenClient.Generate(issuedFor, emailAddress, fullName, ref refreshTokenIdentifier);
+        if (accessCredentials == null || accessCredentials.AccessToken == null ||
+            accessCredentials.RefreshToken == null)
+        {
+            throw new UnauthorizedAccessException("Failed to generate a new identity from the token!");
+        }
         return new GetRefreshTokenResponse()
         {
-            RefreshToken = refreshToken,
-            Expiry = DateTime.UtcNow.AddDays(2)
+            RefreshToken = accessCredentials.RefreshToken,
+            AccessToken = accessCredentials.AccessToken,
+            RefreshTokenExpiry = DateTime.UtcNow.AddDays(2)
         };
     }
 }

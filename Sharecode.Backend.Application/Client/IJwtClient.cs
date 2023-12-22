@@ -10,6 +10,7 @@ public interface IJwtClient
     string? GenerateRefreshToken(Guid userId, string secretKey, string encryptingKey, ref Guid? tokenIdentifier);
 
     string? GenerateAccessToken(User user, string secretKey, string encryptingKey, List<Claim>? additionalClaims = null);
+    string? GenerateAccessToken(Guid userId, string emailAddress, string fullName, string secretKey, string encryptingKey, List<Claim>? additionalClaims = null);
 
     IEnumerable<Claim> ValidateToken(string token, string secretKey, string encryptionKey, bool validateExpiry = false);
 }
