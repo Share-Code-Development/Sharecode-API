@@ -80,6 +80,7 @@ app.UseHttpMetrics(x =>
 {
     x.ReduceStatusCodeCardinality();
 });
+app.MapMetrics();
 app.UseAuthorization();
 app.MapControllers();
 
