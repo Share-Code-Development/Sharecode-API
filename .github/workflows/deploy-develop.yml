@@ -63,8 +63,8 @@ jobs:
         password: ${{ secrets.VM_PASSWORD }}
         script: |
           cd /home/share-code-develop
-          docker-compose pull sharecodeapi
-          docker-compose up -d
+          docker compose pull sharecodeapi
+          docker compose up -d
           
     - name: Clear the existing cache of the application
       run: |
