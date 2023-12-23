@@ -18,13 +18,21 @@ public class CommonController(IAppCacheClient cache, IHttpClientContext requestC
 {
 
     private static string _exceptionStrings = string.Empty;
-    
+
+    /// <summary>
+    /// This method is used to check the health of the application.
+    /// </summary>
+    /// <returns>Returns an ActionResult with the request details if the application is healthy.</returns>
     [HttpGet]
     public ActionResult Health()
     {
         return Ok(requestContext.RequestDetail);
     }
 
+    /// <summary>
+    /// Retrieves the JSON representation of all registered exceptions in the application and writes it to the response.
+    /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     [HttpGet("exceptions")]
     public async Task Exceptions()
     {

@@ -7,4 +7,9 @@ public class ListSnippetCommentsQuery : ListQuery, IAppRequest<ListSnippetCommen
 {
     public Guid SnippetId { get; set; }
     public Guid? ParentCommentId { get; set; }
+    
+    public override string DefaultOrderBy()
+    {
+        return string.Empty;
+    }
 }

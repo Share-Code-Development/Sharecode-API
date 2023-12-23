@@ -115,7 +115,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
         return Request.QueryString.ToString();
     }
 
-    protected async Task<string> ClearCacheAsync(CancellationToken token = default)
+    protected async Task<string> ClearCacheAsync(bool removeSelf = true, CancellationToken token = default)
     {
         
         var identityBuilder = new StringBuilder();
@@ -142,7 +142,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
                 await _cache.DeleteMatchingKeysAsync(matchingKeys, token).ConfigureAwait(false);
             }
 
-            if (AppRequestContext.HasCacheKey)
+            if (AppRequestContext.HasCacheKey && removeSelf)
             {
                 var primaryModule = AppRequestContext.CacheKeyBlock[0];
                 var identityBlock = AppRequestContext.CacheKeyBlock[1];

@@ -11,8 +11,16 @@ namespace Sharecode.Backend.Api.Controller;
 
 public class GatewayController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
 {
+    /// <summary>
+    /// Validates the gateway based on the provided information.
+    /// </summary>
+    /// <param name="gatewayType">The type of the gateway.</param>
+    /// <param name="id">The ID of the gateway.</param>
+    /// <param name="gatewayAppRequest">The request object containing the gateway information.</param>
+    /// <returns>The validation response for the gateway.</returns>
     [HttpPatch("{gatewayType}/{id}")]
-    public async Task<IActionResult> ValidateGateway([FromRoute] int gatewayType, [FromRoute] Guid id, [FromBody] ValidateGatewayAppRequest gatewayAppRequest)
+    public async Task<ActionResult<ValidateGatewayCommandResponse>> ValidateGateway([FromRoute] int gatewayType,
+        [FromRoute] Guid id, [FromBody] ValidateGatewayAppRequest gatewayAppRequest)
     {
         if (!Enum.IsDefined(typeof(GatewayRequestType), gatewayType))
         {

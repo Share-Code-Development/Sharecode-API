@@ -4,7 +4,7 @@ using Sharecode.Backend.Utilities.JsonExceptions;
 
 namespace Sharecode.Backend.Domain.Exceptions;
 
-[ExceptionDetail(errorCode: 34181, "The user doesn't have privilege to access the provided entity")] //No Access
+[ExceptionDetail(errorCode: 34181, "The user doesn't have privilege to access the requested entity(s)")] //No Access
 public class NoAccessException : AppException
 {
 

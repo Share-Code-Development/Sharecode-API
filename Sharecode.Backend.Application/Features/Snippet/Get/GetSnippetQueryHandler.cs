@@ -24,6 +24,10 @@ public class GetSnippetQueryHandler(IHttpClientContext clientContext, ISnippetSe
             return response;
         }
 
+        if (userId.HasValue && request.UpdateRecent)
+        {
+            clientContext.AddCacheKeyToInvalidate("user-snippets", userId.Value.ToString(), "recent");
+        }
         response.Blob = blob;
         return response;
     }

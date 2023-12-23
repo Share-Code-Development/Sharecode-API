@@ -1,14 +1,20 @@
 using System.Data;
+using System.Transactions;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using NpgsqlTypes;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Exceptions;
-using Sharecode.Backend.Application.Service;    
+using Sharecode.Backend.Application.Features.Users.GetMySnippets;
+using Sharecode.Backend.Application.Service;
+using Sharecode.Backend.Domain.Dto.Snippet;
 using Sharecode.Backend.Domain.Entity.Profile;
+using Sharecode.Backend.Domain.Entity.Snippet;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Db;
+using Sharecode.Backend.Infrastructure.Db.Extensions;
 using Sharecode.Backend.Infrastructure.Exceptions;
 using Sharecode.Backend.Utilities.SecurityClient;
 using CommandDefinition = Dapper.CommandDefinition;
@@ -103,9 +109,65 @@ public class UserService : IUserService
     {
         return await _userRepository.GetNotificationEnabledUserAsync(users, token);
     }
+
+    public async Task<List<MySnippetsDto>> ListUserSnippets(Guid userId, bool onlyOwned = false,
+        bool recentSnippets = true, int skip = 0, int take = 20,
+        string order = "ASC", string orderBy = "ModifiedAt", string searchQuery = null, CancellationToken cancellationToken = default)
+    {
+        using var connectionContext = _userRepository.CreateDapperContext();
+        if (connectionContext == null)
+            throw new InfrastructureDownException($"Failed to list the user's " + (recentSnippets ? "recent " : "") + "snippets", $"Failed to create the dapper context for user search");
+        List<MySnippetsDto> response = [];
+        long totalCount = 0;
+        connectionContext.Open();
+        try
+        {
+            var transaction = connectionContext.BeginTransaction();
+
+            var cursors = await ((NpgsqlConnection) connectionContext).QueryRefcursorsAsync((NpgsqlTransaction)transaction, UserSqlQueries.FunctionListUsersSnippet, CommandType.Text, new
+            {
+                userid = userId,
+                onlyowned = onlyOwned,
+                recent = recentSnippets,
+                skip = skip,
+                take = take,
+                order = order, 
+                orderby = orderBy,
+                searchquery = searchQuery
+            });
+
+            var snippets = await cursors.ReadAsync<MySnippetsDto>();
+            snippets = snippets.ToList();
+
+            var reactions = await cursors.ReadAsync<SnippetsReactionDto>();
+            reactions = reactions.ToList();
+            
+            foreach (var snippet in snippets)
+            {
+                var snippetReactionsList = reactions.Where(x => x.SnippetId == snippet.Id)
+                    .Select(x => new ReactionCommonDto()
+                    {
+                        Count = x.Count,
+                        ReactionType = x.ReactionType
+                    })
+                    .ToList();
+                snippet.Reactions = snippetReactionsList;
+                response.Add(snippet);
+            }
+        }
+        finally
+        {
+            connectionContext.Close();
+        }
+
+        return (response);
+    }
 }
 
 internal static class UserSqlQueries
 {
     public static string FunctionGetUsersToTag => $"SELECT \"EmailAddress\", \"FirstName\", \"MiddleName\", \"LastName\", \"Id\", \"ProfilePicture\" FROM get_users_to_tag(@searchquery::character varying, @skip, @take, @onlyenabled, @includedeleted)";
+
+    public static string FunctionListUsersSnippet =>
+        "SELECT * FROM list_user_snippets(@userid, @onlyowned, @recent, @skip, @take, @order, @orderby, @searchQuery);";
 }

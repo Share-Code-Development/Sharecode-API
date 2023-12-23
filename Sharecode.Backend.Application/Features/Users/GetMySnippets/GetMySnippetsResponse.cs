@@ -5,7 +5,10 @@ namespace Sharecode.Backend.Application.Features.Users.GetMySnippets;
 
 public class GetMySnippetsResponse : ListResponse<GetMySnippetsQuery, MySnippetsDto>
 {
-    
+    public GetMySnippetsResponse(ICollection<MySnippetsDto> entities)
+    {
+        AddRecords(entities);
+    }
 }
 
 public class MySnippetsDto
@@ -16,7 +19,8 @@ public class MySnippetsDto
     public bool Public { get; set; }
     public long View { get; set; }
     public long Copy { get; set; }
-    public long Comment { get; set; }
+    public long CommentCount { get; set; }
     public List<ReactionCommonDto> Reactions { get; set; } = [];
     public Guid? OwnerId { get; set; }
+    public long TotalCount { get; set; }
 }
