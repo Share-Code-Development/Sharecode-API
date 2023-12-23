@@ -2,9 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Utilities.RedisCache;
 
@@ -12,8 +10,7 @@ namespace Sharecode.Backend.Api.Controller;
 
 [Route("v1/api/[controller]")]
 [ApiController]
-public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientContext requestContext,
-        ILogger<AbstractBaseEndpoint> logger, IMediator mediator)
+public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator)
     : ControllerBase
 {
     private readonly IAppCacheClient _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -28,8 +25,9 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
     private const string NoStore = "no-store";
     private const string CacheStatusHeader = "X-Cache-Status";
     private const string SkippedDueToDirective = "Skipped due to directive";
+    private const string CachedResourceHeader = "response-cache";
 
-    protected async Task<TEntity?> ScanAsync<TEntity>(bool updateSlidingExpiry = false, CancellationToken token = default)
+    protected async Task<TEntity?> ScanAsync<TEntity>(bool updateSlidingExpiry = false, bool appendHeaderIfMatched = true,CancellationToken token = default)
     {
         try
         {
@@ -38,13 +36,19 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
             
             if (ShouldSkipCache(NoCache))
             {
-                Response.Headers.Add(CacheStatusHeader, SkippedDueToDirective);
+                Response.Headers.Append(CacheStatusHeader, SkippedDueToDirective);
                 return default;
             }
             
             string? cacheObject = await _cache.GetCacheAsync(AppRequestContext.CacheKey, updateSlidingExpiry, token);
             if (string.IsNullOrEmpty(cacheObject))
                 return default;
+
+            if (appendHeaderIfMatched)
+            {
+                Response.Headers.Append(CachedResourceHeader, "true");
+                Response.Headers.AccessControlExposeHeaders = CachedResourceHeader;
+            }
             
             return JsonConvert.DeserializeObject<TEntity>(cacheObject, Sharecode.JsonSerializerSettings);
         }
@@ -64,7 +68,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
             
             if (ShouldSkipCache(NoStore))
             {
-                Response.Headers.Add(CacheStatusHeader, SkippedDueToDirective);
+                Response.Headers.Append(CacheStatusHeader, SkippedDueToDirective);
                 return;
             }
 

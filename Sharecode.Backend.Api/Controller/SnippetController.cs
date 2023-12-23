@@ -47,6 +47,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// </summary>
     /// <returns>Returns the result of creating a new snippet as an ActionResult</returns>
     [HttpPost("public", Name = "Create a new snippet publicly")]
+    [DisableRequestSizeLimit]
     public async Task<ActionResult<CreateSnippetCommentResponse>> CreateSnippet()
     {
         return await CreateInternal();
@@ -63,6 +64,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// </remarks>
     [HttpPost(Name = "Create a new snippet securely")]
     [Authorize]
+    [DisableRequestSizeLimit]
     public async Task<ActionResult<CreateSnippetCommentResponse>> CreateSnippetSecure()
     {
         return await CreateInternal();
@@ -74,7 +76,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// <param name="snippetId">The unique identifier of the snippet.</param>
     /// <returns>An IActionResult representing the result of the operation.</returns>
     [HttpGet("{snippetId}/comments", Name = "Get the comments of snippets")]
-    public async Task<IActionResult> GetSnippetComments(Guid snippetId)
+    public async Task<IActionResult> ListSnippetComments(Guid snippetId)
     {
         FrameCacheKey("snippet-comment", snippetId.ToString());
         return Ok();
@@ -92,7 +94,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     {
         command.SnippetId = snippetId;
         var response = await mediator.Send(command);
-        return CreatedAtAction("GetSnippetComments", new { snippetId = response.Id }, response);
+        return CreatedAtAction("ListSnippetComments", new { snippetId = response.Id }, response);
     }
 
     /// <summary>

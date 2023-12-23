@@ -11,6 +11,7 @@ public class LocalClientConfiguration
 {
     public string FilePath { get; set; }
     public string FileUrl { get; set; }
+    public bool RevokeExecutePermission { get; set; }
 }
 
 public class OracleOciConfiguration

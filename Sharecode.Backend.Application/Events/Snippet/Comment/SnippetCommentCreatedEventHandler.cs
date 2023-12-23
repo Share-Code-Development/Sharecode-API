@@ -1,14 +1,17 @@
+using System.Net;
 using System.Text;
 using MediatR;
+using Microsoft.Extensions.Options;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Events.Snippet.Comment;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.Configuration;
 using Sharecode.Backend.Utilities.Email;
 using Sharecode.Backend.Utilities.Extensions;
 
 namespace Sharecode.Backend.Application.Events.Snippet.Comment;
 
-public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippetCommentRepository, IUserService service, IEmailClient emailClient) : INotificationHandler<SnippetCommentCreateEvent>
+public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippetCommentRepository, IUserService service, IEmailClient emailClient, IOptions<FrontendConfiguration> frontEndConfiguration) : INotificationHandler<SnippetCommentCreateEvent>
 {
     public async Task Handle(SnippetCommentCreateEvent notification, CancellationToken cancellationToken)
     {
@@ -32,7 +35,15 @@ public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippet
         {
             targets.AddTarget(user.EmailAddress, user.FullName);
         }
-        
+
+        //var stringUrl = GenerateCommentUrl(frontEndConfiguration.Value.Base, snippetId, snippetComment.Id);
+        var commentUrl = frontEndConfiguration.Value.CreateUrlFromBase(
+            new Dictionary<string, string?>()
+            {
+                { "commentId", snippetComment.Id.ToString() }
+            },
+            "snippets", snippetId.ToString()
+        );
         await emailClient.SendTemplateMailAsync(
             EmailTemplateKeys.MentionedInComment,
             targets,
@@ -40,7 +51,7 @@ public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippet
             {
                 { EmailPlaceholderKeys.SnippetCommentMessageAuthorKey, snippetComment.User.FullName },
                 { EmailPlaceholderKeys.SnippetCommentMessageTextKey, ReplaceMentionsInComment(snippetComment.Text, users)},
-                { EmailPlaceholderKeys.SnippetCommentMessageUrl, string.Empty } //TODO
+                { EmailPlaceholderKeys.SnippetCommentMessageUrl, commentUrl } //TODO
             },
             subjectPlaceholders: new Dictionary<string, string>
             {
@@ -57,5 +68,15 @@ public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippet
             replacedText.Replace($"<@{user.Id}>", $"<span class=\"username-mention\">@{user.FullName}</span>");
         }
         return replacedText.ToString();
+    }
+    
+    private string GenerateCommentUrl(string baseUrl, Guid snippetId, Guid commentId)
+    {
+        // Encode parameters to ensure URL is valid and safe
+        string safeSnippetId = WebUtility.UrlEncode(snippetId.ToString());
+        string safeCommentId = WebUtility.UrlEncode(commentId.ToString());
+
+        // Use string interpolation to insert these safe values into the URL
+        return $"{baseUrl}/snippets/{safeSnippetId}?commentId={safeCommentId}";
     }
 }

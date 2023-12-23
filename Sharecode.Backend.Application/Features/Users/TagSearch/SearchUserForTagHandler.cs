@@ -9,11 +9,10 @@ public class SearchUserForTagHandler(IUserService userService, IHttpClientContex
     public async Task<SearchUserForTagResponse> Handle(SearchUsersForTagCommand request, CancellationToken cancellationToken)
     {
         bool includeDeleted = false;
-        var usersToTagAsync = await userService.GetUsersToTagAsync(request.SearchQuery, request.Take, request.Skip, includeDeleted,
+        var usersToTagAsync = await userService.GetUsersToTagAsync(request.SearchQuery ?? string.Empty, request.Take, request.Skip, includeDeleted,
             request.ShouldEnableTagging, cancellationToken);
         
         return (SearchUserForTagResponse) new SearchUserForTagResponse(usersToTagAsync)
-                .SetQuery(request)
-            ;
+                .SetQuery(request);
     }
 }

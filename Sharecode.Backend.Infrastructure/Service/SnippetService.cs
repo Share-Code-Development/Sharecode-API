@@ -34,12 +34,17 @@ public class SnippetService(ISnippetRepository snippetRepository, ILogger logger
             var lineCommentData = cursor.Read<SnippetLineCommentDto>().ToList();
             var reactionsData = cursor.Read<ReactionCommonDto>().ToList();
             var accessControlsData = cursor.Read<SnippetAccessControlDto>().ToList();
-        
+            List<string> selfReactions = [];
+            if (requestedUser.HasValue)
+            {
+                selfReactions = cursor.Read<string>().ToList();
+            }
             
             snippetDto.CommentCount = ((int) totalCommentCountData.count);
             snippetDto.AccessControl = accessControlsData;
             snippetDto.Reactions = reactionsData;
             snippetDto.LineComments = lineCommentData;
+            snippetDto.SelfReactions = selfReactions;
             return snippetDto;
         }
         catch (Exception e)

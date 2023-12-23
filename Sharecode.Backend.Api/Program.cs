@@ -7,6 +7,12 @@ using Sharecode.Backend.Api.Middleware;
 using Sharecode.Backend.Utilities.KeyValue;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.UseKestrel(x =>
+{
+    x.Limits.MaxRequestBodySize = long.MaxValue;
+});
+
 builder.Host.UseSerilog((ctx, conf) =>
 {
     conf.ReadFrom.Configuration(ctx.Configuration);

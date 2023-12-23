@@ -19,4 +19,5 @@ public class SnippetDto
     public string? Blob { get; set; }
     public List<SnippetAccessControlDto> AccessControl = [];
     public List<SnippetLineCommentDto> LineComments = [];
+    public List<string> SelfReactions = [];
 }
