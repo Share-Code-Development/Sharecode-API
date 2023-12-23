@@ -124,8 +124,31 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
 
         if (string.IsNullOrEmpty(command.PreviewCode))
         {
-            string preview;
-            preview = command.Content.Length > 1200 ? Encoding.Default.GetString(command.Content, 0, 1200) : Encoding.Default.GetString(command.Content);
+            string preview = "";
+            int maxCharCount = 500;  // max number of characters
+            int bytesRead = 0; // keeping track of number of bytes read
+            int maxBytes = maxCharCount * Encoding.Default.GetMaxByteCount(1); 
+            int bytesToReadEachTime = Encoding.Default.GetMaxByteCount(1);
+    
+            while (bytesRead < maxBytes && bytesRead < command.Content.Length)
+            {
+                int bytesToReadThisTime = Math.Min(bytesToReadEachTime, command.Content.Length - bytesRead);
+                string currentString = Encoding.Default.GetString(command.Content, bytesRead, bytesToReadThisTime);
+
+                if (preview.Length + currentString.Length > maxCharCount)
+                {
+                    currentString = currentString.Substring(0, maxCharCount - preview.Length);
+                }
+        
+                preview += currentString;
+                bytesRead += bytesToReadThisTime;
+
+                if (preview.Length >= maxCharCount)
+                {
+                    break;
+                }
+            }
+
             command.PreviewCode = preview;
         }
         
