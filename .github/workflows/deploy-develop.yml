@@ -53,10 +53,8 @@ jobs:
         username: ${{ secrets.VM_USERNAME }}
         password: ${{ secrets.VM_PASSWORD }}
         script: |
-          docker pull alenalex/sharecode-api:master
-          docker stop sharecode-backend-api || true
-          docker rm sharecode-backend-api || true
-          docker run -d --name sharecode-backend-api -e ${{ secrets.DEV_ENV }} -v ${{ secrets.DEV_CONFIGURATION }}:/app/appsettings.json -v ${{ secrets.STORE}}:/app/snippet-store/ -p ${{ secrets.DEV_NETWORK }}:80 alenalex/sharecode-api:master --restart=always
+          docker-compose pull sharecodeapi
+          docker-compose up -d sharecodeapi
           
     - name: Clear the existing cache of the application
       run: |

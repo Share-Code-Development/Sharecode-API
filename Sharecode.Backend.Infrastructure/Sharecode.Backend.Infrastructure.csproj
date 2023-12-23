@@ -26,6 +26,7 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+      <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.0" />
       <PackageReference Include="Quartz" Version="3.8.0" />
       <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
     </ItemGroup>

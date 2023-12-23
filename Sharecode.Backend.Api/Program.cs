@@ -1,5 +1,7 @@
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.Extensions.Primitives;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 using Quartz;
 using Serilog;
 using Sharecode.Backend.Api.Extensions;
@@ -7,10 +9,13 @@ using Sharecode.Backend.Api.Middleware;
 using Sharecode.Backend.Utilities.KeyValue;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 builder.Host.UseSerilog((ctx, conf) =>
 {
     conf.ReadFrom.Configuration(ctx.Configuration);
 });
+
 
 builder.Services.BindConfigurationEntries(builder.Configuration);
 //Adds KeyValueClient  Singleton
@@ -44,6 +49,7 @@ builder.Services.AddSwaggerGen(c =>
     // Additional Swagger configuration if needed
 });
 builder.Services.BuildAuthenticationSchema(builder.Configuration, kvNameSpace);
+builder.Services.UseHttpClientMetrics();
 //---------------------------------------------------------------------------------------------------------------------
 var app = builder.Build();
 
@@ -64,6 +70,10 @@ app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseRouting();
+app.UseHttpMetrics(x =>
+{
+    x.ReduceStatusCodeCardinality();
+});
 app.UseAuthorization();
 app.MapControllers();
 

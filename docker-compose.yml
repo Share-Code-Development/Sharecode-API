@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  sharecodeapi:
+    image: alenalex/sharecode-api:master
+    restart: always
+    environment:
+      - ASPNETCORE_URLS=http://*:80
+    volumes:
+      - /home/share-code-develop/appsettings.json:/app/appsettings.json
+      - /home/share-code-develop/snippet-store/:/app/snippet-store/
+    ports:
+      - "45012:80"
