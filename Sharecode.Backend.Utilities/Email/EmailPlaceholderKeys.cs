@@ -23,6 +23,7 @@ public static class EmailPlaceholderKeys
     public static string SnippetCommentMessageTextKey => "MESSAGE";
     public static string SnippetCommentMessageAuthorKey => "COMMENT_OWNER";
     public static string SnippetCommentMessageUrl => "COMMENT_CONTENT_URL";
+    public static string SnippetCommentChildMessageTextKey => "CHILD_MESSAGE";
 
     #endregion
 

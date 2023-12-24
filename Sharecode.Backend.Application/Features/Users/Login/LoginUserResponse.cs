@@ -13,8 +13,8 @@ public class LoginUserResponse : UserDto
 
     public LoginUserResponse() { }
 
-    public LoginUserResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, object> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture ,string? accessToken, string? refreshToken)
-        : base(userId, firstName, middleName, lastName, emailAddress, emailVerified, metadata, visibility, settings, created, profilePicture)
+    public LoginUserResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, object> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture ,string? accessToken, string? refreshToken, HashSet<Permission> permissions)
+        : base(userId, firstName, middleName, lastName, emailAddress, emailVerified, metadata, visibility, settings, created, profilePicture, permissions)
     {
         AccessToken = accessToken;
         RefreshToken = refreshToken;
@@ -35,7 +35,8 @@ public class LoginUserResponse : UserDto
             user.CreatedAt,
             user.ProfilePicture,
             credentials?.AccessToken,
-            credentials?.RefreshToken
+            credentials?.RefreshToken,
+            user.Permissions
         );
     }
 }

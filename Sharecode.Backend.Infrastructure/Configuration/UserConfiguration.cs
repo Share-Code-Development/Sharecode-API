@@ -11,13 +11,27 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        //Create unique indexes
+        
+        #region Index
+
         builder.HasIndex(x => x.EmailAddress).IsUnique();
 
         builder.HasIndex(x => x.NormalizedFullName)
             .HasMethod("btree");
         
-        //Configure the meta data column to be a JSON
+        builder.HasIndex(x => x.Permissions)
+            .HasMethod("GIN");
+        
+        // Partial index for IsDeleted
+        builder.HasIndex(p => p.IsDeleted)
+            .HasFilter("\"IsDeleted\" = true");
+
+        builder.HasIndex(p => p.EmailVerified)
+            .HasFilter("\"EmailVerified\" = true");
+
+        #endregion
+        
+        #region Json
 
         builder.Property(x => x.Metadata)
             .HasColumnType("jsonb")
@@ -25,11 +39,25 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.ToTable(x => x.HasCheckConstraint("CK_User_Ensure_Json", "\"Metadata\"::jsonb IS NOT NULL"));
 
+        builder.Property(x => x.Permissions)
+            .HasColumnType("jsonb")
+            .HasJsonConversion();
+        
+        builder.ToTable(x => x.HasCheckConstraint("CK_User_Ensure_Perms_Json", "\"Permissions\"::jsonb IS NOT NULL"));
+
+        #endregion
+
+        #region ForiegnKey
+
         builder.HasOne(user => user.AccountSetting)
             .WithOne(accountSettings => accountSettings.User)
             .HasForeignKey<AccountSetting>(x => x.UserId)
             .IsRequired();
-        
+
+        #endregion
+
+        #region Constraints
+
         //Length Setting
         builder.Property(x => x.EmailAddress)
             .HasMaxLength(100);
@@ -54,13 +82,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.IsDeleted)
             .HasDefaultValue(false);
-        
-        // Partial index for IsDeleted
-        builder.HasIndex(p => p.IsDeleted)
-            .HasFilter("\"IsDeleted\" = true");
 
-        builder.HasIndex(p => p.EmailVerified)
-            .HasFilter("\"EmailVerified\" = true");
+        #endregion
 
     }
 }

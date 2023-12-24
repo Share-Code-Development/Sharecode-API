@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Sharecode.Backend.Application.Client;
@@ -94,6 +95,26 @@ public class LocalFileClient(IOptions<FileClientConfiguration> fileClientConfigu
         }
 
         return await File.ReadAllTextAsync(consolidatedFileName, token);
+    }
+
+    public async Task<byte[]> GetChecksum(string fileName)
+    {
+        var consolidatedFileName = GetFullPath(fileName);
+        if (!File.Exists(consolidatedFileName))
+        {
+            throw new FileNotFoundException($"The requested file is not found");
+        }
+
+        var bytes = await File.ReadAllBytesAsync(consolidatedFileName).ConfigureAwait(false);
+        return await GetChecksum(bytes);
+    }
+
+    public async Task<byte[]> GetChecksum(byte[] file)
+    {
+        using (var sha256 = SHA256.Create())
+        {
+            return sha256.ComputeHash(file);
+        }
     }
 
     private string GetFullPath(string fileName)

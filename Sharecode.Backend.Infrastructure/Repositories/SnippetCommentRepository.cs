@@ -4,6 +4,7 @@ using Sharecode.Backend.Domain.Entity.Snippet;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Base;
 using Sharecode.Backend.Infrastructure.Db;
+using Sharecode.Backend.Infrastructure.Db.Extensions;
 
 namespace Sharecode.Backend.Infrastructure.Repositories;
 
@@ -45,5 +46,23 @@ public class SnippetCommentRepository : BaseRepository<Domain.Entity.Snippet.Sni
                 .Include(x => x.Snippet)
                 .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, cancellationToken: token);
         }
+    }
+
+    public async Task<SnippetComment?> GetChildCommentWithParent(Guid commentId, bool track = true, bool simplify = true,CancellationToken token = default)
+    {
+        if(simplify)
+            return await Table
+                .SetTracking(track)
+                .Where(x => x.Id == commentId)
+                .FirstOrDefaultAsync(cancellationToken: token);
+        
+        return await Table
+            .SetTracking(track)
+            .Include(x => x.Snippet)
+            .ThenInclude(x => x.Owner)
+            .Include(x => x.User)
+            .Include(x => x.ParentComment)
+            .Where(x => x.Id == commentId)
+            .FirstOrDefaultAsync(cancellationToken: token);
     }
 }

@@ -25,7 +25,7 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
     [Authorize]
     public async Task<ActionResult<GetUserResponse>> GetUser(Guid id, [FromQuery] bool includeSettings = false)
     {
-        FrameCacheKey("user",id.ToString(), GetQuery());
+        FrameCacheKey(CacheModules.User,id.ToString(), GetQuery());
         var cachedResponse = await ScanAsync<GetUserResponse>(true);
         if (cachedResponse != null)
         {
@@ -48,7 +48,7 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
     [Authorize]
     public async Task<ActionResult<GetUserResponse>> GetUser(string emailAddress, [FromQuery] bool includeSettings = false)
     {
-        FrameCacheKey("user",emailAddress, GetQuery());
+        FrameCacheKey(CacheModules.User,emailAddress, GetQuery());
         var cachedResponse = await ScanAsync<GetUserResponse>(true);
         if (cachedResponse != null)
         {
@@ -70,7 +70,7 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
     public async Task<ActionResult<SearchUserForTagResponse>> GetUsersToTag([FromQuery] SearchUsersForTagCommand command)
     {
         //TODO Add admin role to the cache
-        FrameCacheKey("user", "search", GetQuery());
+        FrameCacheKey(CacheModules.User, "search", GetQuery());
         var response = await ScanAsync<SearchUserForTagResponse>();
         if (response != null)
         {
@@ -100,9 +100,9 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
             throw new NoAccessException(userInIdentity, $"recent-snippets of {userId.ToString()}", typeof(Domain.Entity.Snippet.Snippet));
 
         if (query.RecentSnippets)
-            FrameCacheKey("user-snippets", userId.ToString(), "recent");
+            FrameCacheKey(CacheModules.UserSnippet, userId.ToString(), "recent");
         else
-            FrameCacheKey("user-snippets", userId.ToString(), GetQuery());
+            FrameCacheKey(CacheModules.UserSnippet, userId.ToString(), GetQuery());
         var cacheResponse = await ScanAsync<GetMySnippetsResponse>();
         if (cacheResponse != null)
             return Ok(cacheResponse);

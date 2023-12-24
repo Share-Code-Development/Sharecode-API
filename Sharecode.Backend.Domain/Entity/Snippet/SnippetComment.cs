@@ -14,6 +14,9 @@ public class SnippetComment : Comment
 
     public override void RaiseCreatedEvent()
     {
-        RaiseDomainEvent(new SnippetCommentCreateEvent(Id, SnippetId, UserId));
+        if(ParentCommentId.HasValue)
+            RaiseDomainEvent(new SnippetReplyCommentCreateEvent(Id, SnippetId, UserId, ParentCommentId.Value));
+        else
+            RaiseDomainEvent(new SnippetCommentCreateEvent(Id, SnippetId, UserId));
     }
 }

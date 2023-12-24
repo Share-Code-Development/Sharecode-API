@@ -1,8 +1,6 @@
-using System.Net;
 using System.Text;
 using MediatR;
 using Microsoft.Extensions.Options;
-using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Events.Snippet.Comment;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Utilities.Configuration;
@@ -11,7 +9,7 @@ using Sharecode.Backend.Utilities.Extensions;
 
 namespace Sharecode.Backend.Application.Events.Snippet.Comment;
 
-public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippetCommentRepository, IUserService service, IEmailClient emailClient, IOptions<FrontendConfiguration> frontEndConfiguration) : INotificationHandler<SnippetCommentCreateEvent>
+public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippetCommentRepository, IUserRepository userRepository, IEmailClient emailClient, IOptions<FrontendConfiguration> frontEndConfiguration) : INotificationHandler<SnippetCommentCreateEvent>
 {
     public async Task Handle(SnippetCommentCreateEvent notification, CancellationToken cancellationToken)
     {
@@ -25,9 +23,15 @@ public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippet
         if(!mentionableUsers.Any())
             return;
 
+        var usersInTheMention = await userRepository.GetUsersForMentionWithNotificationSettings(mentionableUsers, cancellationToken);
+
         //Get all the users who have enabled notifications from the above list
-        var users = await service.GetNotificationEnabledUsersAsync(mentionableUsers, cancellationToken);
-        if(users.Any())
+        var users = usersInTheMention.Where(x => x.AccountSetting.EnableNotificationsForMentions).ToList();
+        if(users.Count != 0)
+            return;
+
+        var formattedComment = ReplaceMentionsInComment(snippetComment.Text, usersInTheMention);
+        if(string.IsNullOrEmpty(formattedComment))
             return;
         
         var targets = new EmailTargets();
@@ -50,7 +54,7 @@ public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippet
             placeholders: new Dictionary<string, string>
             {
                 { EmailPlaceholderKeys.SnippetCommentMessageAuthorKey, snippetComment.User.FullName },
-                { EmailPlaceholderKeys.SnippetCommentMessageTextKey, ReplaceMentionsInComment(snippetComment.Text, users)},
+                { EmailPlaceholderKeys.SnippetCommentMessageTextKey, formattedComment},
                 { EmailPlaceholderKeys.SnippetCommentMessageUrl, commentUrl } //TODO
             },
             subjectPlaceholders: new Dictionary<string, string>
@@ -62,21 +66,14 @@ public class SnippetCommentCreatedEventHandler(ISnippetCommentRepository snippet
 
     private string ReplaceMentionsInComment(string messageText, List<Domain.Entity.Profile.User> users)
     {
+        if (string.IsNullOrEmpty(messageText))
+            return string.Empty;
+        
         StringBuilder replacedText = new StringBuilder(messageText);
         foreach (var user in users)
         {
             replacedText.Replace($"<@{user.Id}>", $"<span class=\"username-mention\">@{user.FullName}</span>");
         }
         return replacedText.ToString();
-    }
-    
-    private string GenerateCommentUrl(string baseUrl, Guid snippetId, Guid commentId)
-    {
-        // Encode parameters to ensure URL is valid and safe
-        string safeSnippetId = WebUtility.UrlEncode(snippetId.ToString());
-        string safeCommentId = WebUtility.UrlEncode(commentId.ToString());
-
-        // Use string interpolation to insert these safe values into the URL
-        return $"{baseUrl}/snippets/{safeSnippetId}?commentId={safeCommentId}";
     }
 }

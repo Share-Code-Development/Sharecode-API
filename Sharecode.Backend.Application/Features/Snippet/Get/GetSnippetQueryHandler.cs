@@ -5,6 +5,7 @@ using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Dto.Snippet;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.RedisCache;
 
 namespace Sharecode.Backend.Application.Features.Snippet.Get;
 
@@ -26,7 +27,7 @@ public class GetSnippetQueryHandler(IHttpClientContext clientContext, ISnippetSe
 
         if (userId.HasValue && request.UpdateRecent)
         {
-            clientContext.AddCacheKeyToInvalidate("user-snippets", userId.Value.ToString(), "recent");
+            clientContext.AddCacheKeyToInvalidate(CacheModules.UserSnippet, userId.Value.ToString(), "recent");
         }
         response.Blob = blob;
         return response;

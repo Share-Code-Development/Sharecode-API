@@ -11,12 +11,10 @@ public interface IUserRepository : IBaseRepository<User>
 {
     void Register(User user);
     Task<bool> IsEmailAddressUnique(string emailAddress, CancellationToken token = default);
-
     Task<User?> GetUserByIdIncludingAccountSettings(Guid userId, bool includeAccountSettings = false , bool trackUser = false,CancellationToken token = default);
-    
     Task<User?> GetUserByEmailIncludingAccountSettings(string emailAddress, bool includeAccountSettings = false,
         bool trackUser = false, CancellationToken token = default);
-
-    Task<List<User>> GetNotificationEnabledUserAsync(HashSet<Guid> userIds, CancellationToken token = default);
+    Task<List<User>> GetUsersForMentionWithNotificationSettings(HashSet<Guid> userIds, CancellationToken token = default);
+    Task<List<User>> GetUsersWithEnabledNotification(HashSet<Guid> userIds, CancellationToken token = default);
 
 }

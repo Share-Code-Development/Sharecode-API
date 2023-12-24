@@ -7,6 +7,7 @@ using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Entity.Snippet;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Utilities.MetaKeys;
+using Sharecode.Backend.Utilities.RedisCache;
 
 namespace Sharecode.Backend.Application.Features.Snippet.Create;
 
@@ -51,7 +52,8 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
         }
         
         snippet.Tags.Add(request.Language);
-
+        var checksum = await fileClient.GetChecksum(request.Content);
+        snippet.CheckSum = checksum;
         await snippetRepository.AddAsync(snippet, cancellationToken);
         await unitOfWork.CommitAsync(cancellationToken);
         var blob = await fileClient.UploadFileAsync(snippet.Id.ToString(), request.Content, false, cancellationToken);
@@ -61,7 +63,7 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
 
         //For My Snippets
         if(userIdentifier.HasValue)
-            context.AddCacheKeyToInvalidate("user-snippets", userIdentifier.Value.ToString());
+            context.AddCacheKeyToInvalidate(CacheModules.UserSnippet, userIdentifier.Value.ToString());
         
         return new SnippetCreatedResponse()
         {

@@ -14,8 +14,9 @@ public interface IHttpClientContext
     bool HasCacheKey { get;  }
     string[] CacheKeyBlock { get; set; }
     Dictionary<string, HashSet<string>> CacheInvalidRecords { get; }
-    bool HasPermission(Permission key);
     Task<bool> HasPermissionAsync(Permission key, CancellationToken token = default);
+    Task<bool> HasPermissionAnyAsync(CancellationToken token = default, params Permission[] key);
+    Task<bool> HasPermissionAllAsync(CancellationToken token = default, params Permission[] key);
     void AddCacheKeyToInvalidate(string module, params string[] keys);
     bool TryGetHeader(string key, [MaybeNullWhen(false)] out string headerValue);
     IRequestDetail RequestDetail { get; }

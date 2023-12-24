@@ -9,4 +9,10 @@ public interface IFileClient
     Task<bool> DeleteFileAsync(string fileName, CancellationToken token = default);
     
     Task<string?> GetFileAsStringAsync(string fileName, CancellationToken token = default);
+    Task<byte[]> GetChecksum(string fileName);
+    Task<byte[]> GetChecksum(byte[] file);
+    bool CompareChecksums(byte[] storedChecksum, byte[] calculatedChecksum)
+    {
+        return storedChecksum.SequenceEqual(calculatedChecksum);
+    }
 }

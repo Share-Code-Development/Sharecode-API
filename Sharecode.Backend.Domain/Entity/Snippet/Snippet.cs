@@ -21,14 +21,13 @@ public class Snippet : AggregateRootWithMetadata
     public bool Public { get; set; } = false;
     public long Views { get; set; }
     public long Copy { get; set; }
-    
     public User? Owner { get; set; }
     public Guid? OwnerId { get; set; }
-
+    public byte[] CheckSum { get; set; }
     public List<SnippetReactions> Reactions { get; private set; } = [];
     public List<SnippetComment> Comments { get; private set; } = [];
     public List<SnippetAccessControl> AccessControls { get; private set; } = [];
-
+    
     public void CreateTags(List<string> tags)
     {
         Tags = tags;

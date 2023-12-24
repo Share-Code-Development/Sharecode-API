@@ -9,8 +9,8 @@ public class UserCreatedResponse : UserDto
 {
     public UserCreatedResponse() { }
 
-    public UserCreatedResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, object> metadata, AccountVisibility visibility, AccountSettingDto settings, DateTime created, string? profilePicture)
-        : base(userId, firstName, middleName, lastName, emailAddress, emailVerified, metadata, visibility, settings, created, profilePicture) { }
+    public UserCreatedResponse(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, object> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture, HashSet<Permission> permissions)
+        : base(userId, firstName, middleName, lastName, emailAddress, emailVerified, metadata, visibility, settings, created, profilePicture, permissions) { }
 
     public new static UserCreatedResponse From(User user)
     {
@@ -25,7 +25,8 @@ public class UserCreatedResponse : UserDto
             user.Visibility,
             AccountSettingDto.From(user),
             user.CreatedAt,
-            user.ProfilePicture
+            user.ProfilePicture,
+            user.Permissions
         );
     }
 }

@@ -63,6 +63,8 @@ public class User : AggregateRootWithMetadata
     public DateTime? LastUnsuccessfulLoginAttempt { get; set; } = null;
     [Required]
     public int FailedAttemptCount { get; set; }
+
+    public HashSet<Permission> Permissions { get; set; } = [];
     
     public override void RaiseCreatedEvent()
     {
@@ -164,5 +166,34 @@ public class User : AggregateRootWithMetadata
         LastUnsuccessfulLoginAttempt = null;
         FailedAttemptCount = 0;
         AccountLocked = false;
+    }
+
+    public void SetUserPermissions()
+    {
+        foreach (var userPermission in PermissionRepository.GetUserPermissions())
+        {
+            Permissions.Add(userPermission);
+        }
+    }
+    
+    public void SetAdminPermissions()
+    {
+        foreach (var permission in PermissionRepository.GetAll())
+        {
+            Permissions.Add(permission);
+        }
+    }
+
+    public void AddPermission(Permission permission)
+    {
+        Permissions.Add(permission);
+    }
+
+    public void SetPermissions(HashSet<Permission> permissions)
+    {
+        foreach (var permission in permissions)
+        {
+            Permissions.Add(permission);
+        }
     }
 }

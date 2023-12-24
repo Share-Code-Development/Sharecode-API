@@ -36,6 +36,7 @@ internal class CreateUserCommandHandler(IUnitOfWork unitOfWork, IUserRepository 
             Id = Guid.NewGuid()
         };
         user.SetMeta(MetaKeys.UserKeys.RecentlyVisitedSnippets, new List<Guid>());
+        user.SetUserPermissions();
         userRepository.Register(user);
         await unitOfWork.CommitAsync(cancellationToken);
         return UserCreatedResponse.From(user);

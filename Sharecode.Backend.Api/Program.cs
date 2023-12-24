@@ -11,6 +11,7 @@ using Sharecode.Backend.Utilities.KeyValue;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Sharecode.Backend.Api.Sharecode.RegisterConverter();
 
 builder.Host.UseSerilog((ctx, conf) =>
 {

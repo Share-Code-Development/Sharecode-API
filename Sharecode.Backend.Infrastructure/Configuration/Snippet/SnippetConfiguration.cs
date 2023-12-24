@@ -40,5 +40,9 @@ public class SnippetConfiguration : IEntityTypeConfiguration<Domain.Entity.Snipp
 
         builder.Property(x => x.PreviewCode)
             .HasMaxLength(500);
+
+        builder.Property(x => x.CheckSum)
+            .HasColumnType("bytea")
+            .IsRequired();
     }
 }

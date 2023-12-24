@@ -77,6 +77,7 @@ public class LoginUserCommandHandler(IUserService userService, IHttpClientContex
             user = await RegisterFromGoogle(payload, token);
 
             user.SetMeta(MetaKeys.UserKeys.RecentlyVisitedSnippets, new List<Guid>());
+            user.SetUserPermissions();
         }
         else
         {

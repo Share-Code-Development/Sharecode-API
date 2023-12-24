@@ -13,7 +13,6 @@ public interface IUserService
 
     Task<IReadOnlyList<User>> GetUsersToTagAsync(string searchQuery, int take, int skip, bool includeDeleted = false,
         bool shouldEnableTagging = true, CancellationToken token = default);
-    Task<List<User>> GetNotificationEnabledUsersAsync(HashSet<Guid> users, CancellationToken token = default);
 
     Task<List<MySnippetsDto>> ListUserSnippets(Guid userId, bool onlyOwned = false, bool recentSnippets = true,
         int skip = 0, int take = 20, string order = "ASC", string orderBy = "ModifiedAt", string searchQuery = null, 

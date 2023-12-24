@@ -14,11 +14,6 @@ public class GetUserQueryByIdHandler(IUserRepository repository, IHttpClientCont
     public async Task<GetUserResponse> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
         var requesterId = await context.GetUserIdentifierAsync();
-        if (request.UserId != requesterId)
-        {
-            request = new GetUserByIdQuery(request.UserId, false);
-            logger.Information($"Disabled include settings since the request is coming from {requesterId} for {request.UserId}");
-        }
         
         if (context.IsApiRequest)
         {
@@ -28,9 +23,15 @@ public class GetUserQueryByIdHandler(IUserRepository repository, IHttpClientCont
         {
             if (request.UserId != requesterId)
             {
-                var hasPermission = await context.HasPermissionAsync(Permissions.AccessProfileOthers, cancellationToken);
+                var hasPermission = await context.HasPermissionAnyAsync(cancellationToken, Permissions.ViewUserOtherAdmin, Permissions.ViewUserOtherMinimal);
                 if (!hasPermission)
                     throw new NoAccessException(requesterId ?? Guid.Empty, request.UserId, typeof(User));
+
+                if (request.IncludeSettings && !await context.HasPermissionAsync(Permissions.ViewUserOtherAdmin, cancellationToken))
+                {
+                    request = new GetUserByIdQuery(request.UserId, false);
+                    logger.Information($"Disabled include settings since the request is coming from {requesterId} for {request.UserId}");
+                }
             }
         }
         var user = await repository.GetUserByIdIncludingAccountSettings(request.UserId, request.IncludeSettings, token: cancellationToken);
@@ -64,7 +65,7 @@ public class GetUserQueryByEmailHandler(IUserRepository repository, IHttpClientC
         {
             if (request.EmailAddress != requesterEmailAddress)
             {
-                var hasPermission = await context.HasPermissionAsync(Permissions.AccessProfileOthers, cancellationToken);
+                var hasPermission = await context.HasPermissionAnyAsync(cancellationToken, Permissions.ViewUserOtherAdmin, Permissions.ViewUserOtherMinimal);
                 if (!hasPermission)
                     throw new NoAccessException(requesterEmailAddress ?? string.Empty, request.EmailAddress, typeof(User));
             }

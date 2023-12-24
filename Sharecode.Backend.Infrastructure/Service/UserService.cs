@@ -105,11 +105,6 @@ public class UserService : IUserService
         return mentionableUsers.ToList();
     }
 
-    public async Task<List<User>> GetNotificationEnabledUsersAsync(HashSet<Guid> users, CancellationToken token = default)
-    {
-        return await _userRepository.GetNotificationEnabledUserAsync(users, token);
-    }
-
     public async Task<List<MySnippetsDto>> ListUserSnippets(Guid userId, bool onlyOwned = false,
         bool recentSnippets = true, int skip = 0, int take = 20,
         string order = "ASC", string orderBy = "ModifiedAt", string searchQuery = null, CancellationToken cancellationToken = default)

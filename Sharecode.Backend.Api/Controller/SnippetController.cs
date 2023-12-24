@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Snippet;
 using Sharecode.Backend.Application.Features.Snippet.Comments.Create;
+using Sharecode.Backend.Application.Features.Snippet.Comments.List;
 using Sharecode.Backend.Application.Features.Snippet.Create;
 using Sharecode.Backend.Application.Features.Snippet.Get;
 using Sharecode.Backend.Utilities.RedisCache;
@@ -24,7 +25,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     public async Task<ActionResult<GetSnippetResponse>> GetSnippet([FromRoute] Guid id, [FromQuery] GetSnippetQuery snippetQuery)
     {
         snippetQuery.SnippetId = id;
-        FrameCacheKey("snippet", id.ToString());
+        FrameCacheKey(CacheModules.Snippet, id.ToString());
         var cacheValue = await ScanAsync<GetSnippetResponse>();
         if (cacheValue != null)
         {
@@ -47,7 +48,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// </summary>
     /// <returns>Returns the result of creating a new snippet as an ActionResult</returns>
     [HttpPost("public", Name = "Create a new snippet publicly")]
-    [DisableRequestSizeLimit]
+    /*[DisableRequestSizeLimit]*/
     public async Task<ActionResult<CreateSnippetCommentResponse>> CreateSnippet()
     {
         return await CreateInternal();
@@ -74,12 +75,22 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// Get the comments of a specific snippet.
     /// </summary>
     /// <param name="snippetId">The unique identifier of the snippet.</param>
+    /// <param name="query">The query for the request</param>
     /// <returns>An IActionResult representing the result of the operation.</returns>
     [HttpGet("{snippetId}/comments", Name = "Get the comments of snippets")]
-    public async Task<IActionResult> ListSnippetComments(Guid snippetId)
+    public async Task<ActionResult<ListSnippetCommentsResponse>> ListSnippetComments([FromRoute] Guid snippetId, [FromQuery] ListSnippetCommentsQuery query)
     {
-        FrameCacheKey("snippet-comment", snippetId.ToString());
-        return Ok();
+        query.SnippetId = snippetId;
+        if (query.ParentCommentId.HasValue)
+            FrameCacheKey(CacheModules.SnippetComment, snippetId.ToString(), query.ParentCommentId.Value.ToString());
+        else
+            FrameCacheKey(CacheModules.SnippetComment, snippetId.ToString());
+        var commentsResponse = await mediator.Send(query);
+        if (commentsResponse == null)
+            return NotFound();
+        
+        await StoreCacheAsync(commentsResponse);
+        return Ok(commentsResponse);
     }
 
     /// <summary>
@@ -94,6 +105,9 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     {
         command.SnippetId = snippetId;
         var response = await mediator.Send(command);
+        
+        //Clear reply's cache
+        await ClearCacheAsync();
         return CreatedAtAction("ListSnippetComments", new { snippetId = response.Id }, response);
     }
 

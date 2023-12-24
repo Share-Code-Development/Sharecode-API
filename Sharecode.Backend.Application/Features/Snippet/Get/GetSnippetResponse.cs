@@ -1,5 +1,6 @@
 using Sharecode.Backend.Domain.Dto.Snippet;
 using Sharecode.Backend.Domain.Entity.Snippet;
+using Sharecode.Backend.Utilities.MetaKeys;
 
 namespace Sharecode.Backend.Application.Features.Snippet.Get;
 
@@ -18,7 +19,8 @@ public class GetSnippetResponse : SnippetDto
             Public = snippet.Public,
             Views = snippet.Views,
             Copy = snippet.Copy,
-            OwnerId = snippet.OwnerId
+            OwnerId = snippet.OwnerId,
+            IsCommentsLimited = snippet.ReadMeta(MetaKeys.SnippetKeys.LimitComments, false) 
         };
     }
     
@@ -39,7 +41,8 @@ public class GetSnippetResponse : SnippetDto
             CommentCount = snippet.CommentCount,
             AccessControl = snippet.AccessControl,
             LineComments = snippet.LineComments,
-            Reactions = snippet.Reactions
+            Reactions = snippet.Reactions,
+            IsCommentsLimited = snippet.IsCommentsLimited
         };
     }
 }

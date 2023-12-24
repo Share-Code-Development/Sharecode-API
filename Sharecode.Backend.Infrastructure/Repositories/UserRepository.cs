@@ -6,6 +6,7 @@ using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Base;
 using Sharecode.Backend.Infrastructure.Db;
+using Sharecode.Backend.Infrastructure.Db.Extensions;
 
 namespace Sharecode.Backend.Infrastructure.Repositories;
 
@@ -43,16 +44,28 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     public async Task<User?> GetUserByIdIncludingAccountSettings(Guid userId, bool includeAccountSettings = false , bool trackUser = false,
         CancellationToken token = default)
     {
-        var query = Table.Where(x => x.Id == userId && !x.IsDeleted);
+        var query = Table
+            .SetTracking(trackUser)
+            .Where(x => x.Id == userId && !x.IsDeleted);
 
+        //If include Settings is true that means the user has permission to view all data
+        //If not only select the limited data
         if (includeAccountSettings)
         {
             query = query.Include(x => x.AccountSetting);
         }
-
-        if (!trackUser)
+        else
         {
-            query = query.AsNoTracking();
+            query = query.Select(x => new User()
+            {
+                EmailAddress = x.EmailAddress,
+                FirstName = x.FirstName,
+                MiddleName = x.MiddleName,
+                LastName = x.LastName,
+                ProfilePicture = x.ProfilePicture,
+                Visibility = x.Visibility,
+                Id = x.Id
+            });
         }
 
         return await query.FirstOrDefaultAsync(cancellationToken: token);
@@ -79,7 +92,28 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return await query.FirstOrDefaultAsync(cancellationToken: token);
     }
 
-    public async Task<List<User>> GetNotificationEnabledUserAsync(HashSet<Guid> userIds, CancellationToken token = default)
+    public async Task<List<User>> GetUsersForMentionWithNotificationSettings(HashSet<Guid> userIds, CancellationToken token = default)
+    {
+        return await Table.AsNoTracking()
+            .Include(x => x.AccountSetting)
+            .Where(x => !x.IsDeleted && userIds.Contains(x.Id))
+            .Select(x => new User
+            {
+                Id = x.Id,
+                EmailAddress = x.EmailAddress,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                MiddleName = x.MiddleName,
+                ProfilePicture = x.ProfilePicture,
+                Visibility = AccountVisibility.Public,
+                AccountSetting = new AccountSetting()
+                {
+                    EnableNotificationsForMentions = x.AccountSetting.EnableNotificationsForMentions
+                }
+            }).ToListAsync(token);
+    }
+
+    public async Task<List<User>> GetUsersWithEnabledNotification(HashSet<Guid> userIds, CancellationToken token = default)
     {
         return await Table.AsNoTracking()
             .Include(x => x.AccountSetting)
@@ -92,7 +126,11 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                 LastName = x.LastName,
                 MiddleName = x.MiddleName,
                 ProfilePicture = x.ProfilePicture,
-                Visibility = AccountVisibility.Public
+                Visibility = AccountVisibility.Public,
+                AccountSetting = new AccountSetting()
+                {
+                    EnableNotificationsForMentions = x.AccountSetting.EnableNotificationsForMentions
+                }
             }).ToListAsync(token);
     }
 }

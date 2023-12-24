@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using CodeCompanion.Extensions.Dapper.Postgres;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -70,5 +71,10 @@ public static class ShareCodeDbExtensions
         propertyBuilder.Metadata.SetValueComparer(comparer);
 
         return propertyBuilder;
+    }
+
+    public static IQueryable<T> SetTracking<T>(this DbSet<T> dbSet, bool track = true) where T : class
+    {
+        return track ? dbSet.AsTracking() : dbSet.AsNoTracking();
     }
 }

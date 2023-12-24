@@ -153,18 +153,46 @@ public class HttpClientContext : IHttpClientContext
         }
     }
 
-    public Dictionary<string, HashSet<string>> CacheInvalidRecords
-    {
-        get => _cacheInvalidateRecords;
-    }
-
-    public bool HasPermission(Permission key)
-    {
-        return true;
-    }
+    public Dictionary<string, HashSet<string>> CacheInvalidRecords => _cacheInvalidateRecords;
 
     public async Task<bool> HasPermissionAsync(Permission key, CancellationToken token = default)
     {
+        var nonTrackingUsr = await GetNonTrackingUserAsync();
+        if (nonTrackingUsr == null)
+            return false;
+        
+        return nonTrackingUsr.Permissions.Contains(key);
+    }
+
+    public async Task<bool> HasPermissionAnyAsync(CancellationToken token = default, params Permission[] key)
+    {
+        var nonTrackingUsr = await GetNonTrackingUserAsync();
+        if (nonTrackingUsr == null)
+            return false;
+        
+        foreach (var permission in key)
+        {
+            var contains = nonTrackingUsr.Permissions.Contains(permission);
+            if (contains)
+                return true;
+        }
+
+        return false;
+    }
+
+    public async Task<bool> HasPermissionAllAsync(CancellationToken token = default, params Permission[] key)
+    {
+        var nonTrackingUsr = await GetNonTrackingUserAsync();
+        if (nonTrackingUsr == null)
+            return false;
+        
+        foreach (var permission in key)
+        {
+            var contains = nonTrackingUsr.Permissions.Contains(permission);
+            if (!contains)
+                return false;
+        }
+
         return true;
     }
 

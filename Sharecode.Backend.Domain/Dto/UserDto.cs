@@ -17,10 +17,11 @@ public class UserDto
     public AccountVisibility Visibility { get; set; }
     public AccountSettingDto? Settings { get; set; }
     public DateTime Created { get; set; }
+    public HashSet<Permission> Permissions;
 
     public UserDto() { }
 
-    public UserDto(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, object> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture)
+    public UserDto(Guid userId, string firstName, string? middleName, string lastName, string emailAddress, bool emailVerified, Dictionary<string, object> metadata, AccountVisibility visibility, AccountSettingDto? settings, DateTime created, string? profilePicture, HashSet<Permission> permissions)
     {
         UserId = userId;
         FirstName = firstName;
@@ -33,6 +34,7 @@ public class UserDto
         Settings = settings;
         Created = created;
         ProfilePicture = profilePicture;
+        Permissions = permissions;
     }
 
     public static UserDto From(User user)
@@ -48,7 +50,8 @@ public class UserDto
             user.Visibility,
             AccountSettingDto.From(user),
             user.CreatedAt,
-            user.ProfilePicture
+            user.ProfilePicture,
+            user.Permissions
         );
     }
 }
