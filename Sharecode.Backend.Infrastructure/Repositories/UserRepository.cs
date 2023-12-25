@@ -26,7 +26,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .SetTracking(track);
         queryable.Include(x => x.AccountSetting);
         if (!includeSoftDeleted)
-            queryable = queryable.Where(x => !x.IsDeleted);
+            queryable = queryable.Where(x => x.EmailAddress == emailAddress && !x.IsDeleted);
         
         return await queryable.FirstOrDefaultAsync(cancellationToken: token);
     }
