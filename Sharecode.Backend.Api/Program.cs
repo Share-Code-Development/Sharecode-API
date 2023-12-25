@@ -84,5 +84,5 @@ app.UseHttpMetrics(x =>
 app.MapMetrics("/v1/api/metrics");
 app.UseAuthorization();
 app.MapControllers();
-
+app.MapSignalREndpoints();
 app.Run();

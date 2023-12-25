@@ -14,6 +14,7 @@ using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Infrastructure;
 using Sharecode.Backend.Infrastructure.Client;
 using Sharecode.Backend.Infrastructure.Jobs;
+
 using Sharecode.Backend.Presentation;
 using Sharecode.Backend.Utilities;
 using Sharecode.Backend.Utilities.Configuration;
@@ -92,6 +93,7 @@ public static class BootstrapExtensions
 
     public static IServiceCollection RegisterCoreServices(this IServiceCollection service, IWebHostEnvironment environment, IConfiguration configuration)
     {
+        
         service.AddSingleton<IKeyValueClient, KeyValueClient>();
         service.AddSingleton<IEmailClient, EmailClient>();
         service.AddHttpContextAccessor();
@@ -125,7 +127,7 @@ public static class BootstrapExtensions
         {
             throw new ApplicationException("Found configuration, but no implementation found!");
         }
-
+        service.AddSignalR();
         return service;
     }
 
@@ -199,5 +201,11 @@ public static class BootstrapExtensions
             });
 
         return serviceCollection;
+    }
+
+    public static WebApplication MapSignalREndpoints(this WebApplication webApplication)
+    {
+        
+        return webApplication;
     }
 }

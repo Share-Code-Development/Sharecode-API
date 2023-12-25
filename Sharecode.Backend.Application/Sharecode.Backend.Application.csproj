@@ -25,6 +25,13 @@
       <Folder Include="Factory\" />
       <Folder Include="Features\Http\" />
       <Folder Include="Features\SignalR\" />
+      <Folder Include="SignalR\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore.SignalR.Core">
+        <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.0\Microsoft.AspNetCore.SignalR.Core.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
