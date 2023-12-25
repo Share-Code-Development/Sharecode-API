@@ -19,6 +19,7 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
         User? user = null;
         if (userIdentifier.HasValue)
         {
+            //No domain events are raised from here so no need to track the user
             user = await userRepository.GetAsync(userIdentifier.Value, false, cancellationToken, false);
         }
 
