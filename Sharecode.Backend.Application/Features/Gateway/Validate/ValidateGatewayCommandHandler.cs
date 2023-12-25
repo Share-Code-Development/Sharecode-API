@@ -38,8 +38,8 @@ public class ValidateGatewayCommandHandler : IRequestHandler<ValidateGatewayAppR
             if (gatewayRequest.IsDeleted || gatewayRequest.IsCompleted || !gatewayRequest.IsValid)
             {
                 return ValidateGatewayCommandResponse.Invalid(gatewayRequest.IsCompleted
-                    ? "Already completed"
-                    : "Invalid Request");
+                    ? "An attempt has been already made using this link, Please recreate a new link"
+                    : "The link has been made invalid or is deleted. Please try again with a new link");
             }
 
             if (DateTime.UtcNow > gatewayRequest.Expiry)
