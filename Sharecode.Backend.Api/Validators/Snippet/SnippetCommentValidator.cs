@@ -1,5 +1,5 @@
 using FluentValidation;
-using Sharecode.Backend.Application.Features.Snippet.Comments.Create;
+using Sharecode.Backend.Application.Features.Http.Snippet.Comments.Create;
 using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Api.Validators.Snippet;

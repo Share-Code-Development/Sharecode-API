@@ -1,5 +1,5 @@
 using FluentValidation;
-using Sharecode.Backend.Application.Features.Gateway.Validate;
+using Sharecode.Backend.Application.Features.Http.Gateway.Validate;
 using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Api.Validators.Gateway;

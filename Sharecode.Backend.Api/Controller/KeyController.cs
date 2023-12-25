@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
-using Sharecode.Backend.Application.Features.Users.Create;
 using Sharecode.Backend.Domain.Dto;
 using Sharecode.Backend.Utilities.KeyValue;
 

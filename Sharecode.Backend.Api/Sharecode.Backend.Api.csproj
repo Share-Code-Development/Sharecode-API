@@ -24,6 +24,8 @@
       <PackageReference Include="MicroElements.Swashbuckle.FluentValidation" Version="6.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="8.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="8.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -41,6 +43,7 @@
     <ItemGroup>
       <Folder Include="Handlers\" />
       <Folder Include="Logs\" />
+      <Folder Include="SignalR\" />
     </ItemGroup>
 
 </Project>

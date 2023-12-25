@@ -23,11 +23,23 @@ public class SnippetConfiguration : IEntityTypeConfiguration<Domain.Entity.Snipp
 
         builder.HasMany<SnippetComment>(s => s.Comments)
             .WithOne(x => x.Snippet)
-            .HasForeignKey(x => x.SnippetId);
+            .HasForeignKey(x => x.SnippetId)
+            .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasMany<SnippetReactions>(s => s.Reactions)
             .WithOne(x => x.Snippet)
-            .HasForeignKey(x => x.SnippetId);
+            .HasForeignKey(x => x.SnippetId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany<SnippetAccessControl>(x => x.AccessControls)
+            .WithOne(x => x.Snippet)
+            .HasForeignKey(x => x.SnippetId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.Owner)
+            .WithMany()
+            .HasForeignKey(x => x.OwnerId)
+            .IsRequired(false);
 
         builder.Property(x => x.Title)
             .HasMaxLength(100);

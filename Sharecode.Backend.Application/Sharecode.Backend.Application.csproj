@@ -23,6 +23,8 @@
 
     <ItemGroup>
       <Folder Include="Factory\" />
+      <Folder Include="Features\Http\" />
+      <Folder Include="Features\SignalR\" />
     </ItemGroup>
 
 </Project>

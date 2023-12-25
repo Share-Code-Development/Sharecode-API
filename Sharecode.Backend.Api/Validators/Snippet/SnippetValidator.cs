@@ -1,6 +1,6 @@
 using FluentValidation;
-using Sharecode.Backend.Application.Features.Snippet;
-using Sharecode.Backend.Application.Features.Snippet.Create;
+using Sharecode.Backend.Application.Features.Http.Snippet.Create;
+
 
 namespace Sharecode.Backend.Api.Validators.Snippet;
 

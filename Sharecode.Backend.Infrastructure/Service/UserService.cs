@@ -6,7 +6,7 @@ using Npgsql;
 using NpgsqlTypes;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Exceptions;
-using Sharecode.Backend.Application.Features.Users.GetMySnippets;
+using Sharecode.Backend.Application.Features.Http.Users.GetMySnippets;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Dto.Snippet;
 using Sharecode.Backend.Domain.Entity.Profile;
@@ -156,6 +156,19 @@ public class UserService : IUserService
         }
 
         return (response);
+    }
+
+    public async Task<bool> DeleteUser(Guid userId, Guid requestedBy, bool softDelete = true, CancellationToken token = default)
+    {
+        var userToDelete = await _userRepository.GetAsync(userId, true, token);
+        if (userToDelete == null)
+            throw new EntityNotFoundException(typeof(User), userId, false);
+
+        if (userToDelete.IsDeleted)
+            return false;
+        
+        userToDelete.RequestAccountDeletion(softDelete, requestedBy);
+        return true;
     }
 }
 

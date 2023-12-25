@@ -10,6 +10,7 @@
       <PackageReference Include="CodeCompanion.Extensions.Dapper.Postgres" Version="1.0.5" />
       <PackageReference Include="Dapper" Version="2.1.24" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="8.0.0" />
       <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0-preview4.23342.2" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
         <PrivateAssets>all</PrivateAssets>

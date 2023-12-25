@@ -196,4 +196,17 @@ public class User : AggregateRootWithMetadata
             Permissions.Add(permission);
         }
     }
+
+    public void RequestAccountDeletion(bool softDelete, Guid requestedBy, bool forced = false)
+    {
+        if (!forced && (AccountLocked || !Active))
+            return;
+        
+        RaiseDomainEvent(new DeleteUserDomainEvent(Id, requestedBy, softDelete));
+        Permissions.Clear();
+        AccountLocked = true;
+        EmailVerified = false;
+        Salt = null;
+        PasswordHash = null;
+    }
 }

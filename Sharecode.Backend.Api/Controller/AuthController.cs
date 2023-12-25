@@ -1,10 +1,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sharecode.Backend.Application.Client;
-using Sharecode.Backend.Application.Features.Refresh.Get;
-using Sharecode.Backend.Application.Features.Users.Create;
-using Sharecode.Backend.Application.Features.Users.ForgotPassword;
-using Sharecode.Backend.Application.Features.Users.Login;
+using Sharecode.Backend.Application.Features.Http.Refresh.Get;
+using Sharecode.Backend.Application.Features.Http.Users.Create;
+using Sharecode.Backend.Application.Features.Http.Users.ForgotPassword;
+using Sharecode.Backend.Application.Features.Http.Users.Login;
 using Sharecode.Backend.Utilities.RedisCache;
 
 namespace Sharecode.Backend.Api.Controller;

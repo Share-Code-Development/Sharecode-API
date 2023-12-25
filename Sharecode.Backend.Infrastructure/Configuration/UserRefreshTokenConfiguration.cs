@@ -14,9 +14,9 @@ public class UserRefreshTokenConfiguration : IEntityTypeConfiguration<UserRefres
 
         builder
             .HasOne<User>() // Assuming there is a User entity
-            .WithMany()    // No corresponding navigation property in User class
+            .WithMany() // No corresponding navigation property in User class
             .HasForeignKey(t => t.IssuedFor)
-            .IsRequired(false);
-            
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }

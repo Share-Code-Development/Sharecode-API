@@ -1,8 +1,8 @@
 using FluentValidation;
-using Sharecode.Backend.Application.Features.Users.Create;
-using Sharecode.Backend.Application.Features.Users.ForgotPassword;
-using Sharecode.Backend.Application.Features.Users.Login;
-using Sharecode.Backend.Application.Features.Users.TagSearch;
+using Sharecode.Backend.Application.Features.Http.Users.Create;
+using Sharecode.Backend.Application.Features.Http.Users.ForgotPassword;
+using Sharecode.Backend.Application.Features.Http.Users.Login;
+using Sharecode.Backend.Application.Features.Http.Users.TagSearch;
 using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Api.Validators.User;

@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Sharecode.Backend.Application.Client;
-using Sharecode.Backend.Application.Features.Gateway.Validate;
+using Sharecode.Backend.Application.Features.Http.Gateway.Validate;
 using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Utilities.RedisCache;
 

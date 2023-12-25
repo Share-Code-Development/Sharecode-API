@@ -36,11 +36,26 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         Add(user);
     }
     
-    public async Task<bool> IsEmailAddressUnique(string emailAddress, CancellationToken token = default)
+    public async Task<EmailState> IsEmailAddressUnique(string emailAddress, CancellationToken token = default)
     {
-        return await (_dbContext.Set<User>()
-            .AsNoTracking()
-            .AnyAsync(x => x.EmailAddress == emailAddress && !x.IsDeleted, token)) == false;
+        var possibleUser = await Table
+            .SetTracking(false)
+            .Where(x => x.EmailAddress == emailAddress)
+            .Select(x => new
+            {
+                EmailAddress = x.EmailAddress,
+                IsDeleted = x.IsDeleted        
+            })
+            .FirstOrDefaultAsync(token);
+
+
+        if (possibleUser == null)
+            return EmailState.NotPresent;
+
+        if (possibleUser.IsDeleted)
+            return EmailState.Deleted;
+
+        return EmailState.Present;
     }
     
     public async Task<User?> GetUserDetailsById(Guid userId, bool includeAccountSettings = false,

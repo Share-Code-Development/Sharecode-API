@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Entity.Profile;
+using Sharecode.Backend.Domain.Enums;
 
 namespace Sharecode.Backend.Domain.Repositories;
 
@@ -28,13 +29,20 @@ public interface IUserRepository : IBaseRepository<User>
     void Register(User user);
 
     /// <summary>
-    /// Checks if the given email address is unique.
+    /// Checks if an email address is unique.
     /// </summary>
     /// <param name="emailAddress">The email address to check.</param>
-    /// <param name="token">Optional cancellation token to cancel the operation.</param>
-    /// <returns>Returns a task that represents the asynchronous operation.
-    /// The task result contains true if the email address is unique; otherwise, false.</returns>
-    Task<bool> IsEmailAddressUnique(string emailAddress, CancellationToken token = default);
+    /// <param name="token">
+    /// A cancellation token that can be used to cancel the operation.
+    /// The default value is 'default', indicating that no cancellation is requested.
+    /// </param>
+    /// <returns>
+    /// A Task representating the asynchronous operation. The task will contain an EmailState enumeration value:
+    /// - EmailState.Unique: If the email address is unique.
+    /// - EmailState.Duplicate: If the email address is a duplicate.
+    /// - EmailState.Invalid: If the email address is invalid.
+    /// </returns>
+    Task<EmailState> IsEmailAddressUnique(string emailAddress, CancellationToken token = default);
 
     /// <summary>
     /// Retrieves the details of a user by their unique identifier.

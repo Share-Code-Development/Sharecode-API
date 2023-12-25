@@ -53,6 +53,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(accountSettings => accountSettings.User)
             .HasForeignKey<AccountSetting>(x => x.UserId)
             .IsRequired();
+        
 
         #endregion
 

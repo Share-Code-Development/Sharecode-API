@@ -12,17 +12,12 @@ public class SnippetAccessControlConfiguration : IEntityTypeConfiguration<Snippe
         builder.ToTable("SnippetAccessControls", "snippet");
 
         #region ForeignKeys
-        //Link to snippets
-        /*builder.HasOne(x => x.Snippet)
-            .WithMany()
-            .HasForeignKey(x => x.SnippetId)
-            .IsRequired();*/
 
         //Link to users
         builder.HasOne(x => x.User)
             .WithMany()
             .HasForeignKey(x => x.UserId)
-            .IsRequired();
+            .OnDelete(DeleteBehavior.Cascade);
         #endregion
 
         

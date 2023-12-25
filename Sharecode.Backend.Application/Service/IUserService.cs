@@ -1,4 +1,4 @@
-using Sharecode.Backend.Application.Features.Users.GetMySnippets;
+using Sharecode.Backend.Application.Features.Http.Users.GetMySnippets;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Entity.Snippet;
 
@@ -17,4 +17,5 @@ public interface IUserService
     Task<List<MySnippetsDto>> ListUserSnippets(Guid userId, bool onlyOwned = false, bool recentSnippets = true,
         int skip = 0, int take = 20, string order = "ASC", string orderBy = "ModifiedAt", string searchQuery = null, 
         CancellationToken cancellationToken = default);
+    Task<bool> DeleteUser(Guid userId, Guid requestedBy, bool softDelete = true, CancellationToken token = default);
 }

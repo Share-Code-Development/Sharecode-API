@@ -1,5 +1,4 @@
 using System.Data;
-using System.Data.Common;
 using Sharecode.Backend.Domain.Base.Primitive;
 
 namespace Sharecode.Backend.Domain.Base.Interfaces;

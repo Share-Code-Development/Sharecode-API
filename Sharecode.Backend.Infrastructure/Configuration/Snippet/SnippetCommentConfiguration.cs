@@ -20,18 +20,19 @@ public class SnippetCommentConfiguration : IEntityTypeConfiguration<SnippetComme
         builder.HasOne(x => x.Snippet)
             .WithMany()
             .HasForeignKey(x => x.SnippetId)
-            .IsRequired();
+            .OnDelete(DeleteBehavior.Cascade);
         
         //Link child comments to parent comments
         builder.HasOne<SnippetComment>(x => x.ParentComment)
             .WithMany()
-            .HasForeignKey(x => x.ParentCommentId);
+            .HasForeignKey(x => x.ParentCommentId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         //Link the comment to the user
         builder.HasOne(x => x.User)
             .WithMany()
             .HasForeignKey(x => x.UserId)
-            .IsRequired();
+            .OnDelete(DeleteBehavior.Cascade);
         #endregion
 
         #region Index

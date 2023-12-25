@@ -4,9 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Org.BouncyCastle.Ocsp;
 using Sharecode.Backend.Application.Client;
-using Sharecode.Backend.Application.Features.Users.Get;
-using Sharecode.Backend.Application.Features.Users.GetMySnippets;
-using Sharecode.Backend.Application.Features.Users.TagSearch;
+using Sharecode.Backend.Application.Features.Http.Users.Delete;
+using Sharecode.Backend.Application.Features.Http.Users.Get;
+using Sharecode.Backend.Application.Features.Http.Users.GetMySnippets;
+using Sharecode.Backend.Application.Features.Http.Users.TagSearch;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Utilities.RedisCache;
 
@@ -110,6 +111,22 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
         var response = await mediator.Send(query);
         await StoreCacheAsync(response, token: RequestCancellationToken);
         return Ok(response);
+    }
+
+    [HttpDelete("{userId}")]
+    [Authorize]
+    public async Task<ActionResult> DeleteUserAccount([FromRoute]Guid userId, [FromQuery] DeleteUserCommand deleteUserCommand)
+    {
+        deleteUserCommand.UserId = userId;
+        var deleteUserResponse = await mediator.Send(deleteUserCommand, RequestCancellationToken);
+
+        if (deleteUserResponse.Success)
+        {
+            await ClearCacheAsync();
+            return NoContent();
+        }
+        
+        return NotFound();
     }
     
 }

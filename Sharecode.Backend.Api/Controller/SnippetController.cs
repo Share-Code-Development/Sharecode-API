@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Sharecode.Backend.Application.Client;
-using Sharecode.Backend.Application.Features.Snippet;
-using Sharecode.Backend.Application.Features.Snippet.Comments.Create;
-using Sharecode.Backend.Application.Features.Snippet.Comments.List;
-using Sharecode.Backend.Application.Features.Snippet.Create;
-using Sharecode.Backend.Application.Features.Snippet.Get;
+using Sharecode.Backend.Application.Features.Http.Snippet.Comments.Create;
+using Sharecode.Backend.Application.Features.Http.Snippet.Comments.List;
+using Sharecode.Backend.Application.Features.Http.Snippet.Create;
+using Sharecode.Backend.Application.Features.Http.Snippet.Get;
 using Sharecode.Backend.Utilities.RedisCache;
 
 namespace Sharecode.Backend.Api.Controller;
