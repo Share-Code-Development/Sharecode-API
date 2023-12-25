@@ -21,7 +21,7 @@ public record ValidateGatewayCommandResponse(
     public static ValidateGatewayCommandResponse Success => new ValidateGatewayCommandResponse(HttpStatusCode.OK, "Success");
 
     public static ValidateGatewayCommandResponse AccountSuspended =>
-        new ValidateGatewayCommandResponse(HttpStatusCode.BadRequest, "Account has been suspended, Contact support!");
+        new ValidateGatewayCommandResponse(HttpStatusCode.BadRequest, "This account has been suspended, you cannot reset the password, Contact support!");
 }
     
     
