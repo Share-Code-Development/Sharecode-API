@@ -61,7 +61,7 @@ public class UserService : IUserService
 
     public async Task<bool> RequestForgotPassword(string emailAddress, CancellationToken token = default)
     {
-        var user = await _userRepository.GetUserByEmailIncludingAccountSettings(emailAddress, false, true, token);
+        var user = await _userRepository.GetAsync(emailAddress, false, token, true);
         if (user == null)
             throw new EntityNotFoundException(typeof(User), emailAddress);
         
@@ -76,7 +76,7 @@ public class UserService : IUserService
 
     public async Task<bool> ResetPasswordAsync(Guid userId, string password, CancellationToken token = default)
     {
-        var user = await _userRepository.GetUserByIdIncludingAccountSettings(userId, false, true,  token);
+        var user = await _userRepository.GetAsync(userId, false, token, false);
         if (user == null)
             throw new EntityNotFoundException(typeof(User), userId);
         

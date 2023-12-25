@@ -18,30 +18,33 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
         _dbContext = dbContext;
     }
-
+    
+    public async Task<User?> GetAsync(string emailAddress, bool track = true, CancellationToken token = default,
+        bool includeSoftDeleted = false)
+    {
+        var queryable = Table
+            .SetTracking(track);
+        queryable.Include(x => x.AccountSetting);
+        if (!includeSoftDeleted)
+            queryable = queryable.Where(x => !x.IsDeleted);
+        
+        return await queryable.FirstOrDefaultAsync(cancellationToken: token);
+    }
 
     public void Register(User user)
     {
         Add(user);
     }
-
-    public async Task<User?> GetUserIncludingAccountSettings(Guid userId, CancellationToken token = default)
-    {
-        return await Table
-            .AsNoTracking()
-            .Include(x => x.AccountSetting)
-            .FirstOrDefaultAsync(x => x.Id == userId && !x.IsDeleted, cancellationToken: token);
-
-    }
-
+    
     public async Task<bool> IsEmailAddressUnique(string emailAddress, CancellationToken token = default)
     {
         return await (_dbContext.Set<User>()
             .AsNoTracking()
             .AnyAsync(x => x.EmailAddress == emailAddress && !x.IsDeleted, token)) == false;
     }
-
-    public async Task<User?> GetUserByIdIncludingAccountSettings(Guid userId, bool includeAccountSettings = false , bool trackUser = false,
+    
+    public async Task<User?> GetUserDetailsById(Guid userId, bool includeAccountSettings = false,
+        bool trackUser = false,
         CancellationToken token = default)
     {
         var query = Table
@@ -70,29 +73,42 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 
         return await query.FirstOrDefaultAsync(cancellationToken: token);
     }
-
-    public async Task<User?> GetUserByEmailIncludingAccountSettings(
-        string emailAddress, 
-        bool includeAccountSettings = false, 
+    
+    public async Task<User?> GetUserDetailsByEmailAddress(
+        string emailAddress,
+        bool includeAccountSettings = false,
         bool trackUser = false,
         CancellationToken token = default)
     {
-        var query = Table.Where(x => x.EmailAddress == emailAddress && !x.IsDeleted);
+        var query = Table
+            .SetTracking(trackUser)
+            .Where(x => x.EmailAddress == emailAddress && !x.IsDeleted);
 
+        //If include Settings is true that means the user has permission to view all data
+        //If not only select the limited data
         if (includeAccountSettings)
         {
             query = query.Include(x => x.AccountSetting);
         }
-
-        if (!trackUser)
+        else
         {
-            query = query.AsNoTracking();
+            query = query.Select(x => new User()
+            {
+                EmailAddress = x.EmailAddress,
+                FirstName = x.FirstName,
+                MiddleName = x.MiddleName,
+                LastName = x.LastName,
+                ProfilePicture = x.ProfilePicture,
+                Visibility = x.Visibility,
+                Id = x.Id
+            });
         }
 
         return await query.FirstOrDefaultAsync(cancellationToken: token);
     }
-
-    public async Task<List<User>> GetUsersForMentionWithNotificationSettings(HashSet<Guid> userIds, CancellationToken token = default)
+    
+    public async Task<List<User>> GetUsersForMentionWithNotificationSettings(HashSet<Guid> userIds,
+        CancellationToken token = default)
     {
         return await Table.AsNoTracking()
             .Include(x => x.AccountSetting)
@@ -112,6 +128,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                 }
             }).ToListAsync(token);
     }
+
 
     public async Task<List<User>> GetUsersWithEnabledNotification(HashSet<Guid> userIds, CancellationToken token = default)
     {

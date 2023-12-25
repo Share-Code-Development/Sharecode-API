@@ -19,7 +19,7 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
         User? user = null;
         if (userIdentifier.HasValue)
         {
-            user = await userRepository.GetUserByIdIncludingAccountSettings(userIdentifier.Value, true, false, cancellationToken);
+            user = await userRepository.GetAsync(userIdentifier.Value, false, cancellationToken, false);
         }
 
         Domain.Entity.Snippet.Snippet snippet = new Domain.Entity.Snippet.Snippet()

@@ -71,7 +71,7 @@ public class LoginUserCommandHandler(IUserService userService, IHttpClientContex
         }
 
         var emailAddress = payload.Email;
-        var user = await userRepository.GetUserByEmailIncludingAccountSettings(emailAddress, true, true, token);
+        var user = await userRepository.GetAsync(emailAddress, true, token,true);
         if (user == null)
         {
             user = await RegisterFromGoogle(payload, token);
@@ -127,7 +127,7 @@ public class LoginUserCommandHandler(IUserService userService, IHttpClientContex
     {
         try
         {
-            var user = await userRepository.GetUserByEmailIncludingAccountSettings(request.EmailAddress!, true, true, token: token);
+            var user = await userRepository.GetAsync(request.EmailAddress!, true, token, true);
             if (user == null)
                 throw new EntityNotFoundException(typeof(User), request.EmailAddress!);
 

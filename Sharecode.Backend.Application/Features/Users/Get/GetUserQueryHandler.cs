@@ -34,7 +34,7 @@ public class GetUserQueryByIdHandler(IUserRepository repository, IHttpClientCont
                 }
             }
         }
-        var user = await repository.GetUserByIdIncludingAccountSettings(request.UserId, request.IncludeSettings, token: cancellationToken);
+        var user = await repository.GetUserDetailsById(request.UserId, request.IncludeSettings, token: cancellationToken);
         if (user == null)
             throw new EntityNotFoundException(typeof(User), request.UserId);
 
@@ -71,7 +71,7 @@ public class GetUserQueryByEmailHandler(IUserRepository repository, IHttpClientC
             }
         }
         
-        var user = await repository.GetUserByEmailIncludingAccountSettings(request.EmailAddress, request.IncludeSettings, token: cancellationToken);
+        var user = await repository.GetUserDetailsByEmailAddress(request.EmailAddress, request.IncludeSettings, token: cancellationToken);
         if (user == null)
             throw new EntityNotFoundException(typeof(User), request.EmailAddress);
 
