@@ -90,6 +90,13 @@ public class ExceptionHandlingMiddleware
                 null,
                 null
                 ),
+            BadHttpRequestException badHttpRequestException => new ExceptionDetail(
+                StatusCodes.Status400BadRequest,
+                Type: "The request is not valid",
+                Message: badHttpRequestException.Message,
+                Errors: null,
+                ExtendedMessage: showExtended ? badHttpRequestException.InnerException?.Message : ""
+                ),
             AppException appException => CreateExceptionDetail(appException),
             _ => new ExceptionDetail(
                 StatusCodes.Status500InternalServerError,

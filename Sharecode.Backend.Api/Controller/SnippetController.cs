@@ -119,34 +119,38 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     {
             var formCollection = await Request.ReadFormAsync();
             logger.Information("Form collection has {Count}", formCollection.Count.ToString());
-            if (!formCollection.ContainsKey("body") || formCollection.Files.GetFile("code") == null)
-                return BadRequest("Request body is invalid!");
+            if (!formCollection.ContainsKey("body"))
+                throw new BadHttpRequestException("Body data is missing!");
+            
+            if (formCollection.Files.Count == 0)
+                throw new BadHttpRequestException("No files were uploaded!");
             
             var bodyRaw = formCollection["body"];
             
             if (string.IsNullOrEmpty(bodyRaw))
-                return BadRequest("Invalid body object");
+                throw new BadHttpRequestException("Invalid body object");
             
             var command = JsonConvert.DeserializeObject<CreateSnippetCommand>(bodyRaw.ToString());
             if (command == null)
-                return BadRequest("Failed to parse the request");
+                throw new BadHttpRequestException("Failed to parse the request");
             
             byte[]? fileBytes = null;
+            // Process files in the form
             foreach (var formFile in formCollection.Files)
             {
-                logger.Information("File name: {fileName}, File length: {fileLength}", formFile.Name, formFile.Length);
+                logger.Information("File: name={fileName} length={fileLength}", formFile.Name, formFile.Length);
 
-                // If the file name or some property matches the file you're looking for, you can process it
-                if(formFile.Name == "code"){
-                    // Process the "code" file
+                if (formFile.Name.Equals("code", StringComparison.OrdinalIgnoreCase))
+                {
                     using var ms = new MemoryStream();
                     await formFile.CopyToAsync(ms);
                     fileBytes = ms.ToArray();
+                    break;
                 }
             }
 
             if (fileBytes == null)
-                return BadRequest("Missing binary file");
+                throw new BadHttpRequestException("Missing binary file");
             
             command.Content = fileBytes;
             if (string.IsNullOrEmpty(command.PreviewCode))
