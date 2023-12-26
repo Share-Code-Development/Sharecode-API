@@ -118,15 +118,14 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// <returns>An <see cref="ActionResult{T}"/> object containing the result of the operation.</returns>
     private async Task<ActionResult<CreateSnippetCommentResponse>> CreateInternal()
     {
-            logger.Information("Create Internal");
             var formCollection = await Request.ReadFormAsync();
-            var file = formCollection.Files.FirstOrDefault();
+            var file = formCollection.Files.GetFile("code");
             if (file == null)
             {
                 return BadRequest("Missing file object");
             }
             var bodyRaw = formCollection["body"];
-            logger.Information("Body is {Body}", bodyRaw);
+            
             if (string.IsNullOrEmpty(bodyRaw))
                 return BadRequest("Invalid body object");
             
