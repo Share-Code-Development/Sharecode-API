@@ -114,10 +114,8 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// Creates a new snippet comment internally.
     /// </summary>
     /// <returns>An <see cref="ActionResult{T}"/> object containing the result of the operation.</returns>
-    private async Task<ActionResult<CreateSnippetCommentResponse>> CreateInternal()
+    private async Task<ActionResult> CreateInternal()
     {
-        try
-        {
             var formCollection = await Request.ReadFormAsync();
             var file = formCollection.Files.FirstOrDefault();
             if (file == null)
@@ -125,14 +123,14 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
                 return BadRequest("Missing file object");
             }
             var bodyRaw = formCollection["body"];
-            Console.WriteLine($"Body raw: {bodyRaw}");
+            return Ok(bodyRaw);
             if (string.IsNullOrEmpty(bodyRaw))
                 return BadRequest("Invalid body object");
             
             var command = JsonConvert.DeserializeObject<CreateSnippetCommand>(bodyRaw.ToString());
             if (command == null)
                 return BadRequest("Failed to parse the request");
-            Console.WriteLine("Body parsed : "+command);
+            
             await using var ms = new MemoryStream();
             await file.CopyToAsync(ms);
             command.Content = ms.ToArray();
@@ -169,12 +167,5 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
             
             var response = await mediator.Send(command);
             return CreatedAtAction("GetSnippet", new {id = response.SnippetId} , response);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"Failed to create the snippet: {e.Message}");
-            Console.WriteLine(e);
-            return BadRequest($"Failed to create the request");
-        }
     }
 }
