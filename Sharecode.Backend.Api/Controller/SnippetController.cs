@@ -119,13 +119,18 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     {
             var formCollection = await Request.ReadFormAsync();
             logger.Information("Form collection has {Count}", formCollection.Count.ToString());
-            foreach (var formCollectionKey in formCollection.Keys)
+            if (!formCollection.ContainsKey("body") || !formCollection.ContainsKey("code"))
+                return BadRequest("Request body is invalid!");
+            
+            foreach (var formFile in formCollection.Files.GetFiles("code"))
             {
-                logger.Information("Key = {Key}, Value {Length}", formCollectionKey, formCollection[formCollectionKey].Count);
+                logger.Information("Form File {F}, {FF}", formFile.Length, formFile.Name);
             }
-            logger.Information("-----------------------------");
+            
             
             var file = formCollection.Files.GetFile("code");
+            logger.Information("File is null? {Null}", file == null);
+            logger.Information($"File is {file.Name}, {file.Length}");
             if (file == null)
             {
                 return BadRequest("Missing file object");
