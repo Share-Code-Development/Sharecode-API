@@ -9,10 +9,11 @@ using Sharecode.Backend.Application.Features.Http.Snippet.Comments.List;
 using Sharecode.Backend.Application.Features.Http.Snippet.Create;
 using Sharecode.Backend.Application.Features.Http.Snippet.Get;
 using Sharecode.Backend.Utilities.RedisCache;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.Controller;
 
-public class SnippetController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
+public class SnippetController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
 {
     /// <summary>
     /// Retrieves a snippet by its ID and query parameters.
@@ -67,6 +68,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     [DisableRequestSizeLimit]
     public async Task<ActionResult<CreateSnippetCommentResponse>> CreateSnippetSecure()
     {
+        logger.Information("Reached the controller");
         return await CreateInternal();
     }
 
@@ -114,8 +116,9 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// Creates a new snippet comment internally.
     /// </summary>
     /// <returns>An <see cref="ActionResult{T}"/> object containing the result of the operation.</returns>
-    private async Task<ActionResult> CreateInternal()
+    private async Task<ActionResult<CreateSnippetCommentResponse>> CreateInternal()
     {
+            logger.Information("Create Internal");
             var formCollection = await Request.ReadFormAsync();
             var file = formCollection.Files.FirstOrDefault();
             if (file == null)
@@ -123,7 +126,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
                 return BadRequest("Missing file object");
             }
             var bodyRaw = formCollection["body"];
-            return Ok(bodyRaw);
+            logger.Information("Body is {Body}", bodyRaw);
             if (string.IsNullOrEmpty(bodyRaw))
                 return BadRequest("Invalid body object");
             

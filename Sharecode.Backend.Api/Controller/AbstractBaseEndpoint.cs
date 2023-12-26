@@ -5,16 +5,17 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Utilities.RedisCache;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.Controller;
 
 [Route("v1/api/[controller]")]
 [ApiController]
-public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator)
+public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientContext requestContext, ILogger logger, IMediator mediator)
     : ControllerBase
 {
     private readonly IAppCacheClient _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-    private readonly ILogger<AbstractBaseEndpoint> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     protected IHttpClientContext AppRequestContext { get; } = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(3);
     protected CancellationToken RequestCancellationToken => HttpContext.RequestAborted;
@@ -54,7 +55,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during cache retrieval");
+            _logger.Error(ex, "Error during cache retrieval");
             return default;
         }
     }
@@ -81,7 +82,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during cache store");
+            _logger.Error(ex, "Error during cache store");
         }
     }
 
@@ -157,7 +158,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
         }
         catch (Exception ex)
         {
-            _logger.LogError($"An unknown exception occured during cache handling", ex);
+            _logger.Error($"An unknown exception occured during cache handling", ex);
         }
 
         return identityBuilder.ToString();

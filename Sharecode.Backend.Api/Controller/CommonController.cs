@@ -10,11 +10,12 @@ using Sharecode.Backend.Utilities.Configuration;
 using Sharecode.Backend.Utilities.ExceptionDetail;
 using Sharecode.Backend.Utilities.JsonExceptions;
 using Sharecode.Backend.Utilities.RedisCache;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.Controller;
 
 [EnableRateLimiting("fixed")]
-public class CommonController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
+public class CommonController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
 {
 
     private static string _exceptionStrings = string.Empty;

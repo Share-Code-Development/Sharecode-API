@@ -1,8 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
-using Org.BouncyCastle.Ocsp;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Http.Users.Delete;
 using Sharecode.Backend.Application.Features.Http.Users.Get;
@@ -10,11 +8,12 @@ using Sharecode.Backend.Application.Features.Http.Users.GetMySnippets;
 using Sharecode.Backend.Application.Features.Http.Users.TagSearch;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Utilities.RedisCache;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.Controller;
 
 
-public class UserController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
+public class UserController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
 {
     /// <summary>
     /// Retrieves a user based on the provided ID.

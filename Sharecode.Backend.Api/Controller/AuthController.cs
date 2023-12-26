@@ -6,10 +6,11 @@ using Sharecode.Backend.Application.Features.Http.Users.Create;
 using Sharecode.Backend.Application.Features.Http.Users.ForgotPassword;
 using Sharecode.Backend.Application.Features.Http.Users.Login;
 using Sharecode.Backend.Utilities.RedisCache;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.Controller;
 
-public class AuthController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
+public class AuthController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
 {
 
     private const string ExposeHeadersString = $"Authorization, Expires, RefreshToken";

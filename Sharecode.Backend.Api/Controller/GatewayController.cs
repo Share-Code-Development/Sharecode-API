@@ -6,10 +6,11 @@ using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Http.Gateway.Validate;
 using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Utilities.RedisCache;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.Controller;
 
-public class GatewayController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger<AbstractBaseEndpoint> logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
+public class GatewayController(IAppCacheClient cache, IHttpClientContext requestContext, ILogger logger, IMediator mediator) : AbstractBaseEndpoint(cache, requestContext, logger, mediator)
 {
     /// <summary>
     /// Validates the gateway based on the provided information.
