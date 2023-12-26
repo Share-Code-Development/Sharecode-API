@@ -157,16 +157,8 @@ public class LocalFileClient(IOptions<FileClientConfiguration> fileClientConfigu
             };
 
             proc.Start();
-            // Wait for the process to end
-            string stderr = await proc.StandardError.ReadToEndAsync(); // Capture the error output
-
-            if (!string.IsNullOrEmpty(stderr))
-            {
-                _logger.Error("Command stderr: {stderr}", stderr);
-            }
-
-            // Returns true if the process ended correctly (exit code 0)
-            return proc.ExitCode == 0;
+            await proc.WaitForExitAsync();
+            return true;
         }
         catch (Exception e)
         {

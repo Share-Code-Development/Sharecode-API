@@ -27,5 +27,6 @@ services:
     volumes:
       - /home/share-code-develop/appsettings.json:/app/appsettings.json
       - /home/share-code-develop/snippet-store/:/app/snippet-store/
+      - /home/share-code-develop/Logs/:/app/Logs/    
     ports:
       - "45012:80"
