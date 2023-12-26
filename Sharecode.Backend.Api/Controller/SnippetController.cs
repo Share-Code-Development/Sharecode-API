@@ -125,14 +125,14 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
                 return BadRequest("Missing file object");
             }
             var bodyRaw = formCollection["body"];
-            logger.LogInformation($"Body raw: {bodyRaw}");
+            Console.WriteLine($"Body raw: {bodyRaw}");
             if (string.IsNullOrEmpty(bodyRaw))
                 return BadRequest("Invalid body object");
             
             var command = JsonConvert.DeserializeObject<CreateSnippetCommand>(bodyRaw.ToString());
             if (command == null)
                 return BadRequest("Failed to parse the request");
-            logger.LogInformation("Body parsed : "+command);
+            Console.WriteLine("Body parsed : "+command);
             await using var ms = new MemoryStream();
             await file.CopyToAsync(ms);
             command.Content = ms.ToArray();
@@ -172,7 +172,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
         }
         catch (Exception e)
         {
-            logger.LogError($"Failed to create the snippet: {e.Message}");
+            Console.WriteLine($"Failed to create the snippet: {e.Message}");
             Console.WriteLine(e);
             return BadRequest($"Failed to create the request");
         }
