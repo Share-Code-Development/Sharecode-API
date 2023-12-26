@@ -68,7 +68,6 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     [DisableRequestSizeLimit]
     public async Task<ActionResult<CreateSnippetCommentResponse>> CreateSnippetSecure()
     {
-        logger.Information("Reached the controller");
         return await CreateInternal();
     }
 
@@ -119,6 +118,13 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     private async Task<ActionResult<CreateSnippetCommentResponse>> CreateInternal()
     {
             var formCollection = await Request.ReadFormAsync();
+            logger.Information("Form collection has {Count}", formCollection.Count.ToString());
+            foreach (var formCollectionKey in formCollection.Keys)
+            {
+                logger.Information("Key = {Key}, Value {Length}", formCollectionKey, formCollection[formCollectionKey].Count);
+            }
+            logger.Information("-----------------------------");
+            
             var file = formCollection.Files.GetFile("code");
             if (file == null)
             {
