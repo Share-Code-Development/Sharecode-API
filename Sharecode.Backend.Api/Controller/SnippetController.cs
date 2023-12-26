@@ -118,7 +118,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     private async Task<ActionResult<CreateSnippetCommentResponse>> CreateInternal()
     {
             var formCollection = await Request.ReadFormAsync();
-            logger.Information("Form collection has {Count}", formCollection.Count.ToString());
+            
             if (!formCollection.ContainsKey("body"))
                 throw new BadHttpRequestException("Body data is missing!");
             
@@ -135,11 +135,9 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
                 throw new BadHttpRequestException("Failed to parse the request");
             
             byte[]? fileBytes = null;
-            // Process files in the form
+            
             foreach (var formFile in formCollection.Files)
             {
-                logger.Information("File: name={fileName} length={fileLength}", formFile.Name, formFile.Length);
-
                 if (formFile.Name.Equals("code", StringComparison.OrdinalIgnoreCase))
                 {
                     using var ms = new MemoryStream();
