@@ -116,56 +116,65 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     /// <returns>An <see cref="ActionResult{T}"/> object containing the result of the operation.</returns>
     private async Task<ActionResult<CreateSnippetCommentResponse>> CreateInternal()
     {
-        var formCollection = await Request.ReadFormAsync();
-        var file = formCollection.Files.FirstOrDefault();
-        if (file == null)
+        try
         {
-            return BadRequest("Missing file object");
-        }
-        var bodyRaw = formCollection["body"];
-
-        if (string.IsNullOrEmpty(bodyRaw))
-            return BadRequest("Invalid body object");
-
-        var command = JsonConvert.DeserializeObject<CreateSnippetCommand>(bodyRaw.ToString());
-        if (command == null)
-            return BadRequest("Failed to parse the request");
-        
-        await using var ms = new MemoryStream();
-        await file.CopyToAsync(ms);
-        command.Content = ms.ToArray();
-
-        if (string.IsNullOrEmpty(command.PreviewCode))
-        {
-            string preview = "";
-            int maxCharCount = 500;  // max number of characters
-            int bytesRead = 0; // keeping track of number of bytes read
-            int maxBytes = maxCharCount * Encoding.Default.GetMaxByteCount(1); 
-            int bytesToReadEachTime = Encoding.Default.GetMaxByteCount(1);
-    
-            while (bytesRead < maxBytes && bytesRead < command.Content.Length)
+            var formCollection = await Request.ReadFormAsync();
+            var file = formCollection.Files.FirstOrDefault();
+            if (file == null)
             {
-                int bytesToReadThisTime = Math.Min(bytesToReadEachTime, command.Content.Length - bytesRead);
-                string currentString = Encoding.Default.GetString(command.Content, bytesRead, bytesToReadThisTime);
-
-                if (preview.Length + currentString.Length > maxCharCount)
-                {
-                    currentString = currentString.Substring(0, maxCharCount - preview.Length);
-                }
-        
-                preview += currentString;
-                bytesRead += bytesToReadThisTime;
-
-                if (preview.Length >= maxCharCount)
-                {
-                    break;
-                }
+                return BadRequest("Missing file object");
             }
+            var bodyRaw = formCollection["body"];
+            logger.LogInformation($"Body raw: {bodyRaw}");
+            if (string.IsNullOrEmpty(bodyRaw))
+                return BadRequest("Invalid body object");
+            
+            var command = JsonConvert.DeserializeObject<CreateSnippetCommand>(bodyRaw.ToString());
+            if (command == null)
+                return BadRequest("Failed to parse the request");
+            logger.LogInformation("Body parsed : "+command);
+            await using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            command.Content = ms.ToArray();
 
-            command.PreviewCode = preview;
-        }
+            if (string.IsNullOrEmpty(command.PreviewCode))
+            {
+                string preview = "";
+                int maxCharCount = 500;  // max number of characters
+                int bytesRead = 0; // keeping track of number of bytes read
+                int maxBytes = maxCharCount * Encoding.Default.GetMaxByteCount(1); 
+                int bytesToReadEachTime = Encoding.Default.GetMaxByteCount(1);
         
-        var response = await mediator.Send(command);
-        return CreatedAtAction("GetSnippet", new {id = response.SnippetId} , response);
+                while (bytesRead < maxBytes && bytesRead < command.Content.Length)
+                {
+                    int bytesToReadThisTime = Math.Min(bytesToReadEachTime, command.Content.Length - bytesRead);
+                    string currentString = Encoding.Default.GetString(command.Content, bytesRead, bytesToReadThisTime);
+
+                    if (preview.Length + currentString.Length > maxCharCount)
+                    {
+                        currentString = currentString.Substring(0, maxCharCount - preview.Length);
+                    }
+            
+                    preview += currentString;
+                    bytesRead += bytesToReadThisTime;
+
+                    if (preview.Length >= maxCharCount)
+                    {
+                        break;
+                    }
+                }
+
+                command.PreviewCode = preview;
+            }
+            
+            var response = await mediator.Send(command);
+            return CreatedAtAction("GetSnippet", new {id = response.SnippetId} , response);
+        }
+        catch (Exception e)
+        {
+            logger.LogError($"Failed to create the snippet: {e.Message}");
+            Console.WriteLine(e);
+            return BadRequest($"Failed to create the request");
+        }
     }
 }
