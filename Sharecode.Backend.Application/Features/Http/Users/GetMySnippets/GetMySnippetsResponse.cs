@@ -23,4 +23,6 @@ public class MySnippetsDto
     public List<ReactionCommonDto> Reactions { get; set; } = [];
     public Guid? OwnerId { get; set; }
     public long TotalCount { get; set; }
+    public string Language { get; set; }
+    public string PreviewCode { get; set; }
 }
