@@ -109,15 +109,15 @@ jobs:
             docker compose pull sharecodeapi
             docker compose up -d
 
-      - name: Debug Info for worker
-        run: |
-          docker run alenalex/sharecode-worker-outbox:master ls /usr/share/dotnet/
-          docker run alenalex/sharecode-worker-outbox:master dotnet --info
-    
-      - name: Debug Info for api
-        run: |
-          docker run alenalex/sharecode-api:master ls /usr/share/dotnet/
-          docker run alenalex/sharecode-api:master dotnet --info
+#      - name: Debug Info for worker
+#        run: |
+#          docker run alenalex/sharecode-worker-outbox:master ls /usr/share/dotnet/
+#          docker run alenalex/sharecode-worker-outbox:master dotnet --info
+#    
+#      - name: Debug Info for api
+#        run: |
+#          docker run alenalex/sharecode-api:master ls /usr/share/dotnet/
+#          docker run alenalex/sharecode-api:master dotnet --info
 
       - name: Clear the existing cache of the application
         run: |

@@ -10,8 +10,10 @@ var builder = Host.CreateApplicationBuilder(args);
 SharecodeOutboxWorker.RegisterConverter();
 
 var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .AddJsonFile("appsettings.development.json", true)
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // Use appsettings.json as the default
+    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+    .AddEnvironmentVariables()
     .Build();
 
 builder.Services.AddSerilog(x => x.ReadFrom.Configuration(builder.Configuration));
