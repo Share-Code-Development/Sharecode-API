@@ -85,7 +85,7 @@ jobs:
       if: github.ref == 'refs/heads/master'
         
   deploy:
-    needs: [build-and-deploy-job, build-and-deploy-api]
+    needs: [build-and-push-job, build-and-push-api]
     runs-on: self-hosted
     
     steps:
