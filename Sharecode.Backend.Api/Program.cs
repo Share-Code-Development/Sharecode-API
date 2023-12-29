@@ -44,7 +44,6 @@ builder.Services.AddShareCodeRateLimiting();
 
 builder.Services.RegisterCors();
 
-builder.Services.AddQuartzHostedService();
 builder.Services.AddFluentValidationRulesToSwagger();
 builder.Services.AddSwaggerGen(c =>
 {
