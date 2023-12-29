@@ -9,6 +9,7 @@ using Newtonsoft.Json.Serialization;
 using Quartz;
 using Sharecode.Backend.Api.Filters;
 using Sharecode.Backend.Api.Service;
+using Sharecode.Backend.Api.SignalR;
 using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Infrastructure;
@@ -131,9 +132,9 @@ public static class BootstrapExtensions
         return service;
     }
 
-    public static IServiceCollection RegisterLayeredServices(this IServiceCollection serviceCollection, Namespace keyValueNamespace, IWebHostEnvironment environment)
+    public static IServiceCollection RegisterLayeredServices(this IServiceCollection serviceCollection, Namespace keyValueNamespace, WebApplicationBuilder builder)
     {
-        serviceCollection.RegisterInfrastructureLayer(keyValueNamespace, environment.IsDevelopment())
+        serviceCollection.RegisterInfrastructureLayer(keyValueNamespace, builder.Configuration, builder.Environment.IsDevelopment())
             .RegisterApplicationLayer()
             .RegisterPresentationLayer();
 
@@ -205,7 +206,7 @@ public static class BootstrapExtensions
 
     public static WebApplication MapSignalREndpoints(this WebApplication webApplication)
     {
-        
+        webApplication.MapHub<SnippetHub>("/v1/live/snippet");
         return webApplication;
     }
 }

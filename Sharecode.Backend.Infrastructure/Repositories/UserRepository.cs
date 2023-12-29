@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Serilog;
 using Sharecode.Backend.Domain.Entity;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Enums;
@@ -14,7 +15,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 {
 
     private readonly ShareCodeDbContext _dbContext;
-    public UserRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder) : base(dbContext, connectionStringBuilder)
+    public UserRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder, ILogger logger) : base(dbContext, connectionStringBuilder, logger)
     {
         _dbContext = dbContext;
     }

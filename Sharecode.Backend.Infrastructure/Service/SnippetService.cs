@@ -3,6 +3,7 @@ using System.Data;
 using Npgsql;
 using Serilog;
 using Sharecode.Backend.Application.Exceptions.Snippet;
+using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Dto.Snippet;
 using Sharecode.Backend.Domain.Repositories;
@@ -20,7 +21,6 @@ public class SnippetService(ISnippetRepository snippetRepository, ILogger logger
             throw new InfrastructureDownException("Failed to get the snippet",
                 $"Failed to create the dapper context for aggregated data");
         
-        dapperContext.Open();
         try
         {
             using var transaction = dapperContext.BeginTransaction();
@@ -56,10 +56,6 @@ public class SnippetService(ISnippetRepository snippetRepository, ILogger logger
             
             logger.Error(e, "Failed to get the snippet of Id {Id} due to {Message}", snippetId, e.Message);
             throw;
-        }
-        finally
-        {
-            dapperContext.Close();
         }
     }
 }

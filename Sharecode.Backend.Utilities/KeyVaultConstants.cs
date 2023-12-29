@@ -55,4 +55,12 @@ public class KeyVaultConstants
     public static string GoogleClientSecret => "google-client-secret";
 
     #endregion
+
+    #region Redis SignalR
+    public static string SignalRRedisDbName => "signalr-redis-db-name";
+    public static string SignalRRedisConnectionPassword => "signalr-redis-connection-password";
+    public static string SignalRRedisConnectionString => "signalr-redis-connection-string";
+    public static string SignalRRedisUserName => "signalr-redis-connection-user-name";
+
+    #endregion
 }

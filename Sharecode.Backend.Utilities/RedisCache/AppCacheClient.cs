@@ -1,12 +1,13 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Utilities.RedisCache;
 
-public class AppCacheClient(ConfigurationOptions connectionConfiguration, ILogger<AppCacheClient> logger) : IAppCacheClient
+public class AppCacheClient([FromKeyedServices(DiKeyedServiceConstants.RedisForCache)]ConfigurationOptions connectionConfiguration, ILogger logger) : IAppCacheClient
 {
-    private IDatabase? RedisDatabase { get; set; }
     private ConnectionMultiplexer? Redis { get; set; }
     private static readonly object Lock = new();
     private readonly int _maxRetryCount = 3;
@@ -34,7 +35,7 @@ public class AppCacheClient(ConfigurationOptions connectionConfiguration, ILogge
         }
         catch (Exception e)
         {
-            logger.Log(LogLevel.Error, e, $"Failed to set the {key} to redis cache");
+            logger.Error(e, $"Failed to set the {key} to redis cache");
             return false;
         }
     }
@@ -55,12 +56,12 @@ public class AppCacheClient(ConfigurationOptions connectionConfiguration, ILogge
         }
         catch (OperationCanceledException)
         {
-            logger.LogWarning("Operation was cancelled.");
+            logger.Warning("Operation was cancelled.");
             return null;
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error retrieving key: {Key} from cache", key);
+            logger.Error(e, "Error retrieving key: {Key} from cache", key);
             throw;
         }
 
@@ -74,7 +75,7 @@ public class AppCacheClient(ConfigurationOptions connectionConfiguration, ILogge
         }
         catch (Exception e)
         {
-            logger.Log(LogLevel.Error, e, $"Failed to delete the {key} from redis cache");
+            logger.Error( e, $"Failed to delete the {key} from redis cache");
         }
     }
 
@@ -87,7 +88,7 @@ public class AppCacheClient(ConfigurationOptions connectionConfiguration, ILogge
         }
         catch (Exception e)
         {
-            logger.Log(LogLevel.Error, e, "Failed to delete multiple keys from redis cache");
+            logger.Error( e, "Failed to delete multiple keys from redis cache");
         }
     }
 
@@ -121,7 +122,7 @@ public class AppCacheClient(ConfigurationOptions connectionConfiguration, ILogge
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to delete keys with patterns {Key}", string.Join(",", patterns));
+            logger.Error(e, "Failed to delete keys with patterns {Key}", string.Join(",", patterns));
         }
         return deletedCount;
     }
@@ -157,12 +158,12 @@ public class AppCacheClient(ConfigurationOptions connectionConfiguration, ILogge
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "Failed to reconnect to Redis. Attempt {AttemptNumber}", retry + 1);
+                        logger.Error(ex, "Failed to reconnect to Redis-[{Type}]. Attempt {AttemptNumber}", retry + 1, DiKeyedServiceConstants.RedisForCache);
                         Thread.Sleep(_initialRetryDelay * (int)Math.Pow(2, retry));
                     }
                 }
 
-                throw new Exception("Failed to reconnect to Redis after multiple attempts.");
+                throw new ApplicationException($"Failed to reconnect to Redis-[{DiKeyedServiceConstants.RedisForCache}] after multiple attempts.");
             }
         }
     }

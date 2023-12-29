@@ -2,6 +2,8 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=0B63EF9F_002DAEB7_002D4F8A_002D808E_002D9D765C2CE759_002Fd_003AFeatures_002Fd_003ASnippet_002Ff_003ACreateSnippetCommandHandler_002Ecs/@EntryIndexedValue">ExplicitlyExcluded</s:String>
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\8.0.0-rc.2.23479.6\ref\net8.0\System.ComponentModel.Annotations.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\aleng\.nuget\packages\microsoft.aspnetcore.signalr.client.core\8.0.0\lib\net8.0\Microsoft.AspNetCore.SignalR.Client.Core.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\8.0.0\ref\net8.0\Microsoft.AspNetCore.SignalR.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=666653ca_002D186e_002D4aa0_002D87a5_002D464e4e839ace/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from ExceptionUniquenessTests.cs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;ProjectFile&gt;7CEEFB43-CE1A-4067-BAEF-5BDE30C6D263/f:ExceptionUniquenessTests.cs&lt;/ProjectFile&gt;&#xD;

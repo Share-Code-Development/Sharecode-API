@@ -1,19 +1,15 @@
 using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using Sharecode.Backend.Api.Extensions;
+using Sharecode.Backend.Api.Exceptions;
 using Sharecode.Backend.Application.Exceptions;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Infrastructure.Exceptions.Jwt;
 using Sharecode.Backend.Utilities.Extensions;
 
-namespace Sharecode.Backend.Api.Middleware;
+namespace Sharecode.Backend.Api.Middleware.Http;
 
 public class ExceptionHandlingMiddleware
 {
-    
-    private static readonly ConcurrentDictionary<string, string> ExceptionNameCache = new ConcurrentDictionary<string, string>();
-
     
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
@@ -110,7 +106,7 @@ public class ExceptionHandlingMiddleware
     private static ExceptionDetail CreateExceptionDetail(AppException appException)
     {
         string typeName = appException.GetType().Name;
-        string readableName = ExceptionNameCache.GetOrAdd(typeName, key =>
+        string readableName = ExceptionCache.Exceptions.GetOrAdd(typeName, key =>
             key.ToCapitalized().Replace("Exception", string.Empty).TrimEnd()
         );
         

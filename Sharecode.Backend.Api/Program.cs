@@ -7,6 +7,7 @@ using Quartz;
 using Serilog;
 using Sharecode.Backend.Api.Extensions;
 using Sharecode.Backend.Api.Middleware;
+using Sharecode.Backend.Api.Middleware.Http;
 using Sharecode.Backend.Utilities.KeyValue;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +39,7 @@ if (kvNameSpace == null)
 }
 builder.Services.AddSingleton<Namespace>(kvNameSpace);
 //Register Services from other layers
-builder.Services.RegisterLayeredServices(kvNameSpace, builder.Environment);
+builder.Services.RegisterLayeredServices(kvNameSpace, builder);
 builder.Services.AddShareCodeRateLimiting();
 builder.Services.CreateShareCodeJobScheduler();
 builder.Services.RegisterCors();

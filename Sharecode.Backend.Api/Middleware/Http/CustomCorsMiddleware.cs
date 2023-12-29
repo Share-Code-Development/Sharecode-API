@@ -1,4 +1,4 @@
-namespace Sharecode.Backend.Api.Middleware;
+namespace Sharecode.Backend.Api.Middleware.Http;
 
 public static class CorsMiddlewareExtensions
 {

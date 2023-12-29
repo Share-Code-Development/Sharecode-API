@@ -18,12 +18,13 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
     private NpgsqlConnectionStringBuilder _connectionStringBuilder;
     protected DbSet<TEntity> Table => _dbContext.Set<TEntity>();
     private NpgsqlConnection? _dbConnection = null;
+    protected ILogger Logger;
 
-
-    protected BaseRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder)
+    protected BaseRepository(ShareCodeDbContext dbContext, NpgsqlConnectionStringBuilder connectionStringBuilder, ILogger logger)
     {
         _dbContext = dbContext;
         _connectionStringBuilder = connectionStringBuilder;
+        Logger = logger;
     }
 
     public IDbConnection? CreateDapperContext()

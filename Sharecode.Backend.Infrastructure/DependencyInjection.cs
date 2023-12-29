@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -23,7 +24,7 @@ namespace Sharecode.Backend.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection RegisterInfrastructureLayer(this IServiceCollection collection, Namespace nameSpace, bool development = false)
+    public static IServiceCollection RegisterInfrastructureLayer(this IServiceCollection collection, Namespace nameSpace, IConfiguration configuration ,bool development = false)
     {
         if (nameSpace == null)
             throw new Exception("Failed to fetch data from Key Vault");
@@ -66,7 +67,8 @@ public static class DependencyInjection
 
         #region Redis
 
-        collection.AddShareCodeRedisClient(nameSpace);
+        collection.AddShareCodeRedisCacheClient(nameSpace);
+        
 
         #endregion
 
@@ -101,10 +103,28 @@ public static class DependencyInjection
         collection.AddScoped<ISnippetLineCommentRepository, SnippetLineCommentRepository>();
         #endregion
         
+        #region GroupStateManager
+            var clientStateManagerType = configuration.GetValue<string>("LiveGroupStateManagementConfiguration:Implementation");
+            if (string.IsNullOrEmpty(clientStateManagerType))
+                throw new ApplicationException("LiveGroupStateManagementConfiguration:Implementation has not been defined");
+
+            if (string.Equals(clientStateManagerType, "Redis", StringComparison.OrdinalIgnoreCase))
+            {
+                collection.AddSharecodeRedisStateManagerClient(nameSpace);
+            }
+            else if (string.Equals(clientStateManagerType, "PgSQL", StringComparison.OrdinalIgnoreCase))
+            {
+                
+            }
+            else
+            {
+                throw new ApplicationException("LiveGroupStateManagementConfiguration:Implementation must be either Redis or PgSQL");
+            }
+        #endregion
         return collection;
     }
-    
-    public static IServiceCollection AddShareCodeRedisClient(this IServiceCollection service, Namespace keyValueClient)
+
+    private static IServiceCollection AddShareCodeRedisCacheClient(this IServiceCollection service, Namespace keyValueClient)
     {
         string redisConnectionString = keyValueClient.Of(KeyVaultConstants.RedisConnectionString)?.Value ?? string.Empty;
         string redisUserName = keyValueClient.Of(KeyVaultConstants.RedisConnectionUserName)?.Value ?? string.Empty;
@@ -120,8 +140,32 @@ public static class DependencyInjection
             EndPoints = {endPoint}
         };
 
-        service.AddSingleton<ConfigurationOptions>(configurationOption);
+        service.AddKeyedSingleton(DiKeyedServiceConstants.RedisForCache, configurationOption);
         service.AddSingleton<IAppCacheClient, AppCacheClient>();
+        return service;
+    }
+    
+    public static IServiceCollection AddSharecodeRedisStateManagerClient(this IServiceCollection service, Namespace keyValueClient)
+    {
+        if (service.Any(x => x.ServiceType == typeof(IGroupStateManager)))
+            throw new ApplicationException("A Group State Manager is already been defined!");
+        
+        string redisConnectionString = keyValueClient.Of(KeyVaultConstants.SignalRRedisConnectionString)?.Value ?? string.Empty;
+        string redisUserName = keyValueClient.Of(KeyVaultConstants.SignalRRedisUserName)?.Value ?? string.Empty;
+        string redisPassword = keyValueClient.Of(KeyVaultConstants.SignalRRedisConnectionPassword)?.Value ?? string.Empty;
+        
+        string[]? strings = redisConnectionString.Split(":");
+        DnsEndPoint endPoint = new DnsEndPoint(strings[0], Convert.ToInt32(strings[1]));
+        var configurationOption = new ConfigurationOptions()
+        {
+            AbortOnConnectFail = false,
+            User = redisUserName,
+            Password = redisPassword,
+            EndPoints = {endPoint}
+        };
+
+        service.AddKeyedSingleton(DiKeyedServiceConstants.RedisForSignalRStateManagement, configurationOption);
+        service.AddSingleton<IGroupStateManager, RedisGroupStateManager>();
         return service;
     }
 }
