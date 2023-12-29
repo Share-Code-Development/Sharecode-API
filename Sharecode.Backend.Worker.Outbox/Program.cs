@@ -12,6 +12,7 @@ SharecodeOutboxWorker.RegisterConverter();
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // Use appsettings.json as the default
+    .AddJsonFile("appsettings.Development.json", optional: true) // Try adding this line specifically
     .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
     .AddEnvironmentVariables()
     .Build();
