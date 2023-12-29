@@ -6,5 +6,4 @@ namespace Sharecode.Backend.Domain.Repositories;
 
 public interface ISnippetRepository : IBaseRepository<Snippet>
 {
-    Task<SnippetAccessPermission> GetSnippetAccess(Guid snippetId, Guid requestedUser);
 }

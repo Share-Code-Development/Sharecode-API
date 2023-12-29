@@ -18,7 +18,7 @@ public class ExceptionUniquenessTests
     [Fact]
     public void AllExceptionTypesShouldHaveUniqueNamesAndErrorCodes()
     {
-        var exceptionDetailClient = ExceptionDetailClient.FromAssemblies(Sharecode.Backend.Api.Sharecode.ReferencingAssemblies).CollectErrors(typeof(AppException));
+        var exceptionDetailClient = ExceptionDetailClient.FromAssemblies(Sharecode.Backend.Api.SharecodeRestApi.ReferencingAssemblies).CollectErrors(typeof(AppException));
         
         var allExceptions = exceptionDetailClient.Errors;
         

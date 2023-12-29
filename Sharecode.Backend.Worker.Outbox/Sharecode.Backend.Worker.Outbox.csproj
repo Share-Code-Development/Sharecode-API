@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-Sharecode.Backend.Worker.Outbox-6AFD0982-B906-423F-917A-4D25E04E3349</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="Quartz" Version="3.8.0" />
+        <PackageReference Include="Quartz.Extensions.Hosting" Version="3.8.0" />
+        <PackageReference Include="Serilog" Version="3.1.2-dev-02097" />
+        <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.1-dev-00561" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+        <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Sharecode.Backend.Infrastructure\Sharecode.Backend.Infrastructure.csproj" />
+      <ProjectReference Include="..\Sharecode.Backend.Presentation\Sharecode.Backend.Presentation.csproj" />
+    </ItemGroup>
+</Project>

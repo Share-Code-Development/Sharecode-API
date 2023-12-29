@@ -1,23 +1,29 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Quartz;
 using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Domain.Base;
 using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Outbox;
+using ILogger = Serilog.ILogger;
 
-namespace Sharecode.Backend.Infrastructure.Jobs;
+namespace Sharecode.Backend.Worker.Outbox.Jobs;
 
 [DisallowConcurrentExecution]
-public class ProcessOutboxJob(ShareCodeDbContext dbContext, IPublisher publisher, ILogger<ProcessOutboxJob> logger,
+public class ProcessOutboxJob(ShareCodeDbContext dbContext, IPublisher publisher, ILogger logger,
         IUnitOfWork unitOfWork)
     : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
         List<OutboxMessage> messages = await FetchMessages(context.CancellationToken);
+        if (!messages.Any())
+        {
+            logger.Information("No pending job is available");
+            return;
+        }
+        
         foreach (OutboxMessage outboxMessage in messages)
         {
             List<string> errors = null;
@@ -39,7 +45,7 @@ public class ProcessOutboxJob(ShareCodeDbContext dbContext, IPublisher publisher
                                       $"Attempt: {outboxMessage.Attempt}. " +
                                       $"Error Message: {e.Message}, " +
                                       $"Error Stacktrace: {e.StackTrace}";
-                logger.LogCritical(errorMessage);
+                logger.Error(errorMessage);
                 errors ??= JsonConvert.DeserializeObject<List<string>>(outboxMessage.Error) ?? new List<string>();
                 errors.Add(errorMessage);
                 outboxMessage.Error = JsonConvert.SerializeObject(errors);
@@ -54,7 +60,7 @@ public class ProcessOutboxJob(ShareCodeDbContext dbContext, IPublisher publisher
                                       $"MessageType : {outboxMessage.Type}, " +
                                       $"MessageContent : {outboxMessage.Content}, " +
                                       $"Attempt: {outboxMessage.Attempt}. ";
-                logger.LogCritical(errorMessage);
+                logger.Error(errorMessage);
                 errors.Add(errorMessage);
                 outboxMessage.Error = JsonConvert.SerializeObject(errors);
                 continue;   
@@ -72,7 +78,7 @@ public class ProcessOutboxJob(ShareCodeDbContext dbContext, IPublisher publisher
                                       $"Attempt: {outboxMessage.Attempt}. " +
                                       $"Error Message: {e.Message}, " +
                                       $"Error Stacktrace: {e.StackTrace}";
-                logger.LogCritical(errorMessage);
+                logger.Error(errorMessage);
                 errors ??= JsonConvert.DeserializeObject<List<string>>(outboxMessage.Error) ?? new List<string>();
                 errors.Add(errorMessage);
                 outboxMessage.Error = JsonConvert.SerializeObject(errors);

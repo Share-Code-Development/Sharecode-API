@@ -5,11 +5,12 @@ using Sharecode.Backend.Application.Features.Live.Snippet;
 using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Base.Primitive;
+using Sharecode.Backend.Utilities.RedisCache;
 using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.SignalR;
 
-public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IMediator mediator) : AbstractHub<ISignalRClient>(logger, groupStateManager)
+public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IMediator mediator, IAppCacheClient appCacheClient) : AbstractHub<ISignalRClient>(logger, groupStateManager, mediator, appCacheClient)
 {
     
     public override async Task OnConnectedAsync()
@@ -33,7 +34,7 @@ public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IM
             SnippetId = snippetId
         };
         
-        var joinedSnippetResponse = await mediator.Send(joinedSnippetEvent);
+        var joinedSnippetResponse = await Mediator.Send(joinedSnippetEvent);
         if (joinedSnippetResponse == null)
         {
             await Clients.Caller.Message(new LiveEvent<object>(new LiveEventConnectionRefused("You don't have access to this snippet")));
@@ -55,9 +56,11 @@ public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IM
         {
             logger.Error(exception, "A disconnect event has been called with an error message {Message} on connection id ", exception.Message, contextConnectionId);
         }
-
+        
         await DisconnectAsync(Context.ConnectionId);
     }
+    
+    
 
     private async Task ShowMembers(Guid snippetId)
     {

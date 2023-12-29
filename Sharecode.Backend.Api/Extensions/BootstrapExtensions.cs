@@ -6,20 +6,15 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
-using Quartz;
 using Sharecode.Backend.Api.Filters;
 using Sharecode.Backend.Api.Service;
 using Sharecode.Backend.Api.SignalR;
 using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Infrastructure;
-using Sharecode.Backend.Infrastructure.Client;
-using Sharecode.Backend.Infrastructure.Jobs;
-
 using Sharecode.Backend.Presentation;
 using Sharecode.Backend.Utilities;
 using Sharecode.Backend.Utilities.Configuration;
-using Sharecode.Backend.Utilities.Email;
 using Sharecode.Backend.Utilities.KeyValue;
 
 namespace Sharecode.Backend.Api.Extensions;
@@ -94,9 +89,7 @@ public static class BootstrapExtensions
 
     public static IServiceCollection RegisterCoreServices(this IServiceCollection service, IWebHostEnvironment environment, IConfiguration configuration)
     {
-        
         service.AddSingleton<IKeyValueClient, KeyValueClient>();
-        service.AddSingleton<IEmailClient, EmailClient>();
         service.AddHttpContextAccessor();
         service.AddScoped<IHttpClientContext, HttpClientContext>();
         service.AddValidatorsFromAssembly(typeof(BootstrapExtensions).Assembly);
@@ -112,22 +105,7 @@ public static class BootstrapExtensions
             IdentityModelEventSource.ShowPII = true;
             Console.WriteLine($"Enabled to show details for authentication schema with in development env");
         }
-
-        var clientType = configuration["FileClient:ClientType"] ?? string.Empty;
-        if (string.IsNullOrEmpty(clientType))
-        {
-            throw new ApplicationException("No valid FileClient:ClientType is provided");
-        }
-
-        if (clientType.Equals("local", StringComparison.OrdinalIgnoreCase))
-        {
-            service.AddSingleton<IFileClient, LocalFileClient>();
-            Console.WriteLine($"Loaded LocalFileClient");
-        }
-        else
-        {
-            throw new ApplicationException("Found configuration, but no implementation found!");
-        }
+        
         service.AddSignalR();
         return service;
     }
@@ -163,7 +141,7 @@ public static class BootstrapExtensions
         return keyValueClient;
     }
 
-    public static IServiceCollection CreateShareCodeJobScheduler(this IServiceCollection serviceCollection)
+    /*public static IServiceCollection CreateShareCodeJobScheduler(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddQuartz(conf =>
         {
@@ -176,7 +154,7 @@ public static class BootstrapExtensions
                 });
         });
         return serviceCollection;
-    }
+    }*/
 
     public static IServiceCollection BuildAuthenticationSchema(this IServiceCollection serviceCollection, IConfiguration configuration, Namespace keyValueNamespace)
     {

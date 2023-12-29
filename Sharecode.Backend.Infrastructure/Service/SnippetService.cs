@@ -1,11 +1,13 @@
 using System.ComponentModel;
 using System.Data;
+using Dapper;
 using Npgsql;
 using Serilog;
 using Sharecode.Backend.Application.Exceptions.Snippet;
 using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Dto.Snippet;
+using Sharecode.Backend.Domain.Helper;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Db.Extensions;
 using Sharecode.Backend.Infrastructure.Exceptions;
@@ -21,6 +23,7 @@ public class SnippetService(ISnippetRepository snippetRepository, ILogger logger
             throw new InfrastructureDownException("Failed to get the snippet",
                 $"Failed to create the dapper context for aggregated data");
         
+        dapperContext.Open();
         try
         {
             using var transaction = dapperContext.BeginTransaction();
@@ -57,5 +60,42 @@ public class SnippetService(ISnippetRepository snippetRepository, ILogger logger
             logger.Error(e, "Failed to get the snippet of Id {Id} due to {Message}", snippetId, e.Message);
             throw;
         }
+        finally
+        {
+            dapperContext.Close();
+        }
     }
+    
+    public async Task<SnippetAccessPermission> GetSnippetAccess(Guid snippetId, Guid requestedUser, bool checkAdminAccess = true)
+    {
+        try
+        {
+            using var dapperContext = snippetRepository.CreateDapperContext();
+            if (dapperContext == null)
+                throw new InfrastructureDownException("Failed to get snippet permissions",
+                    "Failed to create dapper context for getting snippet permission");
+
+            var param = new DynamicParameters();
+            param.Add("snippetId", snippetId);
+            param.Add("requestedUser", requestedUser);
+            param.Add("checkAdminPermission", checkAdminAccess);
+            
+            return null;
+        }
+        catch (Exception e)
+        {
+            if (e is InfrastructureDownException)
+                throw;
+            
+            logger.Error(e, "An unknown error occured while fetching the permission of user {User} on Snippet {Snippet} due to {Message}", requestedUser, snippetId, e.Message);
+            return SnippetAccessPermission.Error();
+        }
+    }
+    
+}
+
+internal sealed class SnippetUserSqlQueries
+{
+    public static string GetSnippetAccess =>
+        $"SELECT \"Read\", \"Write\", \"Manage\" FROM get_permission_of_snippet(@snippetId, @requestedUser, @checkAdminPermission)";
 }

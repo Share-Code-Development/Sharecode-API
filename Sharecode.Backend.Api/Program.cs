@@ -12,7 +12,7 @@ using Sharecode.Backend.Utilities.KeyValue;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Sharecode.Backend.Api.Sharecode.RegisterConverter();
+Sharecode.Backend.Api.SharecodeRestApi.RegisterConverter();
 
 builder.Host.UseSerilog((ctx, conf) =>
 {
@@ -41,7 +41,7 @@ builder.Services.AddSingleton<Namespace>(kvNameSpace);
 //Register Services from other layers
 builder.Services.RegisterLayeredServices(kvNameSpace, builder);
 builder.Services.AddShareCodeRateLimiting();
-builder.Services.CreateShareCodeJobScheduler();
+
 builder.Services.RegisterCors();
 
 builder.Services.AddQuartzHostedService();

@@ -16,6 +16,7 @@ using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Repositories;
 using Sharecode.Backend.Infrastructure.Service;
 using Sharecode.Backend.Utilities;
+using Sharecode.Backend.Utilities.Email;
 using Sharecode.Backend.Utilities.KeyValue;
 using Sharecode.Backend.Utilities.RedisCache;
 using StackExchange.Redis;
@@ -28,7 +29,12 @@ public static class DependencyInjection
     {
         if (nameSpace == null)
             throw new Exception("Failed to fetch data from Key Vault");
+
+        #region EmailClient & KeyValueClient
         
+        collection.AddSingleton<IEmailClient, EmailClient>();
+
+        #endregion
         
         #region PostgreSQL
 
@@ -104,23 +110,49 @@ public static class DependencyInjection
         #endregion
         
         #region GroupStateManager
-            var clientStateManagerType = configuration.GetValue<string>("LiveGroupStateManagementConfiguration:Implementation");
-            if (string.IsNullOrEmpty(clientStateManagerType))
-                throw new ApplicationException("LiveGroupStateManagementConfiguration:Implementation has not been defined");
 
-            if (string.Equals(clientStateManagerType, "Redis", StringComparison.OrdinalIgnoreCase))
+            if (configuration.GetSection("LiveGroupStateManagementConfiguration").Value != null)
             {
-                collection.AddSharecodeRedisStateManagerClient(nameSpace);
+                var clientStateManagerType = configuration.GetValue<string>("LiveGroupStateManagementConfiguration:Implementation");
+                if (string.IsNullOrEmpty(clientStateManagerType))
+                    throw new ApplicationException("LiveGroupStateManagementConfiguration:Implementation has not been defined");
+
+                if (string.Equals(clientStateManagerType, "Redis", StringComparison.OrdinalIgnoreCase))
+                {
+                    collection.AddSharecodeRedisStateManagerClient(nameSpace);
+                }
+                else if (string.Equals(clientStateManagerType, "PgSQL", StringComparison.OrdinalIgnoreCase))
+                {
+                    
+                }
+                else
+                {
+                    throw new ApplicationException("LiveGroupStateManagementConfiguration:Implementation must be either Redis or PgSQL");
+                }
             }
-            else if (string.Equals(clientStateManagerType, "PgSQL", StringComparison.OrdinalIgnoreCase))
-            {
-                
-            }
-            else
-            {
-                throw new ApplicationException("LiveGroupStateManagementConfiguration:Implementation must be either Redis or PgSQL");
-            }
+
         #endregion
+
+        #region FileClient
+
+        var clientType = configuration["FileClient:ClientType"] ?? string.Empty;
+        if (string.IsNullOrEmpty(clientType))
+        {
+            throw new ApplicationException("No valid FileClient:ClientType is provided");
+        }
+
+        if (clientType.Equals("local", StringComparison.OrdinalIgnoreCase))
+        {
+            collection.AddSingleton<IFileClient, LocalFileClient>();
+            Console.WriteLine($"Loaded LocalFileClient");
+        }
+        else
+        {
+            throw new ApplicationException("Found configuration, but no implementation found!");
+        }
+
+        #endregion
+        
         return collection;
     }
 

@@ -51,7 +51,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
                 Response.Headers.AccessControlExposeHeaders = CachedResourceHeader;
             }
             
-            return JsonConvert.DeserializeObject<TEntity>(cacheObject, Sharecode.JsonSerializerSettings);
+            return JsonConvert.DeserializeObject<TEntity>(cacheObject, SharecodeRestApi.JsonSerializerSettings);
         }
         catch (Exception ex)
         {
@@ -73,7 +73,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
                 return;
             }
 
-            string cacheObject = JsonConvert.SerializeObject(entityResponse, Sharecode.JsonSerializerSettings);
+            string cacheObject = JsonConvert.SerializeObject(entityResponse, SharecodeRestApi.JsonSerializerSettings);
             if (string.IsNullOrEmpty(cacheObject))
                 return;
 

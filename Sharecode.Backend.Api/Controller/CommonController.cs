@@ -39,7 +39,7 @@ public class CommonController(IAppCacheClient cache, IHttpClientContext requestC
     {
         if (string.IsNullOrEmpty(_exceptionStrings))
         {
-            _exceptionStrings = ExceptionDetailClient.FromAssemblies(Sharecode.ReferencingAssemblies).CollectErrors(typeof(AppException))
+            _exceptionStrings = ExceptionDetailClient.FromAssemblies(SharecodeRestApi.ReferencingAssemblies).CollectErrors(typeof(AppException))
                 .ToString();
         }
         

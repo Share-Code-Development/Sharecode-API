@@ -44,5 +44,11 @@
       <Folder Include="Handlers\" />
       <Folder Include="Logs\" />
     </ItemGroup>
+    
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>Sharecode.Backend.UnitTest.CodeQuality</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
 
 </Project>

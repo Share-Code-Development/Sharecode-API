@@ -114,37 +114,45 @@ public class UserService : IUserService
             throw new InfrastructureDownException($"Failed to list the user's " + (recentSnippets ? "recent " : "") + "snippets", $"Failed to create the dapper context for user search");
         List<MySnippetsDto> response = [];
         long totalCount = 0;
-        var transaction = connectionContext.BeginTransaction();
-
-        var cursors = await ((NpgsqlConnection) connectionContext).QueryRefcursorsAsync((NpgsqlTransaction)transaction, UserSqlQueries.FunctionListUsersSnippet, CommandType.Text, new
+        connectionContext.Open();
+        try
         {
-            userid = userId,
-            onlyowned = onlyOwned,
-            recent = recentSnippets,
-            skip = skip,
-            take = take,
-            order = order, 
-            orderby = orderBy,
-            searchquery = searchQuery
-        });
+            var transaction = connectionContext.BeginTransaction();
 
-        var snippets = await cursors.ReadAsync<MySnippetsDto>();
-        snippets = snippets.ToList();
+            var cursors = await ((NpgsqlConnection) connectionContext).QueryRefcursorsAsync((NpgsqlTransaction)transaction, UserSqlQueries.FunctionListUsersSnippet, CommandType.Text, new
+            {
+                userid = userId,
+                onlyowned = onlyOwned,
+                recent = recentSnippets,
+                skip = skip,
+                take = take,
+                order = order, 
+                orderby = orderBy,
+                searchquery = searchQuery
+            });
 
-        var reactions = await cursors.ReadAsync<SnippetsReactionDto>();
-        reactions = reactions.ToList();
+            var snippets = await cursors.ReadAsync<MySnippetsDto>();
+            snippets = snippets.ToList();
+
+            var reactions = await cursors.ReadAsync<SnippetsReactionDto>();
+            reactions = reactions.ToList();
             
-        foreach (var snippet in snippets)
+            foreach (var snippet in snippets)
+            {
+                var snippetReactionsList = reactions.Where(x => x.SnippetId == snippet.Id)
+                    .Select(x => new ReactionCommonDto()
+                    {
+                        Count = x.Count,
+                        ReactionType = x.ReactionType
+                    })
+                    .ToList();
+                snippet.Reactions = snippetReactionsList;
+                response.Add(snippet);
+            }
+        }
+        finally
         {
-            var snippetReactionsList = reactions.Where(x => x.SnippetId == snippet.Id)
-                .Select(x => new ReactionCommonDto()
-                {
-                    Count = x.Count,
-                    ReactionType = x.ReactionType
-                })
-                .ToList();
-            snippet.Reactions = snippetReactionsList;
-            response.Add(snippet);
+            connectionContext.Close();
         }
 
         return (response);

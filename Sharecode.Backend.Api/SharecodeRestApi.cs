@@ -8,7 +8,7 @@ using Sharecode.Backend.Utilities.Configuration;
 
 namespace Sharecode.Backend.Api;
 
-public static class Sharecode
+internal static class SharecodeRestApi
 {
     public static Assembly[] ReferencingAssemblies => new[]
     {
@@ -30,13 +30,6 @@ public static class Sharecode
     public static void RegisterConverter()
     {
         JsonSerializerSettings.Converters.Add(new PermissionConverter());
-        JsonConvert.DefaultSettings = () => Sharecode.JsonSerializerSettings;
-        
-        Console.WriteLine($"Registering customer converters");
-        Console.WriteLine($"Permission Converter Check: ");
-        var serializeObject = JsonConvert.SerializeObject(Permissions.ViewSnippet);
-        Console.WriteLine($" Serialized: {serializeObject}");
-        Console.WriteLine($" Deserialized: {JsonConvert.DeserializeObject<Permission>(serializeObject)}");
-        Console.WriteLine($" Deserialized: {JsonConvert.DeserializeObject<Permission?>(serializeObject)}");
+        JsonConvert.DefaultSettings = () => SharecodeRestApi.JsonSerializerSettings;
     }
 }

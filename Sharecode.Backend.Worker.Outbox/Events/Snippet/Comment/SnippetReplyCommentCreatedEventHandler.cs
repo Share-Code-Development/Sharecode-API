@@ -1,17 +1,16 @@
 using System.Text;
 using MediatR;
 using Microsoft.Extensions.Options;
-using Serilog;
 using Sharecode.Backend.Application.Service;
-using Sharecode.Backend.Domain.Entity.Snippet;
 using Sharecode.Backend.Domain.Events.Snippet.Comment;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Utilities.Configuration;
 using Sharecode.Backend.Utilities.Email;
 using Sharecode.Backend.Utilities.Extensions;
 using Sharecode.Backend.Utilities.Extensions.Task;
+using ILogger = Serilog.ILogger;
 
-namespace Sharecode.Backend.Application.Events.Snippet.Comment;
+namespace Sharecode.Backend.Worker.Outbox.Events.Snippet.Comment;
 
 public class SnippetReplyCommentCreatedEventHandler(ISnippetCommentRepository snippetCommentRepository, ISnippetCommentService commentService, IUserRepository userRepository, IEmailClient emailClient, IOptions<FrontendConfiguration> frontEndConfiguration, ILogger logger) : INotificationHandler<SnippetReplyCommentCreateEvent>
 {

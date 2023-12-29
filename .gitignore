@@ -2,7 +2,8 @@
 /.idea
 /.vs
 #Ignore env settings to keep it as private
-/Sharecode.Backend.Api/appsettings.json
+/Sharecode.Backend.Api/appsettings-development.json
+/Sharecode.Backend.Worker.Outbox/appsettings-development.json
 
 # Migrations Folder
 /Sharecode.Backend.Infrastructure/Migrations/
@@ -24,4 +25,7 @@
 /Sharecode.Backend.Application/bin/
 /Sharecode.Backend.UnitTest.CodeQuality/obj/
 /Sharecode.Backend.UnitTest.CodeQuality/bin/
+/Sharecode.Backend.Worker.Outbox/obj/
+/Sharecode.Backend.Worker.Outbox/bin/
+/Sharecode.Backend.Worker.Outbox/Logs/
 

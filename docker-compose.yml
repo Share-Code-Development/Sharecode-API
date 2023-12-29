@@ -25,8 +25,18 @@ services:
     environment:
       - ASPNETCORE_URLS=http://*:80
     volumes:
-      - /home/share-code-develop/appsettings.json:/app/appsettings.json
+      - /home/share-code-develop/api/appsettings.json:/app/appsettings.json
       - /home/share-code-develop/snippet-store/:/app/snippet-store/
       - /home/share-code-develop/Logs/:/app/Logs/    
     ports:
       - "45012:80"
+      
+  sharecode-outbox-job:
+    image: alenalex/sharecode-worker-outbox:master
+    restart: always
+    environment: []
+    volumes:
+      - /home/share-code-develop/job/appsettings.json:/app/appsettings.json
+      - /home/share-code-develop/snippet-store/:/app/snippet-store/
+      - /home/share-code-develop/Logs/:/app/Logs/
+    ports: []

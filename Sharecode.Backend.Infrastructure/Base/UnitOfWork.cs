@@ -5,10 +5,11 @@ using Sharecode.Backend.Application.Data;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Outbox;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Infrastructure.Base;
 
-public class UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger) : IUnitOfWork
+public class UnitOfWork(ShareCodeDbContext context, ILogger logger) : IUnitOfWork
 {
     public void Commit()
     {
@@ -21,11 +22,11 @@ public class UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger)
             DateTime started = DateTime.Now;
             context.SaveChanges();
             DateTime ended = DateTime.Now;
-            logger.Log(LogLevel.Information, $"Completed unit of work execution at {ended - unitOfWorkStarted}ms. Database persistence took {ended - started}ms");
+            logger.Information("Completed unit of work execution at {UoWTime} ms. Database persistence took {Persistence} ms", ended - unitOfWorkStarted, ended - started);
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            logger.LogError(ex, "Concurrency conflict detected when committing changes.");
+            logger.Error(ex, "Concurrency conflict detected when committing changes.");
             HandleConcurrencyException(ex);
             context.SaveChanges();
         }
@@ -43,11 +44,11 @@ public class UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger)
             DateTime started = DateTime.Now;
             await context.SaveChangesAsync(cancellationToken);
             DateTime ended = DateTime.Now;
-            logger.Log(LogLevel.Information, $"Completed unit of work execution at {ended - unitOfWorkStarted}ms. Database persistence took {ended - started}ms");            
+            logger.Information("Completed unit of work execution at {UoWTime} ms. Database persistence took {Persistence} ms", ended - unitOfWorkStarted, ended - started);
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            logger.LogError(ex, "Concurrency conflict detected when committing changes asynchronously.");
+            logger.Error(ex, "Concurrency conflict detected when committing changes asynchronously.");
             HandleConcurrencyException(ex);
             await context.SaveChangesAsync(cancellationToken);
         }
@@ -159,7 +160,7 @@ public class UnitOfWork(ShareCodeDbContext context, ILogger<IUnitOfWork> logger)
                 {
                     if (baseEntity.IsDeleted)
                     {
-                        logger.LogInformation($"Delete has been called on again already deleted. Id: {baseEntity.Id}!");
+                        logger.Information("Delete has been called on again already deleted. Id: {EntityId}!", baseEntity.Id);
                         continue;
                     }
                     

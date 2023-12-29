@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Sharecode.Backend.Application.Client;
+using Sharecode.Backend.Utilities.RedisCache;
 using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.SignalR;
 
-public abstract class AbstractHub<TClient>(ILogger logger, IGroupStateManager groupStateManager) : Hub<TClient> where TClient : class
+public abstract class AbstractHub<TClient>(ILogger logger, IGroupStateManager groupStateManager, IMediator mediator ,IAppCacheClient cacheClient) : Hub<TClient> where TClient : class
 {
-
+    protected IAppCacheClient CacheClient => cacheClient;
+    protected IMediator Mediator => mediator;
     protected IGroupStateManager StateManager => groupStateManager;
     
     protected async Task<bool> AddToGroupAsync(string groupName, string connectionId, string userIdentifier, CancellationToken token = default)
