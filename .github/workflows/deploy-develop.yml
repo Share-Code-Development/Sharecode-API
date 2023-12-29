@@ -109,6 +109,18 @@ jobs:
             docker compose pull sharecodeapi
             docker compose up -d
 
+      - name: Debug Info for worker
+        run: |
+          docker run -it --entrypoint /bin/bash alenalex/sharecode-worker-outbox:master
+          ls /usr/share/dotnet/
+          dotnet --info
+          
+      - name: Debug Info for api
+        run: |
+          docker run -it --entrypoint /bin/bash alenalex/sharecode-api:master
+          ls /usr/share/dotnet/
+          dotnet --info          
+
       - name: Clear the existing cache of the application
         run: |
           sudo apt-get update

@@ -11,7 +11,7 @@ SharecodeOutboxWorker.RegisterConverter();
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
-    .AddJsonFile("appsettings.development.json")
+    .AddJsonFile("appsettings.development.json", true)
     .Build();
 
 builder.Services.AddSerilog(x => x.ReadFrom.Configuration(builder.Configuration));
