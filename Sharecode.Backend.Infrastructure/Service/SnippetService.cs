@@ -88,8 +88,12 @@ public class SnippetService(
             param.Add("snippetId", snippetId);
             param.Add("requestedUser", requestedUser);
             param.Add("checkAdminPermission", checkAdminAccess);
+
+            var permission = await dapperContext.QueryFirstOrDefaultAsync<SnippetAccessPermission>(SnippetUserSqlQueries.GetSnippetAccess, param, commandTimeout: 1000);
+            if(permission == null)
+                permission = SnippetAccessPermission.NoPermission(snippetId, requestedUser);
             
-            return null;
+            return permission;
         }
         catch (Exception e)
         {

@@ -8,41 +8,33 @@ using Sharecode.Backend.Utilities.Extensions;
 
 namespace Sharecode.Backend.Api.Middleware.Http;
 
-public class ExceptionHandlingMiddleware
+public class ExceptionHandlingMiddleware(
+    RequestDelegate next,
+    ILogger<ExceptionHandlingMiddleware> logger,
+    IWebHostEnvironment env)
 {
-    
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
-    private readonly IWebHostEnvironment _env;
-    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger, IWebHostEnvironment env)
-    {
-        _next = next;
-        _logger = logger;
-        _env = env;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (AggregateException aggEx)
         {
             var innerException = aggEx.Flatten().InnerException;
-            _logger.LogError(innerException, "An aggregate exception has been caught on the request pipeline.");
+            logger.LogError(innerException, "An aggregate exception has been caught on the request pipeline.");
             await HandleExceptionAsync(context, innerException);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception has been caught on the request pipeline.");
+            logger.LogError(ex, "An exception has been caught on the request pipeline.");
             await HandleExceptionAsync(context, ex);
         }
     }
     
     private async Task HandleExceptionAsync(HttpContext context, Exception? exception)
     {
-        ExceptionDetail exceptionDetail = BuildExceptionMessage(exception, _env.IsDevelopment());
+        ExceptionDetail exceptionDetail = BuildExceptionMessage(exception, env.IsDevelopment());
         context.Response.StatusCode = exceptionDetail.StatusCode;
         context.Response.ContentType = "application/json";
         if (exceptionDetail.StatusCode is < 500 and >= 300 )

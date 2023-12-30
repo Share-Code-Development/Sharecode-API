@@ -29,6 +29,13 @@ public class CreateSnippetCommentCommandHandler(IHttpClientContext context, IUni
             snippet.SetMeta(MetaKeys.SnippetKeys.LimitComments, false);
             limitComments = false;
         }
+
+        var restrictedUsers = snippet.ReadMeta<HashSet<Guid>?>(MetaKeys.SnippetKeys.CommentRestriction);
+        if (restrictedUsers != null)
+        {
+            if (restrictedUsers.Contains(userIdentifier.Value))
+                throw new BlockedCommentCreationException();
+        }
         
         if (limitComments.Value)
         {
@@ -99,9 +106,25 @@ public class CreateSnippetCommentCommandHandler(IHttpClientContext context, IUni
     private async Task<CreateSnippetCommentResponse> CreateSnippetLineCommentAsync(CreateSnippetCommentCommand request,
         Guid userId, Domain.Entity.Snippet.Snippet snippet, CancellationToken cancellationToken)
     {
-        
+        var lineComment = new SnippetLineComment()
+        {
+            SnippetId = request.SnippetId,
+            Text = request.Text,
+            UserId = userId,
+            LineNumber = request.LineNumber!.Value,
+            Id = Guid.NewGuid()
+        };
+
+        await snippetLineCommentRepository.AddAsync(lineComment, cancellationToken);
+        await unitOfWork.CommitAsync(cancellationToken);
         //Line comments are from snippets
         context.AddCacheKeyToInvalidate(CacheModules.Snippet, request.SnippetId.ToString());
-        return null;
+        return new CreateSnippetCommentResponse()
+        {
+            Id = lineComment.Id,
+            SnippetId = lineComment.SnippetId,
+            ParentCommentId = null,
+            LineNumber = request.LineNumber.Value
+        };
     }
 }

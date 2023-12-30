@@ -10,15 +10,15 @@ namespace Sharecode.Backend.Api;
 
 internal static class SharecodeRestApi
 {
-    public static Assembly[] ReferencingAssemblies => new[]
-    {
+    public static Assembly[] ReferencingAssemblies => [
+    
         typeof(KeyValueConfiguration).Assembly,
         typeof(Program).Assembly,
         typeof(DependencyInjection).Assembly,
         typeof(Application.DependencyInjection).Assembly,
         typeof(Presentation.DependencyInjection).Assembly,
         typeof(BaseEntity).Assembly
-    };
+    ];
 
     public static JsonSerializerSettings JsonSerializerSettings => new JsonSerializerSettings()
     {
