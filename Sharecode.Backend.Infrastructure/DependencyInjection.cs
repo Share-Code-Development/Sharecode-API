@@ -107,6 +107,10 @@ public static class DependencyInjection
         collection.AddScoped<ISnippetCommentService, SnippetCommentService>();
         collection.AddScoped<ISnippetCommentRepository, SnippetCommentRepository>();
         collection.AddScoped<ISnippetLineCommentRepository, SnippetLineCommentRepository>();
+        collection.AddScoped<ISnippetAccessControlRepository, SnippetAccessControlRepository>();
+        collection.AddScoped<ISnippetReactionRepository, SnippetReactionRepository>();
+        collection.AddScoped<ISnippetCommentReactionRepository, SnippetCommentReactionRepository>();
+        
         #endregion
         
         #region GroupStateManager

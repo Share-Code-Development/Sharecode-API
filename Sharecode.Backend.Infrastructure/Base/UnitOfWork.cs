@@ -1,7 +1,10 @@
+
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Sharecode.Backend.Application.Data;
+using Sharecode.Backend.Domain.Attributes;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Outbox;
@@ -152,8 +155,9 @@ public class UnitOfWork(ShareCodeDbContext context, ILogger logger) : IUnitOfWor
             {
                 //If the entity is set to hard delete, It will simple delete, without raising an event
                 //So in order to hard delete from database, Set the entity as HardDelete, then call Delete method
-                if (baseEntity.HardDelete)
+                if (baseEntity.HardDelete || (baseEntity.GetType().GetCustomAttribute(typeof(HardDeleteAttribute)) != null))
                 {
+                    logger.Information("Set to delete hard on {Type} on entity Id {EntityId}", baseEntity.GetType().Name, baseEntity.Id);
                     continue;
                 }
                 else

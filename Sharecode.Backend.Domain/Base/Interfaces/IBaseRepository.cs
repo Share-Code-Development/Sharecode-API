@@ -79,7 +79,7 @@ public interface IBaseRepository<TEntity>  where TEntity : BaseEntity
     /// <param name="token">A cancellation token to cancel the delete operation.</param>
     /// <returns>The number of entities deleted.</returns>
     Task<long> DeleteBatchAsync(ISpecification<TEntity>? specification = null, CancellationToken token = default);
-
+    
     /// <summary>
     /// Create a Dapper context for accessing the database.
     /// </summary>

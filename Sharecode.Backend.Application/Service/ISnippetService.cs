@@ -24,4 +24,12 @@ public interface ISnippetService
     /// <param name="checkAdminAccess">Optional. Specifies whether to check for admin access. Default is true.</param>
     /// <returns>The permission level for the requested user on the specified snippet.</returns>
     Task<SnippetAccessPermission> GetSnippetAccess(Guid snippetId, Guid requestedUser, bool checkAdminAccess = true);
+
+    /// <summary>
+    /// Deletes a snippet.
+    /// </summary>
+    /// <param name="snippedId">The ID of the snippet to delete.</param>
+    /// <param name="requestedBy">The ID of the user who requested the deletion.</param>
+    /// <returns>A task that represents the asynchronous delete operation. The task result contains a boolean value indicating whether the deletion was successful.</returns>
+    Task<bool> DeleteSnippet(Guid snippedId, Guid requestedBy);
 }

@@ -166,6 +166,11 @@ public class HttpClientContext : IHttpClientContext
 
     public async Task<bool> HasPermissionAnyAsync(CancellationToken token = default, params Permission[] key)
     {
+        return await HasPermissionAnyAsync(token, key);
+    }
+
+    public async Task<bool> HasPermissionAnyAsync(Permission[] key, CancellationToken token = default)
+    {
         var nonTrackingUsr = await GetNonTrackingUserAsync();
         if (nonTrackingUsr == null)
             return false;
@@ -181,6 +186,11 @@ public class HttpClientContext : IHttpClientContext
     }
 
     public async Task<bool> HasPermissionAllAsync(CancellationToken token = default, params Permission[] key)
+    {
+        return await HasPermissionAllAsync(key, token);
+    }
+
+    public async Task<bool> HasPermissionAllAsync(Permission[] key, CancellationToken token = default)
     {
         var nonTrackingUsr = await GetNonTrackingUserAsync();
         if (nonTrackingUsr == null)

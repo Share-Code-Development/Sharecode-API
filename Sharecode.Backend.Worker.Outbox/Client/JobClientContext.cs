@@ -36,7 +36,17 @@ public class JobClientContext : IHttpClientContext
         throw new NotImplementedException();
     }
 
+    public Task<bool> HasPermissionAnyAsync(Permission[] key, CancellationToken token = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<bool> HasPermissionAllAsync(CancellationToken token = default, params Permission[] key)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> HasPermissionAllAsync(Permission[] key, CancellationToken token = default)
     {
         throw new NotImplementedException();
     }

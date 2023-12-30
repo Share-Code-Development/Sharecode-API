@@ -32,7 +32,7 @@ if (kvNameSpace == null)
 builder.Services.AddSingleton<Namespace>(kvNameSpace);
 builder.Services.RegisterLayeredServices(kvNameSpace, builder);
 builder.Services.RegisterFakeContextAccessor();
-builder.Services.CreateShareCodeJobScheduler();
+builder.Services.RegisterOutboxProcessorScheduler();
 builder.Services.AddQuartzHostedService();
 
 var host = builder.Build();

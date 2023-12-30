@@ -3,10 +3,12 @@ using System.Data;
 using Dapper;
 using Npgsql;
 using Serilog;
+using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Exceptions.Snippet;
 using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Dto.Snippet;
+using Sharecode.Backend.Domain.Entity.Snippet;
 using Sharecode.Backend.Domain.Helper;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Db.Extensions;
@@ -14,7 +16,14 @@ using Sharecode.Backend.Infrastructure.Exceptions;
 
 namespace Sharecode.Backend.Infrastructure.Service;
 
-public class SnippetService(ISnippetRepository snippetRepository, ILogger logger) : ISnippetService
+public class SnippetService(
+    ISnippetRepository snippetRepository, 
+    ISnippetLineCommentRepository lineCommentRepository,
+    ISnippetCommentRepository commentRepository,
+    ISnippetAccessControlRepository accessControlRepository,
+    ISnippetReactionRepository snippetReactionRepository,
+    ISnippetCommentReactionRepository snippetCommentReactionRepository,
+    ILogger logger) : ISnippetService
 {
     public async Task<SnippetDto?> GetAggregatedData(Guid snippetId, Guid? requestedUser, bool updateRecent = false)
     {
@@ -91,7 +100,35 @@ public class SnippetService(ISnippetRepository snippetRepository, ILogger logger
             return SnippetAccessPermission.Error();
         }
     }
-    
+
+    public async Task<bool> DeleteSnippet(Guid snippedId, Guid requestedBy)
+    {
+        try
+        {
+            var accessControlSpecification = new EntitySpecification<SnippetAccessControl>(x => x.SnippetId == snippedId);
+            await accessControlRepository.DeleteBatchAsync(accessControlSpecification);
+
+            var snippetReactionSpecification = new EntitySpecification<SnippetReactions>(x => x.SnippetId == snippedId);
+            await snippetReactionRepository.DeleteBatchAsync(snippetReactionSpecification);
+
+            var snippetLineCommentSpecification = new EntitySpecification<SnippetLineComment>(x => x.SnippetId == snippedId);
+            await lineCommentRepository.DeleteBatchAsync(snippetLineCommentSpecification);
+
+            var snippetCommentReactionSpecification = new EntitySpecification<SnippetCommentReactions>(x => x.SnippetComment.SnippetId == snippedId);
+            await snippetCommentReactionRepository.DeleteBatchAsync(snippetCommentReactionSpecification);
+
+            var snippetCommentSpecification = new EntitySpecification<SnippetComment>(x => x.SnippetId == snippedId);
+            await commentRepository.DeleteBatchAsync(snippetCommentSpecification);
+        
+            snippetRepository.Delete(snippedId);
+            return true;
+        }
+        catch (Exception e)
+        {
+            logger.Error(e, "Failed to delete the snippet of {SnippetId} by {Requester} due to {Error}", snippedId, requestedBy ,e.Message);
+            return false;
+        }
+    }
 }
 
 internal sealed class SnippetUserSqlQueries

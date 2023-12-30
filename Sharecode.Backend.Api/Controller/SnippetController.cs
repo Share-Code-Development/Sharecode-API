@@ -7,6 +7,7 @@ using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Http.Snippet.Comments.Create;
 using Sharecode.Backend.Application.Features.Http.Snippet.Comments.List;
 using Sharecode.Backend.Application.Features.Http.Snippet.Create;
+using Sharecode.Backend.Application.Features.Http.Snippet.Delete;
 using Sharecode.Backend.Application.Features.Http.Snippet.Get;
 using Sharecode.Backend.Utilities.RedisCache;
 using ILogger = Serilog.ILogger;
@@ -91,6 +92,25 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
         
         await StoreCacheAsync(commentsResponse);
         return Ok(commentsResponse);
+    }
+
+
+    [HttpDelete("{snippetId}")]
+    [Authorize]
+    public async Task<ActionResult> DeleteSnippet(Guid snippetId)
+    {
+        var command = new DeleteSnippetCommand()
+        {
+            SnippetId = snippetId
+        };
+        var response = await mediator.Send(command);
+        if (response.Status)
+        {
+            await ClearCacheAsync();
+            return NoContent();
+        }
+
+        return NotFound(response);
     }
 
     /// <summary>

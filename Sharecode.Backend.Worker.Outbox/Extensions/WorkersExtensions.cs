@@ -53,7 +53,7 @@ public static class WorkersExtensions
         return keyValueClient;
     }
 
-    public static IServiceCollection CreateShareCodeJobScheduler(this IServiceCollection serviceCollection)
+    public static IServiceCollection RegisterOutboxProcessorScheduler(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddQuartz(conf =>
         {
