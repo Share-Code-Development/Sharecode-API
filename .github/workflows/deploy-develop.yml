@@ -7,7 +7,8 @@ on:
 jobs:
   check-for-worker-db-cleanup:
     runs-on: ubuntu-latest
-    
+    outputs: 
+      state: $ {{ steps.noChangeStep.outputs.state }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,8 +25,11 @@ jobs:
         run: echo Changes detected in DbCleanUp worker. This will be build and deployed
         
       - name: Success file(s) no change
-        if: steps.change-files-worker-db-cleanup.outputs.any_changed == 'true'
-        run: exit 1    
+        id: noChangeStep
+        if: steps.change-files-worker-db-cleanup.outputs.any_changed != 'true'
+        run: |
+          echo "state=true" >> "$GITHUB_OUTPUT"
+          exit 1
   
   build-and-push-job-worker-db-cleanup:
     needs: [check-for-worker-db-cleanup]
@@ -141,7 +145,15 @@ jobs:
       if: github.ref == 'refs/heads/master'
         
   deploy:
-    needs: [build-and-push-job-outbox-worker, build-and-push-api]
+    needs: [
+      build-and-push-job-outbox-worker,
+      build-and-push-job-worker-db-cleanup,
+      build-and-push-api
+    ]
+    env:
+      skipBuild: ${{ needs.build-and-push-job-worker-db-cleanup.outputs.state }}
+      dbBuildStatus: ${{ needs.build-and-push-job-worker-db-cleanup.result }}
+    if: $skipBuild || dbBuildStatus == 'success'
     runs-on: self-hosted
     
     steps:
