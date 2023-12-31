@@ -26,17 +26,10 @@ internal static class WorkersExtensions
         return keyValueClient;
     }
 
-    public static IServiceCollection RegisterOutboxProcessorScheduler(this IServiceCollection serviceCollection)
+    public static IServiceCollection RegisterJobs(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddQuartz(conf =>
         {
-            /*var outboxJob = new JobKey(nameof(ProcessOutboxJob));
-            conf.AddJob<ProcessOutboxJob>(outboxJob)
-                .AddTrigger(trigger =>
-                {
-                    trigger.ForJob(jobKey: outboxJob)
-                        .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(30).RepeatForever());
-                });*/
             var refreshMaterializedViewJobKey = new JobKey(nameof(RefreshMaterializedView));
             conf.AddJob<RefreshMaterializedView>(refreshMaterializedViewJobKey)
                 .AddTrigger(x =>

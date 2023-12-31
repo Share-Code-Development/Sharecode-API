@@ -30,8 +30,8 @@ if (kvNameSpace == null)
 }
 builder.Services.AddSingleton<Namespace>(kvNameSpace);
 builder.Services.RegisterConnection(kvNameSpace);
-/*builder.Services.RegisterOutboxProcessorScheduler();*/
-/*builder.Services.AddQuartzHostedService();*/
+builder.Services.RegisterJobs();
+builder.Services.AddQuartzHostedService();
 
 var host = builder.Build();
 
