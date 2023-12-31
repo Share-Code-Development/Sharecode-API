@@ -5,7 +5,53 @@ on:
 
 
 jobs:
-  
+  build-and-push-job-db-cleanup:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Check for changes in Sharecode.Backend.Worker.DbCleanup
+        id: check_changes
+        run: |
+          changes=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- Sharecode.Backend.Worker.DbCleanup)
+          if [ -z "$changes" ]; then
+            echo "No changes in Sharecode.Backend.Worker.DbCleanup. Skipping the job."
+            echo "::set-output name=skip-job::true"
+          fi
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0'
+
+      - name: Restore Dependencies for Job
+        run: dotnet restore Sharecode.Backend.Worker.DbCleanup/Sharecode.Backend.Worker.DbCleanup.csproj
+        if: steps.check_changes.outputs.skip-job != 'true'
+
+      - name: Build Job with dotnet
+        run: dotnet build Sharecode.Backend.Worker.DbCleanup/Sharecode.Backend.Worker.DbCleanup.csproj --configuration Release --no-restore
+        if: steps.check_changes.outputs.skip-job != 'true'
+
+      - name: Publish Job
+        run: dotnet publish Sharecode.Backend.Worker.DbCleanup/Sharecode.Backend.Worker.DbCleanup.csproj -c Release -o out/Sharecode.Backend.Worker.DbCleanup
+        if: steps.check_changes.outputs.skip-job != 'true'
+
+      - name: Build Job Docker Image
+        run: |
+          docker build -t alenalex/sharecode-worker-dbcleanup:master -f Sharecode.Backend.Worker.DbCleanup/Dockerfile .
+        if: steps.check_changes.outputs.skip-job != 'true'
+
+      - name: Docker Login
+        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        if: github.ref == 'refs/heads/master' && steps.check_changes.outputs.skip-job != 'true'
+
+      - name: Push Docker Image
+        run: |
+          docker push alenalex/sharecode-worker-dbcleanup:master
+        if: github.ref == 'refs/heads/master' && steps.check_changes.outputs.skip-job != 'true'
+        
   build-and-push-job-outbox-worker:
     runs-on: self-hosted
     
@@ -55,11 +101,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '8.0'
-
-#    - name: Inject the latest email-templates
-#      run: |
-#        git clone --single-branch --branch main https://github.com/Share-Code-Development/Email-templates.git email-templates
-#        cp -r email-templates Sharecode.Backend.Api/email-templates
 
     - name: Restore Dependencies for API
       run: dotnet restore Sharecode.Backend.Api/Sharecode.Backend.Api.csproj
