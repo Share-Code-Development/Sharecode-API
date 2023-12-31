@@ -23,7 +23,8 @@ public class SnippetService(
     ISnippetCommentReactionRepository snippetCommentReactionRepository,
     ILogger logger) : ISnippetService
 {
-    public async Task<SnippetDto?> GetAggregatedData(Guid snippetId, Guid? requestedUser, bool updateRecent = false)
+    public async Task<SnippetDto?> GetSnippet(Guid snippetId, Guid? requestedUser, bool updateRecent = false,
+        bool updateView = false)
     {
         using var dapperContext = snippetRepository.CreateDapperContext();
         if (dapperContext == null)
@@ -34,7 +35,7 @@ public class SnippetService(
         try
         {
             using var transaction = dapperContext.BeginTransaction();
-            var cursor = await ((NpgsqlConnection)dapperContext).QueryRefcursorsAsync((NpgsqlTransaction)transaction, $"SELECT * FROM get_snippet(@snippetid, @requestedby, @updaterecent)", CommandType.Text,new { snippetid = snippetId, requestedby = requestedUser, updaterecent = updateRecent });
+            var cursor = await ((NpgsqlConnection)dapperContext).QueryRefcursorsAsync((NpgsqlTransaction)transaction, $"SELECT * FROM get_snippet(@snippetid, @requestedby, @updaterecent, @updateview)", CommandType.Text,new { snippetid = snippetId, requestedby = requestedUser, updaterecent = updateRecent, updateview = updateView });
 
             var snippetDto = cursor.ReadSingleOrDefault<SnippetDto>();
             if (snippetDto == null)
@@ -44,17 +45,11 @@ public class SnippetService(
             var lineCommentData = cursor.Read<SnippetLineCommentDto>().ToList();
             var reactionsData = cursor.Read<ReactionCommonDto>().ToList();
             var accessControlsData = cursor.Read<SnippetAccessControlDto>().ToList();
-            List<string> selfReactions = [];
-            if (requestedUser.HasValue)
-            {
-                selfReactions = cursor.Read<string>().ToList();
-            }
             
             snippetDto.CommentCount = ((int) totalCommentCountData.count);
             snippetDto.AccessControl = accessControlsData;
             snippetDto.Reactions = reactionsData;
             snippetDto.LineComments = lineCommentData;
-            snippetDto.SelfReactions = selfReactions;
             return snippetDto;
         }
         catch (Exception e)
@@ -130,6 +125,14 @@ public class SnippetService(
             logger.Error(e, "Failed to delete the snippet of {SnippetId} by {Requester} due to {Error}", snippedId, requestedBy ,e.Message);
             return false;
         }
+    }
+
+    public async Task<HashSet<string>> GetUsersReactions(Guid snippetId, Guid requestedUser, CancellationToken token = default)
+    {
+        var reactions = await snippetReactionRepository.GetReactionsOfUser(snippetId, requestedUser, token);
+        return reactions
+            .Select(x => x.ReactionType)
+            .ToHashSet();
     }
 }
 

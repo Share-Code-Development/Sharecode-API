@@ -57,12 +57,17 @@ public class DeleteSnippetCommandHandler(ILogger logger, IHttpClientContext cont
             await unitOfWork.CommitAsync(cancellationToken);
 
             #region Cache Keys To Clear
-
+            //Clear the snippet
             context.AddCacheKeyToInvalidate(CacheModules.Snippet, request.SnippetId.ToString());
+            //Clear the comments of the snippet
             context.AddCacheKeyToInvalidate(CacheModules.SnippetComment, request.SnippetId.ToString());
+            //Clear the user's recent snippets, my snippets etc
             context.AddCacheKeyToInvalidate(CacheModules.UserSnippet, snippetOwnerId.Value.ToString());
+            //Self reaction of the user of that snippet
+            context.AddCacheKeyToInvalidate(CacheModules.SnippetUserReactions, request.SnippetId.ToString());
             if (snippetOwnerId.Value != requestingUser.Value)
             {
+                //If the owner is different, delete my recent snippets of the owner too, (Deleting from admin level may be)
                 context.AddCacheKeyToInvalidate(CacheModules.UserSnippet, requestingUser.Value.ToString());
             }
 

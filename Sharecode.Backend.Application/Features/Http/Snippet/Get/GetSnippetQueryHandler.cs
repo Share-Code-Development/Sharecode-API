@@ -11,7 +11,7 @@ public class GetSnippetQueryHandler(IHttpClientContext clientContext, ISnippetSe
     public async Task<GetSnippetResponse?> Handle(GetSnippetQuery request, CancellationToken cancellationToken)
     {
         var userId = await clientContext.GetUserIdentifierAsync();
-        var aggregatedData = await service.GetAggregatedData(request.SnippetId, userId, request.UpdateRecent);
+        var aggregatedData = await service.GetSnippet(request.SnippetId, userId, request.UpdateRecent, request.UpdateView);
         if (aggregatedData == null)
             throw new EntityNotFoundException(typeof(Domain.Entity.Snippet.Snippet), request.SnippetId, true); 
 

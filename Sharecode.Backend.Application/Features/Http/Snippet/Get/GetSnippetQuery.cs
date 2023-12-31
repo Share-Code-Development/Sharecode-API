@@ -6,4 +6,5 @@ public class GetSnippetQuery : IAppRequest<GetSnippetResponse?>
 {
     public Guid SnippetId { get; set; }
     public bool UpdateRecent { get; set; }
+    public bool UpdateView { get; set; }
 }

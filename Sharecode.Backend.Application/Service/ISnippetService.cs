@@ -13,8 +13,9 @@ public interface ISnippetService
     /// <param name="snippetId">The ID of the snippet.</param>
     /// <param name="requestedUser">The ID of the user requesting the data. Set to null for anonymous users.</param>
     /// <param name="updateRecent">Specifies whether to update the recently viewed snippets list for the requested user. The default value is false.</param>
+    /// <param name="updateView">Specified whether to update the view of the snippet</param>
     /// <returns>Returns a Task object representing the asynchronous operation. The result is a SnippetDto instance containing the aggregated data for the snippet. If no data is found or the specified snippet ID does not exist, the result will be null.</returns>
-    Task<SnippetDto?> GetAggregatedData(Guid snippetId, Guid? requestedUser, bool updateRecent = false);
+    Task<SnippetDto?> GetSnippet(Guid snippetId, Guid? requestedUser, bool updateRecent = false, bool updateView = false);
 
     /// <summary>
     /// Retrieves the access permission for a given snippet ID.
@@ -32,4 +33,13 @@ public interface ISnippetService
     /// <param name="requestedBy">The ID of the user who requested the deletion.</param>
     /// <returns>A task that represents the asynchronous delete operation. The task result contains a boolean value indicating whether the deletion was successful.</returns>
     Task<bool> DeleteSnippet(Guid snippedId, Guid requestedBy);
+
+    /// <summary>
+    /// Retrieves the set of reactions given by users for a specific snippet.
+    /// </summary>
+    /// <param name="snippetId">The identifier of the snippet.</param>
+    /// <param name="requestedUser">The identifier of the user for whom the reactions are requested.</param>
+    /// <param name="token">The cancellation token.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a hash set of unique user reactions.</returns>
+    Task<HashSet<string>> GetUsersReactions(Guid snippetId, Guid requestedUser, CancellationToken token = default);
 }

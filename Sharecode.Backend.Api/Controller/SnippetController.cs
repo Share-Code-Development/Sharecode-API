@@ -9,6 +9,8 @@ using Sharecode.Backend.Application.Features.Http.Snippet.Comments.List;
 using Sharecode.Backend.Application.Features.Http.Snippet.Create;
 using Sharecode.Backend.Application.Features.Http.Snippet.Delete;
 using Sharecode.Backend.Application.Features.Http.Snippet.Get;
+using Sharecode.Backend.Application.Features.Http.Snippet.Reactions.Get;
+using Sharecode.Backend.Application.Features.Http.Snippet.UpdateStats;
 using Sharecode.Backend.Utilities.RedisCache;
 using ILogger = Serilog.ILogger;
 
@@ -25,8 +27,8 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
     [HttpGet("{id}", Name = "Get a snippet")]
     public async Task<ActionResult<GetSnippetResponse>> GetSnippet([FromRoute] Guid id, [FromQuery] GetSnippetQuery snippetQuery)
     {
+        FrameCacheKey(CacheModules.Snippet, id.ToString());    
         snippetQuery.SnippetId = id;
-        FrameCacheKey(CacheModules.Snippet, id.ToString());
         var cacheValue = await ScanAsync<GetSnippetResponse>();
         if (cacheValue != null)
         {
@@ -42,6 +44,36 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
         //This key would be added by handler
         await ClearCacheAsync(removeSelf: false);
         return Ok(snippetResponse);
+    }
+
+    /// Retrieves the reactions given by a user for a specific snippet.
+    /// @param snippetId The identifier of the snippet.
+    /// @param userId The identifier of the user.
+    /// @returns An ActionResult object representing the HTTP response. Returns the reactions given by the user for the snippet if successful. Returns NotFound if the user reactions are not
+    /// found.
+    /// /
+    [HttpGet("{snippetId}/reactions/{userId}")]
+    [Authorize]
+    public async Task<ActionResult> GetReactionsOfUser(Guid snippetId, Guid userId)
+    {
+        FrameCacheKey(CacheModules.SnippetUserReactions, snippetId.ToString(), userId.ToString());
+        //Update sliding expiry, since only user would be able to stale this cache, and if he stales this
+        //cache, we will be deleting it
+        var userReactions = await ScanAsync<GetReactionsOfSnippetByUserResponse>(true);
+        if (userReactions != null)
+        {
+            return Ok(userReactions);
+        }
+        
+        var queryRequest = new GetReactionsOfSnippetByUserCommand()
+        {
+            SnippetId = snippetId,
+            UserId = userId
+        };
+        
+        var response = await mediator.Send(queryRequest);
+        await StoreCacheAsync(queryRequest);
+        return Ok(response);
     }
 
     /// <summary>
@@ -93,7 +125,7 @@ public class SnippetController(IAppCacheClient cache, IHttpClientContext request
         await StoreCacheAsync(commentsResponse);
         return Ok(commentsResponse);
     }
-
+    
 
     [HttpDelete("{snippetId}")]
     [Authorize]
