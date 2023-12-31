@@ -24,11 +24,9 @@ jobs:
         if: steps.change-files-worker-db-cleanup.outputs.any_changed == 'true'
         run: echo Changes detected in DbCleanUp worker. This will be build and deployed
 
-      - name: Success file(s) no change
-        id: noChangeStep
-        if: steps.change-files-worker-db-cleanup.outputs.any_changed != 'true'
-        run: |
-          exit 1
+      - name: cancelling
+        if: steps.change-files-worker-db-cleanup.outputs.any_changed != 'true'        
+        uses: andymckay/cancel-action@0.3          
           
   build-and-push-job-worker-db-cleanup:
     needs: [check-for-worker-db-cleanup]
