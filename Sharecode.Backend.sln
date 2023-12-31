@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{82AA810B-90C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharecode.Backend.Worker.Outbox", "Sharecode.Backend.Worker.Outbox\Sharecode.Backend.Worker.Outbox.csproj", "{9793B324-6110-47F8-879C-30D0EB308894}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharecode.Backend.Worker.DbCleanup", "Sharecode.Backend.Worker.DbCleanup\Sharecode.Backend.Worker.DbCleanup.csproj", "{A9202AE9-BF9C-41F8-9AC7-053CB8D47B8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{9793B324-6110-47F8-879C-30D0EB308894}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9793B324-6110-47F8-879C-30D0EB308894}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9793B324-6110-47F8-879C-30D0EB308894}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9202AE9-BF9C-41F8-9AC7-053CB8D47B8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9202AE9-BF9C-41F8-9AC7-053CB8D47B8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9202AE9-BF9C-41F8-9AC7-053CB8D47B8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9202AE9-BF9C-41F8-9AC7-053CB8D47B8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7CEEFB43-CE1A-4067-BAEF-5BDE30C6D263} = {CE7020F4-A9F3-46F2-A23E-30CD8DC16836}
@@ -68,5 +74,6 @@ Global
 		{0B63EF9F-AEB7-4F8A-808E-9D765C2CE759} = {82AA810B-90C9-4F0F-9145-40F8FE2FD292}
 		{1AD033CC-0F03-48D7-8723-44F08622A5E1} = {82AA810B-90C9-4F0F-9145-40F8FE2FD292}
 		{9793B324-6110-47F8-879C-30D0EB308894} = {82AA810B-90C9-4F0F-9145-40F8FE2FD292}
+		{A9202AE9-BF9C-41F8-9AC7-053CB8D47B8B} = {82AA810B-90C9-4F0F-9145-40F8FE2FD292}
 	EndGlobalSection
 EndGlobal

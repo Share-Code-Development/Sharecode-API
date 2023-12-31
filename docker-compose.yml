@@ -36,7 +36,16 @@ services:
     restart: always
     environment: []
     volumes:
-      - /home/share-code-develop/job/appsettings.json:/app/appsettings.json
+      - /home/share-code-develop/job-outbox/appsettings.json:/app/appsettings.json
       - /home/share-code-develop/snippet-store/:/app/snippet-store/
       - /home/share-code-develop/Logs/:/app/Logs/
     ports: []
+    
+  sharecode-dbcleanup-job:
+    image: alenalex/sharecode-worker-dbcleanup:master
+    restart: always
+    environment: []
+    volumes:
+      - /home/share-code-develop/job-db-cleanup/appsettings.json:/app/appsettings.json
+      - /home/share-code-develop/Logs/:/app/Logs/
+    ports: []    

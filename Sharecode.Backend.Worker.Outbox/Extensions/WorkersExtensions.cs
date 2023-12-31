@@ -17,7 +17,7 @@ using DependencyInjection = Sharecode.Backend.Application.DependencyInjection;
 
 namespace Sharecode.Backend.Worker.Outbox.Extensions;
 
-public static class WorkersExtensions
+internal static class WorkersExtensions
 {
     public static IServiceCollection BindConfigurationEntries(this IServiceCollection service, ConfigurationManager configurationManager)
     {

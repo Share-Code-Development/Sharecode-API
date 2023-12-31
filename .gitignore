@@ -4,6 +4,7 @@
 #Ignore env settings to keep it as private
 /Sharecode.Backend.Api/appsettings.development.json
 /Sharecode.Backend.Worker.Outbox/appsettings.development.json
+/Sharecode.Backend.Worker.DbCleanup/appsettings.development.json
 
 # Migrations Folder
 /Sharecode.Backend.Infrastructure/Migrations/
@@ -28,4 +29,7 @@
 /Sharecode.Backend.Worker.Outbox/obj/
 /Sharecode.Backend.Worker.Outbox/bin/
 /Sharecode.Backend.Worker.Outbox/Logs/
+/Sharecode.Backend.Worker.DbCleanup/obj/
+/Sharecode.Backend.Worker.DbCleanup/bin/
+/Sharecode.Backend.Worker.DbCleanup/Logs/
 
