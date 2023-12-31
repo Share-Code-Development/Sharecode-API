@@ -141,7 +141,7 @@ jobs:
       if: github.ref == 'refs/heads/master'
         
   deploy:
-    needs: [build-and-push-job, build-and-push-api]
+    needs: [build-and-push-job-outbox-worker, build-and-push-api]
     runs-on: self-hosted
     
     steps:
