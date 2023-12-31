@@ -6,7 +6,7 @@ public class SnippetAccessPermission(Guid snippetId, Guid accessorId, bool read,
     public static SnippetAccessPermission NoPermission(Guid snippetId, Guid accessorId) =>
         new SnippetAccessPermission(snippetId, accessorId, false, false, false);
     
-    public static SnippetAccessPermission Error() =>
+    public static SnippetAccessPermission Error =>
         new SnippetAccessPermission(Guid.Empty, Guid.Empty, false, false, false);
     
     public Guid SnippetId { get; } = snippetId;

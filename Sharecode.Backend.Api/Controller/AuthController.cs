@@ -1,10 +1,12 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Http.Refresh.Get;
 using Sharecode.Backend.Application.Features.Http.Users.Create;
 using Sharecode.Backend.Application.Features.Http.Users.ForgotPassword;
 using Sharecode.Backend.Application.Features.Http.Users.Login;
+using Sharecode.Backend.Application.Features.Http.Users.Logout;
 using Sharecode.Backend.Utilities.RedisCache;
 using ILogger = Serilog.ILogger;
 
@@ -73,5 +75,15 @@ public class AuthController(IAppCacheClient cache, IHttpClientContext requestCon
             return Ok();
         
         return BadRequest();
+    }
+
+    [HttpDelete("logout/", Name = "Logout and clear the refresh token")]
+    [Authorize]
+    public async Task<ActionResult> Logout()
+    {
+        var authorization = Request.Headers.Authorization;
+        var logoutCommand = new LogoutCommand(authorization.ToString());
+        await mediator.Send(logoutCommand);
+        return Ok();
     }
 }

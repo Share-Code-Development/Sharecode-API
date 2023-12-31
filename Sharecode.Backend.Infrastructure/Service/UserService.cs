@@ -142,7 +142,7 @@ public class UserService : IUserService
                 var snippetReactionsList = reactions.Where(x => x.SnippetId == snippet.Id)
                     .Select(x => new ReactionCommonDto()
                     {
-                        Count = x.Count,
+                        Reactions = x.Reactions,
                         ReactionType = x.ReactionType
                     })
                     .ToList();

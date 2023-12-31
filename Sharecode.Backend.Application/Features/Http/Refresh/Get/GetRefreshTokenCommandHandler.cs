@@ -22,7 +22,7 @@ public class GetRefreshTokenCommandHandler
         var refreshTokenSecretKey = keyValueNamespace.Of(KeyVaultConstants.JwtRefreshTokenSecretKey)?.Value ?? string.Empty;
         var refreshTokenSecretEncryption = keyValueNamespace.Of(KeyVaultConstants.JwtRefreshTokenEncryptionKey)?.Value ?? string.Empty;
 
-        var accessTokenEncryptionKey = keyValueNamespace.Of(KeyVaultConstants.JwtAccessTokenEncryptionKey)?.Value ?? string.Empty;        
+        var accessTokenEncryptionKey = keyValueNamespace.Of(KeyVaultConstants.JwtAccessTokenEncryptionKey)?.Value ?? string.Empty;
         if (string.IsNullOrEmpty(refreshTokenSecretKey) ||
             string.IsNullOrEmpty(refreshTokenSecretKey))
             throw new UnauthorizedAccessException($"Failed to validate the authority of the user from server!");

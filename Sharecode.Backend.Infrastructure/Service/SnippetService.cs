@@ -1,11 +1,9 @@
-using System.ComponentModel;
 using System.Data;
 using Dapper;
 using Npgsql;
 using Serilog;
 using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Exceptions.Snippet;
-using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Dto.Snippet;
 using Sharecode.Backend.Domain.Entity.Snippet;
@@ -101,7 +99,7 @@ public class SnippetService(
                 throw;
             
             logger.Error(e, "An unknown error occured while fetching the permission of user {User} on Snippet {Snippet} due to {Message}", requestedUser, snippetId, e.Message);
-            return SnippetAccessPermission.Error();
+            return SnippetAccessPermission.Error;
         }
     }
 
