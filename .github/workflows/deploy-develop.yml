@@ -151,10 +151,17 @@ jobs:
       build-and-push-api
     ]
     
-    if: needs.check-for-worker-db-cleanup.outputs.state == 'true' || needs.build-and-push-job-worker-db-cleanup.result == 'success'
+    #if: needs.check-for-worker-db-cleanup.outputs.state == 'true' || needs.build-and-push-job-worker-db-cleanup.result == 'success'
     runs-on: self-hosted
     
     steps:
+      - name: Print
+        run: |
+            echo "${{ needs.check-for-worker-db-cleanup.outputs.state }}"
+            echo "needs.check-for-worker-db-cleanup.outputs.state"
+            echo "${{ needs.build-and-push-job-worker-db-cleanup.result }}
+            echo "needs.build-and-push-job-worker-db-cleanup.result"
+          
       - name: Update docker compose from Github
         uses: appleboy/scp-action@master
         with:
