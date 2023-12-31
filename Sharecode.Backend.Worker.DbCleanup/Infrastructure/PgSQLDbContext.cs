@@ -1,4 +1,6 @@
 ﻿using System.Data;
+using System.Data.Common;
+using Microsoft.Data.SqlClient;
 using Npgsql;
 using Sharecode.Backend.Worker.DbCleanup.Application;
 using ILogger = Serilog.ILogger;
@@ -53,6 +55,42 @@ public class PgSqlDbContext(NpgsqlConnectionStringBuilder connectionStringBuilde
             return null;
         }
     }
+
+    public async Task ExecuteAsync(Func<DbCommand, Task<bool>> commandFunc)
+    {
+        NpgsqlConnection? sqlConnection = null; 
+        try
+        {
+            sqlConnection = await CreateAndOpenConnectionAsync();
+            if (sqlConnection == null)
+            {
+                Logger.Error("Failed to open a connection");
+                return;
+            }
+
+            await using var command = new NpgsqlCommand();
+            command.Connection = sqlConnection;
+    
+            bool success = await commandFunc(command);
+            if (success)
+            {
+                Logger.Information("Command executed successfully");
+            }
+            else
+            {
+                Logger.Error("Command execution failed");
+            }
+        }
+        finally
+        {
+            if (sqlConnection?.State == ConnectionState.Open)
+            {
+                await sqlConnection.CloseAsync();
+            }
+            sqlConnection?.Dispose();
+        }
+    }
+
 
     public ILogger Logger { get; } = logger;
     public NpgsqlConnection? CreateConnection()

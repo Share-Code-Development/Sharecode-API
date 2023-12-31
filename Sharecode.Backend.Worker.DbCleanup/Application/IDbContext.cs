@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using Microsoft.Data.SqlClient;
 using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Worker.DbCleanup.Application;
@@ -43,6 +44,8 @@ public interface IDbContext<TConnectionType, TConnectionConfiguration>
     /// otherwise, null.
     /// </returns>
     Task<TConnectionType?> CreateAndOpenConnectionAsync();
+
+    Task ExecuteAsync(Func<DbCommand, Task<bool>> commandFunc);
 
     /// <summary>
     /// Represents the logger for logging events and messages.

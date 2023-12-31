@@ -5,6 +5,7 @@ using Sharecode.Backend.Utilities.Configuration;
 using Sharecode.Backend.Utilities.KeyValue;
 using Sharecode.Backend.Worker.DbCleanup.Application;
 using Sharecode.Backend.Worker.DbCleanup.Infrastructure;
+using Sharecode.Backend.Worker.DbCleanup.Jobs;
 
 namespace Sharecode.Backend.Worker.DbCleanup.Extensions;
 
@@ -36,6 +37,13 @@ internal static class WorkersExtensions
                     trigger.ForJob(jobKey: outboxJob)
                         .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(30).RepeatForever());
                 });*/
+            var refreshMaterializedViewJobKey = new JobKey(nameof(RefreshMaterializedView));
+            conf.AddJob<RefreshMaterializedView>(refreshMaterializedViewJobKey)
+                .AddTrigger(x =>
+                {
+                    x.ForJob(refreshMaterializedViewJobKey)
+                        .WithSimpleSchedule(x => x.WithIntervalInMinutes(5).RepeatForever());
+                });
         });
         return serviceCollection;
     }
