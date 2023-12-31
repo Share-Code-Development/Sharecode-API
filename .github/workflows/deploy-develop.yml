@@ -129,7 +129,8 @@ jobs:
   deploy:
     needs: [
       build-and-push-job-outbox-worker,
-      build-and-push-api
+      build-and-push-api,
+      build-and-push-job-db-cleanup
     ]
     
     runs-on: self-hosted
