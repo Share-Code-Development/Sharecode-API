@@ -150,10 +150,8 @@ jobs:
       build-and-push-job-worker-db-cleanup,
       build-and-push-api
     ]
-    env:
-      skipBuild: ${{ needs.build-and-push-job-worker-db-cleanup.outputs.state }}
-      dbBuildStatus: ${{ needs.build-and-push-job-worker-db-cleanup.result }}
-    if: $skipBuild || dbBuildStatus == 'success'
+    
+    if: needs.check-for-worker-db-cleanup.outputs.state == 'true' || needs.build-and-push-job-worker-db-cleanup.result == 'success'
     runs-on: self-hosted
     
     steps:
