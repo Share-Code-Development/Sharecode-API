@@ -1,7 +1,9 @@
 using FluentValidation;
 using Sharecode.Backend.Application.Features.Http.Users.Create;
+using Sharecode.Backend.Application.Features.Http.Users.Delete;
 using Sharecode.Backend.Application.Features.Http.Users.ForgotPassword;
 using Sharecode.Backend.Application.Features.Http.Users.Login;
+using Sharecode.Backend.Application.Features.Http.Users.Metadata.Delete;
 using Sharecode.Backend.Application.Features.Http.Users.Metadata.List;
 using Sharecode.Backend.Application.Features.Http.Users.Metadata.Upsert;
 using Sharecode.Backend.Application.Features.Http.Users.TagSearch;
@@ -104,5 +106,19 @@ public class UpsertUserMetadataCommandValidator : AbstractValidator<UpsertUserMe
         RuleFor(x => x.MetaDictionary)
             .Must(metaDic => metaDic.Keys.All(x => x.StartsWith("FE_")))
             .WithMessage(query => $"External metadata(s) should start with FE [For example: FE_userPassed], Invalid key(s): {string.Join(", ", query.MetaDictionary.Keys.Where(key => key.StartsWith("FE_")))}");
+    }
+}
+
+public class DeleteUserMetadataCommandValidator : AbstractValidator<DeleteUserMetadataCommand>
+{
+    public DeleteUserMetadataCommandValidator()
+    {
+        RuleFor(x => x.Keys)
+            .Must(queries => queries.Any())
+            .WithMessage("External metadata(s) should not be empty");
+        
+        RuleFor(x => x.Keys)
+            .Must(metaDic => metaDic.All(x => x.StartsWith("FE_")))
+            .WithMessage(query => $"External metadata(s) should start with FE [For example: FE_userPassed], Invalid key(s): {string.Join(", ", query.Keys.Where(key => key.StartsWith("FE_")))}");
     }
 }

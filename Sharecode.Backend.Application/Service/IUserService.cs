@@ -92,4 +92,14 @@ public interface IUserService
     /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether the update was successful or not.</returns>
     Task<Dictionary<string, object?>> UpdateExternalMetadataAsync(Guid userId, Dictionary<string, object> metadataValues,
         CancellationToken token = default);
+
+    /// <summary>
+    /// Deletes external metadata for a user based on the specified keys.
+    /// </summary>
+    /// <param name="userId">The ID of the user whose external metadata needs to be deleted.</param>
+    /// <param name="keys">The set of keys representing the metadata values to delete.</param>
+    /// <param name="token">A cancellation token that can be used to cancel the asynchronous operation (optional).</param>
+    /// <returns>A Task representing the asynchronous operation. The task result is a dictionary of deleted metadata keys and their corresponding values.</returns>
+    Task DeleteExternalMetadataAsync(Guid userId, HashSet<string> keys,
+        CancellationToken token = default);
 }

@@ -188,6 +188,16 @@ public class UserService : IUserService
         _userRepository.Update(user);
         return oldValues;
     }
+
+    public async Task DeleteExternalMetadataAsync(Guid userId, HashSet<string> keys, CancellationToken token = default)
+    {
+        var user = await _userRepository.GetAsync(userId, token: token);
+        if (user == null)
+            throw new EntityNotFoundException(typeof(User), userId);
+        
+        user.DeleteMeta(keys);
+        _userRepository.Update(user);
+    }
 }
 
 internal static class UserSqlQueries

@@ -39,11 +39,6 @@
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Handlers\" />
-      <Folder Include="Logs\" />
-    </ItemGroup>
     
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">

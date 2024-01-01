@@ -76,9 +76,20 @@ public abstract class BaseEntityWithMetadata : BaseEntity
 
     public void DeleteMeta(MetaKey key)
     {
-        Metadata.Remove(key.Key);
+        DeleteMeta(key.Key);
     }
-    
-    
+
+    public void DeleteMeta(string key)
+    {
+        Metadata.Remove(key);
+    }
+
+    public void DeleteMeta(HashSet<string> keys)
+    {
+        foreach (var key in keys)
+        {
+            DeleteMeta(key);
+        }
+    }
     
 }
