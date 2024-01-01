@@ -26,7 +26,7 @@ public class DeleteUserCommandHandler(IUserService service, IHttpClientContext c
                     Permissions.DeleteSnippetOthers);
             }
             logger.Information("An account deletion has been requested by {RequestUser} on Account Id {ToDelete}. Is the request to soft delete = {SoftDelete}", userIdentifier, request.UserId, request.SoftDelete);
-            var success = await service.DeleteUser(request.UserId, userIdentifier, request.SoftDelete ?? false, cancellationToken);
+            var success = await service.DeleteUserAsync(request.UserId, userIdentifier, request.SoftDelete ?? false, cancellationToken);
             logger.Information("The requested account deletion has been processed on Account Id {ToDelete}. Is the request to soft delete = {SoftDelete}. The response is {Response}", userIdentifier, request.UserId, request.SoftDelete, success);
         
             return new DeleteUserResponse { Success = success };

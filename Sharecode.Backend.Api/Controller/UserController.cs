@@ -6,6 +6,7 @@ using Sharecode.Backend.Application.Features.Http.Users.Delete;
 using Sharecode.Backend.Application.Features.Http.Users.Get;
 using Sharecode.Backend.Application.Features.Http.Users.GetMySnippets;
 using Sharecode.Backend.Application.Features.Http.Users.Metadata.List;
+using Sharecode.Backend.Application.Features.Http.Users.Metadata.Upsert;
 using Sharecode.Backend.Application.Features.Http.Users.TagSearch;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Utilities.Extensions;
@@ -155,6 +156,23 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
         }
 
         return Ok(response);
+    }
+    
+    [HttpPost("{userId}/metadata")]
+    public async Task<ActionResult> UpsertMetadata([FromRoute] Guid userId, [FromBody] UpsertUserMetadataCommand command)
+    {
+        command.UserId = userId;
+        var res = await mediator.Send(command);
+        await ClearCacheAsync();
+        return Ok(res);
+    }
+    
+    [HttpDelete("{userId}/metadata")]
+    public async Task<ActionResult> DeleteMetadata([FromRoute] Guid userId)
+    {
+        
+        await ClearCacheAsync();
+        return Ok();
     }
 
     #endregion

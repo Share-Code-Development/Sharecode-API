@@ -122,6 +122,7 @@ public static class Permissions
     #region Admin
 
     public static Permission ViewUserOtherAdmin => new("view-user-profile-others-admin", "View entire user information of others", true);
+    public static Permission UpdateUserOtherAdmin => new("update-user-profile-others-admin", "Update entire user information of others", true);
 
     #endregion
 

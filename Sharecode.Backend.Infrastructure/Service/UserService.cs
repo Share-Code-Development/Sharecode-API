@@ -37,7 +37,7 @@ public class UserService : IUserService
         _context = context;
     }
     
-    public async Task<bool> IsEmailAddressUnique(string emailAddress, CancellationToken token = default)
+    public async Task<bool> IsEmailAddressUniqueAsync(string emailAddress, CancellationToken token = default)
     {
         return await (_dbContext.Set<User>()
             .AsNoTracking()
@@ -59,7 +59,7 @@ public class UserService : IUserService
         return user.VerifyUser();
     }
 
-    public async Task<bool> RequestForgotPassword(string emailAddress, CancellationToken token = default)
+    public async Task<bool> RequestForgotPasswordAsync(string emailAddress, CancellationToken token = default)
     {
         var user = await _userRepository.GetAsync(emailAddress, true, token, true);
         if (user == null)
@@ -105,7 +105,7 @@ public class UserService : IUserService
         return mentionableUsers.ToList();
     }
 
-    public async Task<List<MySnippetsDto>> ListUserSnippets(Guid userId, bool onlyOwned = false,
+    public async Task<List<MySnippetsDto>> ListUserSnippetsAsync(Guid userId, bool onlyOwned = false,
         bool recentSnippets = true, int skip = 0, int take = 20,
         string order = "ASC", string orderBy = "ModifiedAt", string searchQuery = null, CancellationToken cancellationToken = default)
     {
@@ -158,7 +158,7 @@ public class UserService : IUserService
         return (response);
     }
 
-    public async Task<bool> DeleteUser(Guid userId, Guid requestedBy, bool softDelete = true, CancellationToken token = default)
+    public async Task<bool> DeleteUserAsync(Guid userId, Guid requestedBy, bool softDelete = true, CancellationToken token = default)
     {
         var userToDelete = await _userRepository.GetAsync(userId, true, token);
         if (userToDelete == null)
@@ -169,6 +169,24 @@ public class UserService : IUserService
         
         userToDelete.RequestAccountDeletion(softDelete, requestedBy);
         return true;
+    }
+
+    public async Task<Dictionary<string, object?>> UpdateExternalMetadataAsync(Guid userId, Dictionary<string, object> metadataValues, CancellationToken token = default)
+    {
+        var user = await _userRepository.GetAsync(userId, token: token);
+        if (user == null)
+            throw new EntityNotFoundException(typeof(User), userId);
+
+        Dictionary<string, object?> oldValues = new();
+        
+        foreach (var (key, value) in metadataValues)
+        {
+            var val = user.SetMeta(key, value);
+            oldValues[key] = val;
+        }
+
+        _userRepository.Update(user);
+        return oldValues;
     }
 }
 

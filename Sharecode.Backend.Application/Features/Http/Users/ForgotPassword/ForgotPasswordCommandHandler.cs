@@ -12,7 +12,7 @@ public class ForgotPasswordCommandHandler(IUserService service, IUnitOfWork unit
     {
         try
         {
-            var willSendPassword = await service.RequestForgotPassword(request.EmailAddress, token: cancellationToken);
+            var willSendPassword = await service.RequestForgotPasswordAsync(request.EmailAddress, token: cancellationToken);
             await unitOfWork.CommitAsync(cancellationToken);
             return willSendPassword;
         }

@@ -20,6 +20,41 @@ public abstract class BaseEntityWithMetadata : BaseEntity
         return true;
     }
 
+    /// <summary>
+    /// Sets the metadata value for the given key.
+    /// </summary>
+    /// <param name="key">The key of the metadata.</param>
+    /// <param name="value">The value to set. Pass null to remove the metadata.</param>
+    /// <returns>The previous value associated with the key if it exists, otherwise null.</returns>
+    public object? SetMeta(string key, object? value)
+    {
+        // Check that key is not null, empty, or whitespace
+        if (string.IsNullOrWhiteSpace(key))
+            throw new ArgumentException("Key cannot be null, empty, or whitespace.", nameof(key));
+        
+        // Early return if the value is null
+        if (value == null)
+        {
+            if (Metadata.Remove(key, out var oldValue))
+            {
+                return oldValue;
+            }
+
+            return null;
+        }
+
+        // Assign new value and return old value (if existed)
+        if (Metadata.TryGetValue(key, out var oldValue2))
+        {
+            Metadata[key] = value;
+            return oldValue2;
+        }
+
+        // No previous value, just set new value
+        Metadata[key] = value;
+        return null;
+    }
+
     
     public T? ReadMeta<T>(MetaKey key, T? defaultValue = default)
     {

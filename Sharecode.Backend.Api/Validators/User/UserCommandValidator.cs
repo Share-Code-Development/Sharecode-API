@@ -3,6 +3,7 @@ using Sharecode.Backend.Application.Features.Http.Users.Create;
 using Sharecode.Backend.Application.Features.Http.Users.ForgotPassword;
 using Sharecode.Backend.Application.Features.Http.Users.Login;
 using Sharecode.Backend.Application.Features.Http.Users.Metadata.List;
+using Sharecode.Backend.Application.Features.Http.Users.Metadata.Upsert;
 using Sharecode.Backend.Application.Features.Http.Users.TagSearch;
 using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Utilities.MetaKeys;
@@ -75,6 +76,10 @@ public class ListUserMetadataQueryValidator : AbstractValidator<ListUserMetadata
     public ListUserMetadataQueryValidator()
     {
         RuleFor(x => x.Queries)
+            .Must(queries => queries.Any())
+            .WithMessage("Queries should not be empty");
+        
+        RuleFor(x => x.Queries)
             .Must(queries => !queries.Any(key => RestrictedKeys.Contains(key)))
             .WithMessage(query => $"Queries contain restricted keys: {string.Join(", ", query.Queries.Where(key => RestrictedKeys.Contains(key)))}");
         
@@ -85,5 +90,19 @@ public class ListUserMetadataQueryValidator : AbstractValidator<ListUserMetadata
         RuleFor(x => x.UserId)
             .NotNull()
             .WithMessage("Please ensure a proper user id in the query");
+    }
+}
+
+public class UpsertUserMetadataCommandValidator : AbstractValidator<UpsertUserMetadataCommand>
+{
+    public UpsertUserMetadataCommandValidator()
+    {
+        RuleFor(x => x.MetaDictionary)
+            .Must(queries => queries.Any())
+            .WithMessage("External metadata(s) should not be empty");
+        
+        RuleFor(x => x.MetaDictionary)
+            .Must(metaDic => metaDic.Keys.All(x => x.StartsWith("FE_")))
+            .WithMessage(query => $"External metadata(s) should start with FE [For example: FE_userPassed], Invalid key(s): {string.Join(", ", query.MetaDictionary.Keys.Where(key => key.StartsWith("FE_")))}");
     }
 }

@@ -11,7 +11,7 @@ public class GetMySnippetsQueryHandler(IUserRepository userRepository, IUserServ
     public async Task<GetMySnippetsResponse> Handle(GetMySnippetsQuery request, CancellationToken cancellationToken)
     {
         var userIdentifier = await context.GetUserIdentifierAsync();
-        var listUserSnippets = await userService.ListUserSnippets(userIdentifier!.Value, request.OnlyOwned, request.RecentSnippets, request.Skip, request.Take, request.Order ?? "ASC", request.OrderBy ?? string.Empty, request.SearchQuery ?? string.Empty, cancellationToken);
+        var listUserSnippets = await userService.ListUserSnippetsAsync(userIdentifier!.Value, request.OnlyOwned, request.RecentSnippets, request.Skip, request.Take, request.Order ?? "ASC", request.OrderBy ?? string.Empty, request.SearchQuery ?? string.Empty, cancellationToken);
         GetMySnippetsResponse response = new GetMySnippetsResponse(listUserSnippets)
         {
             Query = request
