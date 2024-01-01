@@ -1,17 +1,22 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
+using Newtonsoft.Json;
 using Sharecode.Backend.Api.Exceptions;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.RedisCache;
 using Sharecode.Backend.Utilities.RequestDetail;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.Service;
 
 public class HttpClientContext : IHttpClientContext
 {
     private readonly IHttpContextAccessor _contextAccessor;
+    private readonly ILogger _logger;
     private readonly IUserRepository _userRepository;
+    private readonly IAppCacheClient _appCacheClient;
     private Guid? _userIdentifier = null;
     private User? _user = null;
     private bool? _isApiRequest = null;
@@ -21,12 +26,15 @@ public class HttpClientContext : IHttpClientContext
     private IRequestDetail? _requestDetail;
     private bool? _hasAuthorizationBearer = null;
     private readonly Dictionary<string, HashSet<string>> _cacheInvalidateRecords = new();
+    private HashSet<Permission>? _permissions;
     
-    public HttpClientContext(IHttpContextAccessor contextAccessor, IUserRepository userRepository)
+    public HttpClientContext(IHttpContextAccessor contextAccessor, IUserRepository userRepository, IAppCacheClient cacheClient, ILogger logger)
     {
         _contextAccessor = contextAccessor;
         _userRepository = userRepository;
         _isApiRequest = IsApiRequest;
+        _appCacheClient = cacheClient;
+        _logger = logger;
     }
 
     public string? EmailAddress
@@ -171,13 +179,10 @@ public class HttpClientContext : IHttpClientContext
 
     public async Task<bool> HasPermissionAnyAsync(Permission[] key, CancellationToken token = default)
     {
-        var nonTrackingUsr = await GetNonTrackingUserAsync();
-        if (nonTrackingUsr == null)
-            return false;
-        
+        var permissions = await GetPermissionsAsync();
         foreach (var permission in key)
         {
-            var contains = nonTrackingUsr.Permissions.Contains(permission);
+            var contains = permissions.Contains(permission);
             if (contains)
                 return true;
         }
@@ -192,13 +197,10 @@ public class HttpClientContext : IHttpClientContext
 
     public async Task<bool> HasPermissionAllAsync(Permission[] key, CancellationToken token = default)
     {
-        var nonTrackingUsr = await GetNonTrackingUserAsync();
-        if (nonTrackingUsr == null)
-            return false;
-        
+        var permissions = await GetPermissionsAsync();
         foreach (var permission in key)
         {
-            var contains = nonTrackingUsr.Permissions.Contains(permission);
+            var contains = permissions.Contains(permission);
             if (!contains)
                 return false;
         }
@@ -284,5 +286,62 @@ public class HttpClientContext : IHttpClientContext
         // ...
 
         return null; // Replace with the actual user identifier obtained from the API key.
+    }
+
+    private async Task<HashSet<Permission>> GetPermissionsAsync()
+    {
+        //If the permission is not yet initialized
+        if (_permissions == null)
+        {
+            var userIdentifier = await GetUserIdentifierAsync();
+            //If the user doesn't have a token, set the permission as an empty array 
+            if (!userIdentifier.HasValue)
+            {
+                _logger.Information("No valid user id is available to identify the user");
+                _permissions = [];
+                return _permissions;
+            }
+            
+            //If the user is already fetched, get the permissions from the user object
+            if (_user != null)
+            {
+                _logger.Information("Permission data for {UserId} has been retrieved from the loaded user object.", _user.Id);
+                _permissions = _user.Permissions;
+                return _permissions;
+            }
+
+            var cacheString = await _appCacheClient.GetCacheAsync(
+                $"{CacheModules.InternalUserPermission}-{userIdentifier.Value.ToString()}", true);
+
+            bool fetchFromDb = true;
+            if (!string.IsNullOrEmpty(cacheString))
+            {
+                try
+                {
+                    _permissions = JsonConvert.DeserializeObject<HashSet<Permission>>(cacheString);
+                    if (_permissions == null)
+                        fetchFromDb = true;
+                    else
+                        fetchFromDb = false;
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "Fetching Permission From Internal cache succeeded but failed to deserialize the object for user {UserId} due to {Message}", userIdentifier.Value.ToString(),e.Message);
+                    fetchFromDb = true;
+                }
+            }
+
+            if (!fetchFromDb)
+            {
+                _logger.Information("The permission has been found on the internal cache of the user {UserId}. Retried from the caching unit", userIdentifier.Value);
+                return _permissions!;
+            }
+            
+            _permissions = await _userRepository.GetUsersPermissionAsync(userIdentifier.Value);
+            await _appCacheClient.WriteCacheAsync($"{CacheModules.InternalUserPermission}-{userIdentifier.Value.ToString()}", JsonConvert.SerializeObject(_permissions), _appCacheClient.DefaultCachingLife);
+            _logger.Information("The permission has been loaded from database for user {UserId}", userIdentifier.Value);
+        }
+
+        return _permissions;
     }
 }

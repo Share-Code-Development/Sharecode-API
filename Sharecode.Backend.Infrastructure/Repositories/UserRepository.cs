@@ -166,4 +166,22 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                 }
             }).ToListAsync(token);
     }
+
+    public async Task<Dictionary<string, object>> GetMetadataAsync(Guid userId, CancellationToken token = default)
+    {
+        return await Table
+            .AsNoTracking()
+            .Where(x => x.Id == userId)
+            .Select(x => x.Metadata)
+            .FirstOrDefaultAsync(cancellationToken: token) ?? new Dictionary<string, object>();
+    }
+
+    public async Task<HashSet<Permission>> GetUsersPermissionAsync(Guid userId, CancellationToken token = default)
+    {
+        return await Table
+            .AsNoTracking()
+            .Where(x => x.Id == userId)
+            .Select(x => x.Permissions)
+            .FirstOrDefaultAsync(cancellationToken: token) ?? [];
+    }
 }

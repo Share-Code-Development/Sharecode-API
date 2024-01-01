@@ -87,4 +87,21 @@ public interface IUserRepository : IBaseRepository<User>
     /// <returns>A task that represents the asynchronous operation.
     /// The task result contains a list of users with enabled notifications.</returns>
     Task<List<User>> GetUsersWithEnabledNotification(HashSet<Guid> userIds, CancellationToken token = default);
+
+    /// <summary>
+    /// Retrieves user metadata for the specified user ID and metadata keys.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="metaKeys">A set of metadata keys to retrieve.</param>
+    /// <param name="token">A cancellation token that can be used to cancel the asynchronous operation (optional).</param>
+    /// <returns>A task representing the asynchronous operation. The task result contains a dictionary where the keys are metadata keys and the values are corresponding metadata values.</returns>
+    Task<Dictionary<string, object>> GetMetadataAsync(Guid userId, CancellationToken token = default);
+
+    /// <summary>
+    /// Retrieves the permissions of the specified user.
+    /// </summary>
+    /// <param name="userId">The unique identifier of the user.</param>
+    /// <param name="token">The cancellation token to cancel operation if needed. Default value is <see cref="CancellationToken.None"/>.</param>
+    /// <returns>A <see cref="Task{T}"/> representing the asynchronous operation. The task result contains a <see cref="HashSet{T}"/> of <see cref="Permission"/> objects representing the user's permissions.</returns>
+    Task<HashSet<Permission>> GetUsersPermissionAsync(Guid userId, CancellationToken token = default);
 }

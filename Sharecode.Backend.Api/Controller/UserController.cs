@@ -5,8 +5,10 @@ using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Http.Users.Delete;
 using Sharecode.Backend.Application.Features.Http.Users.Get;
 using Sharecode.Backend.Application.Features.Http.Users.GetMySnippets;
+using Sharecode.Backend.Application.Features.Http.Users.Metadata.List;
 using Sharecode.Backend.Application.Features.Http.Users.TagSearch;
 using Sharecode.Backend.Domain.Exceptions;
+using Sharecode.Backend.Utilities.Extensions;
 using Sharecode.Backend.Utilities.RedisCache;
 using ILogger = Serilog.ILogger;
 
@@ -127,5 +129,34 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
         
         return NotFound();
     }
+
+    #region Metadata
+
+    [HttpGet("{userId}/metadata")]
+    public async Task<ActionResult> ListMetadata([FromRoute] Guid userId, [FromQuery] string keys)
+    {
+        FrameCacheKey(CacheModules.UserMetadata, userId.ToString(), GetQuery());
+        var cacheResponse = await ScanAsync<ListUserMetadataResponse>();
+        if (cacheResponse != null)
+        {
+            return Ok(cacheResponse);
+        }
+
+        var query = new ListUserMetadataQuery()
+        {
+            UserId = userId
+        };
+        var keySet = keys.Split(",").ToHashSet();
+        query.Queries.AddRange(keySet);
+        var response = await mediator.Send(query);
+        if (response == null)
+        {
+            return NoContent();
+        }
+
+        return Ok(response);
+    }
+
+    #endregion
     
 }
