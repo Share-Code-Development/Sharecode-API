@@ -5,8 +5,16 @@ namespace Sharecode.Backend.Application.Client;
 public interface IGroupStateManager
 {
 
+    /// <summary>
+    /// Execute the startup procedure
+    /// </summary>
+    /// <param name="executionScope">The current execution scope while starting the host</param>
     void OnAppInit(IServiceScope executionScope);
     
+    /// <summary>
+    /// Execute the shut down procedure
+    /// </summary>
+    /// <param name="executionScope">The current execution scope while stopping the host</param>
     void OnAppDestruct(IServiceScope executionScope);
     
     /// <summary>

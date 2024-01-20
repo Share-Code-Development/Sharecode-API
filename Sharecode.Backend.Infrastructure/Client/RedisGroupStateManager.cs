@@ -27,7 +27,7 @@ public class RedisGroupStateManager([FromKeyedServices(DiKeyedServiceConstants.R
             RedisKey[] keysToDelete = (RedisKey[])innerResult[1];
             foreach (var key in keysToDelete)
             {
-                bool deleted = Database.KeyDelete(key);
+                Database.KeyDelete(key);
             }
         } while (cursor != 0);
     }
@@ -44,7 +44,7 @@ public class RedisGroupStateManager([FromKeyedServices(DiKeyedServiceConstants.R
             RedisKey[] keysToDelete = (RedisKey[])innerResult[1];
             foreach (var key in keysToDelete)
             {
-                bool deleted = Database.KeyDelete(key);
+                Database.KeyDelete(key);
             }
         } while (cursor != 0);
     }
@@ -60,7 +60,6 @@ public class RedisGroupStateManager([FromKeyedServices(DiKeyedServiceConstants.R
             await Database.HashSetAsync(key, entries);
 
             #endregion
-
             #region Adding users group to the connectionId
 
             RedisKey connectionKey = new RedisKey($"{SessionValue}:{connectionId}");
@@ -169,10 +168,7 @@ public class RedisGroupStateManager([FromKeyedServices(DiKeyedServiceConstants.R
                 {
                     try
                     {
-                        if (Redis != null)
-                        {
-                            Redis.Dispose();
-                        }
+                        Redis?.Dispose();
                         Redis = ConnectionMultiplexer.Connect(connectionConfiguration);
                         return Redis.GetDatabase();
                     }
