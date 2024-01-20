@@ -26,6 +26,8 @@
 /Sharecode.Backend.Application/bin/
 /Sharecode.Backend.UnitTest.CodeQuality/obj/
 /Sharecode.Backend.UnitTest.CodeQuality/bin/
+/Sharecode.Backend.IntegrationTest.Test/obj/
+/Sharecode.Backend.IntegrationTest.Test/bin/
 /Sharecode.Backend.Worker.Outbox/obj/
 /Sharecode.Backend.Worker.Outbox/bin/
 /Sharecode.Backend.Worker.Outbox/Logs/

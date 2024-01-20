@@ -1,7 +1,14 @@
-﻿namespace Sharecode.Backend.Application.Client;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace Sharecode.Backend.Application.Client;
 
 public interface IGroupStateManager
 {
+
+    void OnAppInit(IServiceScope executionScope);
+    
+    void OnAppDestruct(IServiceScope executionScope);
+    
     /// <summary>
     /// Adds a user to a specified group asynchronously.
     /// </summary>

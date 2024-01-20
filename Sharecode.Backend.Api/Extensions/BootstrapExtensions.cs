@@ -12,6 +12,7 @@ using Sharecode.Backend.Api.SignalR;
 using Sharecode.Backend.Application;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Infrastructure;
+using Sharecode.Backend.Infrastructure.Client;
 using Sharecode.Backend.Presentation;
 using Sharecode.Backend.Utilities;
 using Sharecode.Backend.Utilities.Configuration;
@@ -21,6 +22,15 @@ namespace Sharecode.Backend.Api.Extensions;
 
 public static class BootstrapExtensions
 {
+
+    public static IServerSession CreateAndRegisterSession(this WebApplicationBuilder builder)
+    {
+        var value = builder.Configuration.GetValue<string?>("ServerId") ?? string.Empty;
+
+        IServerSession serverSession = new ServerSession(value);
+        builder.Services.AddSingleton(serverSession);
+        return serverSession;
+    }
     
     public static IServiceCollection AddShareCodeRateLimiting(this IServiceCollection service)
     {
@@ -181,6 +191,8 @@ public static class BootstrapExtensions
 
         return serviceCollection;
     }
+    
+    
 
     public static WebApplication MapSignalREndpoints(this WebApplication webApplication)
     {

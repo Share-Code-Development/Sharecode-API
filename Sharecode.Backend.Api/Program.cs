@@ -1,16 +1,17 @@
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.Primitives;
 using Microsoft.OpenApi.Models;
 using Prometheus;
-using Quartz;
 using Serilog;
 using Sharecode.Backend.Api.Extensions;
-using Sharecode.Backend.Api.Middleware;
 using Sharecode.Backend.Api.Middleware.Http;
+using Sharecode.Backend.Infrastructure;
 using Sharecode.Backend.Utilities.KeyValue;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Create a unique session to this runtime
+var singletonSession = builder.CreateAndRegisterSession();
 
 Sharecode.Backend.Api.SharecodeRestApi.RegisterConverter();
 
@@ -54,7 +55,7 @@ builder.Services.BuildAuthenticationSchema(builder.Configuration, kvNameSpace);
 builder.Services.UseHttpClientMetrics();
 //---------------------------------------------------------------------------------------------------------------------
 var app = builder.Build();
-
+app.InitializeGroupStateManagers();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -86,3 +87,5 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapSignalREndpoints();
 app.Run();
+
+public partial class Program {}

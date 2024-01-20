@@ -5,7 +5,11 @@
   &lt;Assembly Path="C:\Users\aleng\.nuget\packages\microsoft.aspnetcore.signalr.client.core\8.0.0\lib\net8.0\Microsoft.AspNetCore.SignalR.Client.Core.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\8.0.0\ref\net8.0\Microsoft.AspNetCore.SignalR.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=666653ca_002D186e_002D4aa0_002D87a5_002D464e4e839ace/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from ExceptionUniquenessTests.cs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=29a96f70_002Ddfd6_002D401a_002Da7c9_002D1c88d9e683b3/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from &amp;lt;test&amp;gt;\&amp;lt;Sharecode.Backend.IntegrationTest.Test&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;Project Location="D:\ShareCode\Sharecode-Api\Sharecode.Backend.IntegrationTest.Test" Presentation="&amp;lt;test&amp;gt;\&amp;lt;Sharecode.Backend.IntegrationTest.Test&amp;gt;" /&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=666653ca_002D186e_002D4aa0_002D87a5_002D464e4e839ace/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from ExceptionUniquenessTests.cs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;ProjectFile&gt;7CEEFB43-CE1A-4067-BAEF-5BDE30C6D263/f:ExceptionUniquenessTests.cs&lt;/ProjectFile&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=ISJSON/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using Dapper;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,10 +18,12 @@ using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Repositories;
 using Sharecode.Backend.Infrastructure.Service;
 using Sharecode.Backend.Utilities;
+using Sharecode.Backend.Utilities.Configuration;
 using Sharecode.Backend.Utilities.Email;
 using Sharecode.Backend.Utilities.KeyValue;
 using Sharecode.Backend.Utilities.RedisCache;
 using StackExchange.Redis;
+using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Infrastructure;
 
@@ -32,7 +36,7 @@ public static class DependencyInjection
 
         #region EmailClient & KeyValueClient
         
-        collection.AddSingleton<IEmailClient, EmailClient>();
+        /*collection.AddSingleton<IEmailClient, EmailClient>();*/
 
         #endregion
         
@@ -115,7 +119,7 @@ public static class DependencyInjection
         
         #region GroupStateManager
 
-            if (configuration.GetSection("LiveGroupStateManagementConfiguration").Value != null)
+            if (configuration.GetSection("LiveGroupStateManagementConfiguration").Get<LiveGroupStateManagementConfiguration>() != null)
             {
                 var clientStateManagerType = configuration.GetValue<string>("LiveGroupStateManagementConfiguration:Implementation");
                 if (string.IsNullOrEmpty(clientStateManagerType))
@@ -181,7 +185,7 @@ public static class DependencyInjection
         return service;
     }
     
-    public static IServiceCollection AddSharecodeRedisStateManagerClient(this IServiceCollection service, Namespace keyValueClient)
+    private static IServiceCollection AddSharecodeRedisStateManagerClient(this IServiceCollection service, Namespace keyValueClient)
     {
         if (service.Any(x => x.ServiceType == typeof(IGroupStateManager)))
             throw new ApplicationException("A Group State Manager is already been defined!");
@@ -201,7 +205,49 @@ public static class DependencyInjection
         };
 
         service.AddKeyedSingleton(DiKeyedServiceConstants.RedisForSignalRStateManagement, configurationOption);
+        // Register the RedisGroupStateManager using a factory method
         service.AddSingleton<IGroupStateManager, RedisGroupStateManager>();
+        
         return service;
+    }
+
+    public static WebApplication InitializeGroupStateManagers(this WebApplication application)
+    {
+        var appLifeTime = application.Lifetime;
+        appLifeTime.ApplicationStarted.Register(() =>
+        {
+            var startingScope = application.Services.CreateScope();
+            var logger = startingScope.ServiceProvider.GetRequiredService<ILogger>();
+            try
+            {
+                var groupStateManager = startingScope.ServiceProvider.GetRequiredService<IGroupStateManager>();
+                application.Logger.LogInformation("Registering IGroupStateManager[Redis] initializer.");
+                groupStateManager.OnAppInit(startingScope);
+                application.Logger.LogInformation("Registering IGroupStateManager[Redis] initializer complete.");
+            }
+            catch (Exception e)
+            {
+                application.Logger.LogError(e, "Registering IGroupStateManager[Redis] initializer failed due to {Error}.", e.Message);
+            }
+        });
+        
+        appLifeTime.ApplicationStopping.Register(() =>
+        {
+            var startingScope = application.Services.CreateScope();
+            var logger = startingScope.ServiceProvider.GetRequiredService<ILogger>();
+            try
+            {
+                var groupStateManager = startingScope.ServiceProvider.GetRequiredService<IGroupStateManager>();
+                application.Logger.LogInformation("Stopping IGroupStateManager[Redis].");
+                groupStateManager.OnAppDestruct(startingScope);
+                application.Logger.LogInformation("Stopped IGroupStateManager[Redis].");
+            }
+            catch (Exception e)
+            {
+                application.Logger.LogError(e, "Failed to stop RedisGroupStateManager due to {Error}", e.Message);
+            }
+        });
+
+        return application;
     }
 }
