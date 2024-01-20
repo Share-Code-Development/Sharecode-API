@@ -45,5 +45,9 @@
             <_Parameter1>Sharecode.Backend.UnitTest.CodeQuality</_Parameter1>
         </AssemblyAttribute>
     </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Logs\" />
+    </ItemGroup>
 
 </Project>

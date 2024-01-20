@@ -55,6 +55,7 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
         snippet.Tags.Add(request.Language);
         var checksum = await fileClient.GetChecksum(request.Content);
         snippet.CheckSum = checksum;
+        snippet.Size = request.Content.LongLength;
         await snippetRepository.AddAsync(snippet, cancellationToken);
         await unitOfWork.CommitAsync(cancellationToken);
         var blob = await fileClient.UploadFileAsync(snippet.Id.ToString(), request.Content, false, cancellationToken);
@@ -63,8 +64,12 @@ public class CreateSnippetCommandHandler(IHttpClientContext context, IUserReposi
             throw new FailedSnippetCreation("Failed to create the snippet. An unknown error occured!");
 
         //For My Snippets
-        if(userIdentifier.HasValue)
+        //Usage will change, so clear that too
+        if (userIdentifier.HasValue)
+        {
             context.AddCacheKeyToInvalidate(CacheModules.UserSnippet, userIdentifier.Value.ToString());
+            context.AddCacheKeyToInvalidate(CacheModules.UserSnippetUsage, userIdentifier.Value.ToString());
+        }
         
         return new SnippetCreatedResponse()
         {

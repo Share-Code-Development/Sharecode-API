@@ -9,6 +9,7 @@ using Sharecode.Backend.Application.Features.Http.Users.Metadata.Delete;
 using Sharecode.Backend.Application.Features.Http.Users.Metadata.List;
 using Sharecode.Backend.Application.Features.Http.Users.Metadata.Upsert;
 using Sharecode.Backend.Application.Features.Http.Users.TagSearch;
+using Sharecode.Backend.Application.Features.Http.Users.Usage;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Utilities.Extensions;
 using Sharecode.Backend.Utilities.RedisCache;
@@ -27,7 +28,7 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
     /// <returns>An ActionResult containing a GetUserResponse object representing the retrieved user.</returns>
     [HttpGet("{id}", Name = "Get User")]
     [Authorize]
-    public async Task<ActionResult<GetUserResponse>> GetUser(Guid id, [FromQuery] bool includeSettings = false)
+    public async Task<ActionResult<GetUserResponse>> GetUser([FromRoute] Guid id, [FromQuery] bool includeSettings = false)
     {
         FrameCacheKey(CacheModules.User,id.ToString(), GetQuery());
         var cachedResponse = await ScanAsync<GetUserResponse>(true);
@@ -50,7 +51,7 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
     /// <returns>An ActionResult of type GetUserResponse that represents the user information.</returns>
     [HttpGet("email/{emailAddress}", Name = "Get User By Email")]
     [Authorize]
-    public async Task<ActionResult<GetUserResponse>> GetUser(string emailAddress, [FromQuery] bool includeSettings = false)
+    public async Task<ActionResult<GetUserResponse>> GetUser([FromRoute] string emailAddress, [FromQuery] bool includeSettings = false)
     {
         FrameCacheKey(CacheModules.User,emailAddress, GetQuery());
         var cachedResponse = await ScanAsync<GetUserResponse>(true);
@@ -63,6 +64,28 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
         GetUserResponse userResponse = await mediator.Send(emailQuery, RequestCancellationToken);
         await StoreCacheAsync(userResponse,token: RequestCancellationToken);
         return Ok(userResponse);
+    }
+
+    [HttpGet("{id}/snippet-usage", Name = "Get the snippet usage of the user")]
+    [Authorize]
+    public async Task<ActionResult<GetUserSnippetUsageResponse>> GetUsersSnippetUsage([FromRoute] Guid id)
+    {
+        FrameCacheKey(CacheModules.UserSnippetUsage, id.ToString());
+        //Only user can invalidate it by creating new snippet. So update the current ttl if its accessed once. If the usage
+        //is changed, Update/Delete/Create Snippet will remove this 
+        var cachedResponse = await ScanAsync<GetUserSnippetUsageResponse>(true);
+        if (cachedResponse != null)
+        {
+            return cachedResponse;
+        }
+
+        var request = new GetUserSnippetUsageQuery()
+        {
+            UserId = id
+        };
+        var response = await mediator.Send(request);
+        await StoreCacheAsync(response, token: RequestCancellationToken);
+        return response;
     }
 
     /// <summary>

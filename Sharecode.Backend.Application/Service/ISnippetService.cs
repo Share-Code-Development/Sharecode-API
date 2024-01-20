@@ -42,4 +42,12 @@ public interface ISnippetService
     /// <param name="token">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a hash set of unique user reactions.</returns>
     Task<HashSet<string>> GetUsersReactions(Guid snippetId, Guid requestedUser, CancellationToken token = default);
+    
+    /// <summary>
+    /// Gets the user's snippet usage in bytes
+    /// </summary>
+    /// <param name="userId">The ID of the user whose external metadata needs to be deleted.</param>
+    /// <param name="token">A cancellation token that can be used to cancel the asynchronous operation (optional).</param>
+    /// <returns></returns>
+    Task<long> GetUserSnippetUsageAsync(Guid userId, CancellationToken token = default);
 }

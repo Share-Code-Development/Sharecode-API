@@ -10,14 +10,12 @@ using Sharecode.Backend.Application.Features.Http.Users.GetMySnippets;
 using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Dto.Snippet;
 using Sharecode.Backend.Domain.Entity.Profile;
-using Sharecode.Backend.Domain.Entity.Snippet;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Domain.Repositories;
 using Sharecode.Backend.Infrastructure.Db;
 using Sharecode.Backend.Infrastructure.Db.Extensions;
 using Sharecode.Backend.Infrastructure.Exceptions;
 using Sharecode.Backend.Utilities.SecurityClient;
-using CommandDefinition = Dapper.CommandDefinition;
 
 namespace Sharecode.Backend.Infrastructure.Service;
 

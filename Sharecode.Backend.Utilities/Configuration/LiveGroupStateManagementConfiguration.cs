@@ -2,6 +2,5 @@
 
 public class LiveGroupStateManagementConfiguration
 {
-    public string Implementation { get; set; } = null!;
-    public string ServerId { get; set; } = null!;
+    public string Implementation { get; init; } = null!;
 }

@@ -150,7 +150,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
             .ExecuteDeleteAsync(token);
     }
 
-    private static IQueryable<TEntity> ApplySpecification(IQueryable<TEntity> query, ISpecification<TEntity> specification)
+    protected static IQueryable<TEntity> ApplySpecification(IQueryable<TEntity> query, ISpecification<TEntity> specification)
     {
         if (specification.Criteria != null)
         {

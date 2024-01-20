@@ -65,6 +65,11 @@ public class DeleteSnippetCommandHandler(ILogger logger, IHttpClientContext cont
             context.AddCacheKeyToInvalidate(CacheModules.UserSnippet, snippetOwnerId.Value.ToString());
             //Self reaction of the user of that snippet
             context.AddCacheKeyToInvalidate(CacheModules.SnippetUserReactions, request.SnippetId.ToString());
+            //When deleting the usage of the user should be recalculated
+            if (snippetOwnerId.HasValue)
+            {
+                context.AddCacheKeyToInvalidate(CacheModules.UserSnippetUsage, snippetOwnerId.Value.ToString());
+            }
             if (snippetOwnerId.Value != requestingUser.Value)
             {
                 //If the owner is different, delete my recent snippets of the owner too, (Deleting from admin level may be)

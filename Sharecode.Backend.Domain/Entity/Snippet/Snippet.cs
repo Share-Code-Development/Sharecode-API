@@ -24,6 +24,7 @@ public class Snippet : AggregateRootWithMetadata
     public User? Owner { get; set; }
     public Guid? OwnerId { get; set; }
     public byte[] CheckSum { get; set; }
+    public long Size { get; set; }
     public List<SnippetReactions> Reactions { get; private set; } = [];
     public List<SnippetComment> Comments { get; private set; } = [];
     public List<SnippetAccessControl> AccessControls { get; private set; } = [];

@@ -134,6 +134,12 @@ public class SnippetService(
             .Select(x => x.ReactionType)
             .ToHashSet();
     }
+
+    public Task<long> GetUserSnippetUsageAsync(Guid userId, CancellationToken token = default)
+    {
+        EntitySpecification<Snippet> snippetOfUserSpecification = new EntitySpecification<Snippet>(snippet => snippet.OwnerId == userId);
+        return snippetRepository.GetTotalSizeOfSnippetOnSpecification(snippetOfUserSpecification, token);
+    }
 }
 
 internal sealed class SnippetUserSqlQueries

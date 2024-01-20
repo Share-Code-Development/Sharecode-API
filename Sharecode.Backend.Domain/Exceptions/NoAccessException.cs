@@ -13,5 +13,11 @@ public class NoAccessException : AppException
     {
         SetMessage($"{requestUserIdentifier} doesn't have right to access {accessingIdentifier}[{type.Name}]");
     }
+    
+    public NoAccessException(object requestUserIdentifier, object accessingIdentifier, string type) : base($"{requestUserIdentifier} doesn't have right to access {accessingIdentifier}[{type}]", 34181,
+        HttpStatusCode.Forbidden)
+    {
+        SetMessage($"{requestUserIdentifier} doesn't have right to access {accessingIdentifier}[{type}]");
+    }
 
 }

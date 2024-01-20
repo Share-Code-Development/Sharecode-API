@@ -17,7 +17,7 @@ public abstract class AbstractBaseEndpoint(IAppCacheClient cache, IHttpClientCon
     private readonly IAppCacheClient _cache = cache ?? throw new ArgumentNullException(nameof(cache));
     private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     protected IHttpClientContext AppRequestContext { get; } = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
-    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(3);
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
     protected CancellationToken RequestCancellationToken => HttpContext.RequestAborted;
 
     
