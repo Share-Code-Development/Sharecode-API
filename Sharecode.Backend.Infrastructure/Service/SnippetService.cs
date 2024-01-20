@@ -85,7 +85,9 @@ public class SnippetService(
             var permission = await dapperContext.QueryFirstOrDefaultAsync<SnippetAccessPermission>(SnippetUserSqlQueries.GetSnippetAccess, param, commandTimeout: 1000);
             if(permission == null)
                 permission = SnippetAccessPermission.NoPermission(snippetId, requestedUser);
-            
+
+            permission.SnippetId = snippetId;
+            permission.AccessorId = requestedUser;
             return permission;
         }
         catch (Exception e)
@@ -145,5 +147,5 @@ public class SnippetService(
 internal sealed class SnippetUserSqlQueries
 {
     public static string GetSnippetAccess =>
-        $"SELECT \"Read\", \"Write\", \"Manage\" FROM get_permission_of_snippet(@snippetId, @requestedUser, @checkAdminPermission)";
+        $"SELECT \"Read\", \"Write\", \"Manage\", \"Public\" FROM get_permission_of_snippet(@snippetId, @requestedUser, @checkAdminPermission)";
 }
