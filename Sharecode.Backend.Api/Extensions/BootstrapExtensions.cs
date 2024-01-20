@@ -116,7 +116,12 @@ public static class BootstrapExtensions
             Console.WriteLine($"Enabled to show details for authentication schema with in development env");
         }
         
-        service.AddSignalR();
+        service.AddSignalR(x =>
+        {
+            x.EnableDetailedErrors = true;
+            x.KeepAliveInterval = TimeSpan.FromSeconds(20); 
+            x.HandshakeTimeout = TimeSpan.FromSeconds(20);
+        });
         return service;
     }
 

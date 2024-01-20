@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Live.Snippet;

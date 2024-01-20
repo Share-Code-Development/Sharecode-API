@@ -86,7 +86,7 @@ public class ListUserMetadataQueryValidator : AbstractValidator<ListUserMetadata
             .WithMessage(query => $"Queries contain restricted keys: {string.Join(", ", query.Queries.Where(key => RestrictedKeys.Contains(key)))}");
         
         RuleFor(x => x.Queries)
-            .Must(queries => queries.All(key => key.StartsWith("FE")))
+            .Must(queries => queries.All(key => key.StartsWith("FE_")))
             .WithMessage(query => $"External metadata(s) should start with FE [For example: FE_userPassed], Invalid key(s): {string.Join(", ", query.Queries.Where(key => key.StartsWith("FE_")))}");
 
         RuleFor(x => x.UserId)

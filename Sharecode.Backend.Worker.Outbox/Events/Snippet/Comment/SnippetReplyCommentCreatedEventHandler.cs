@@ -131,7 +131,6 @@ public class SnippetReplyCommentCreatedEventHandler(ISnippetCommentRepository sn
             {
                 { EmailPlaceholderKeys.SnippetCommentMessageUrl, formattedChildCommentUrl },
                 { EmailPlaceholderKeys.SnippetCommentChildMessageTextKey, formattedChildMessage },
-                { EmailPlaceholderKeys.SnippetCommentMessageTextKey, formattedParentMessage },
                 { EmailPlaceholderKeys.SnippetCommentMessageAuthorKey, ownerFullName }
             };
 
@@ -141,7 +140,7 @@ public class SnippetReplyCommentCreatedEventHandler(ISnippetCommentRepository sn
             };
 
             await emailClient.SendTemplateMailAsync(
-                EmailTemplateKeys.RepliesInComment,
+                EmailTemplateKeys.MentionedInComment,
                 targets,
                 templatePlaceholders,
                 subjectPlaceholder

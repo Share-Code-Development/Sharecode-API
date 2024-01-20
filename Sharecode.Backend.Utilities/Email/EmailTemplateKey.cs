@@ -51,7 +51,5 @@ public static class EmailTemplateKeys
     public static readonly EmailTemplateKey AccountLocked = new("account-locked.html", "Your sharecode account has been locked!");
     public static readonly EmailTemplateKey MentionedInComment = new("mention-user-snippet-comment.html", "You have been mentioned by {(COMMENT_OWNER)} - Sharecode");
     public static readonly EmailTemplateKey RepliesInComment = new("mention-user-snippet-comment.html", "You have a reply message from {(COMMENT_OWNER)} - Sharecode");
-
-    public static readonly EmailTemplateKey CommentRepliedAlert = new("replied-parent-snippet-comment.html",
-        "{(COMMENT_OWNER)} has replied to one of your comment - Sharecode");
+    public static readonly EmailTemplateKey CommentRepliedAlert = new("replied-parent-snippet-comment.html", "{(COMMENT_OWNER)} has replied to one of your comment - Sharecode");
 }
