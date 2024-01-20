@@ -36,7 +36,9 @@ public class SnippetRepository : BaseRepository<Snippet>, ISnippetRepository
             .AsQueryable();
 
         var snippetSpecification = ApplySpecification(queryable, specification);
-        return snippetSpecification.Select(x => x.Size).SumAsync(token);
+        return snippetSpecification
+            .Select(x => x.Size )
+            .SumAsync(token);
     }
 }
 

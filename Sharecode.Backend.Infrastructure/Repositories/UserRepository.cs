@@ -184,4 +184,27 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .Select(x => x.Permissions)
             .FirstOrDefaultAsync(cancellationToken: token) ?? [];
     }
+
+    public async Task<IEnumerable<User>> GetListOfUserProfileAsync(IEnumerable<Guid> userIds, CancellationToken token = default)
+    {
+        return await Table
+            .SetTracking(false)
+            .Where(x => userIds.Contains(x.Id))
+            .Select(x =>
+                new User
+                {
+                    Id = x.Id,
+                    EmailAddress = x.EmailAddress,
+                    FirstName = x.FirstName,
+                    LastName = x.LastName,
+                    MiddleName = x.MiddleName,
+                    ProfilePicture = x.ProfilePicture,
+                    Visibility = AccountVisibility.Public,
+                    AccountSetting = new AccountSetting()
+                    {
+                        EnableNotificationsForMentions = x.AccountSetting.EnableNotificationsForMentions
+                    }
+                })
+            .ToListAsync(token);
+    }
 }

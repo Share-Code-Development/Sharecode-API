@@ -103,6 +103,11 @@ public class UserService : IUserService
         return mentionableUsers.ToList();
     }
 
+    public async Task<IEnumerable<User>> GetUsersProfileInformationAsync(IEnumerable<Guid> userIds, CancellationToken token = default)
+    {
+        return await _userRepository.GetListOfUserProfileAsync(userIds, token);
+    }
+
     public async Task<List<MySnippetsDto>> ListUserSnippetsAsync(Guid userId, bool onlyOwned = false,
         bool recentSnippets = true, int skip = 0, int take = 20,
         string order = "ASC", string orderBy = "ModifiedAt", string searchQuery = null, CancellationToken cancellationToken = default)

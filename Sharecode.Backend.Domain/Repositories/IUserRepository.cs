@@ -104,4 +104,12 @@ public interface IUserRepository : IBaseRepository<User>
     /// <param name="token">The cancellation token to cancel operation if needed. Default value is <see cref="CancellationToken.None"/>.</param>
     /// <returns>A <see cref="Task{T}"/> representing the asynchronous operation. The task result contains a <see cref="HashSet{T}"/> of <see cref="Permission"/> objects representing the user's permissions.</returns>
     Task<HashSet<Permission>> GetUsersPermissionAsync(Guid userId, CancellationToken token = default);
+
+    /// <summary>
+    /// Get the basic information of provided list of users
+    /// </summary>
+    /// <param name="userIds">Collection of user ids</param>
+    /// <param name="token">Cancellation token</param>
+    /// <returns></returns>
+    Task<IEnumerable<User>> GetListOfUserProfileAsync(IEnumerable<Guid> userIds, CancellationToken token = default);
 }

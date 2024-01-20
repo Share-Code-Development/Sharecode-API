@@ -57,6 +57,14 @@ public interface IUserService
         bool shouldEnableTagging = true, CancellationToken token = default);
 
     /// <summary>
+    /// Get the basic information of provided list of users
+    /// </summary>
+    /// <param name="userIds">Collection of user ids</param>
+    /// <param name="token">Cancellation token</param>
+    /// <returns></returns>
+    Task<IEnumerable<User>> GetUsersProfileInformationAsync(IEnumerable<Guid> userIds,
+        CancellationToken token = default);
+    /// <summary>
     /// Retrieves a list of snippets for a specified user.
     /// </summary>
     /// <param name="userId">The ID of the user.</param>

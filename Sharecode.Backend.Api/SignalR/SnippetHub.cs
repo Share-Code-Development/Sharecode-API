@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Features.Live.Snippet;
@@ -12,7 +13,8 @@ namespace Sharecode.Backend.Api.SignalR;
 
 public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IMediator mediator, IAppCacheClient appCacheClient) : AbstractHub<ISignalRClient>(logger, groupStateManager, mediator, appCacheClient)
 {
-    
+    private readonly ILogger _logger = logger;
+
     public override async Task OnConnectedAsync()
     {
         var queries = Context.GetHttpContext()?.Request.Query;
@@ -31,7 +33,8 @@ public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IM
 
         var joinedSnippetEvent = new JoinedSnippetEvent()
         {
-            SnippetId = snippetId
+            SnippetId = snippetId,
+            ConnectionId = Context.ConnectionId
         };
         
         var joinedSnippetResponse = await Mediator.Send(joinedSnippetEvent);
@@ -45,8 +48,12 @@ public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IM
         var added = await AddToGroupAsync(joinedSnippetResponse.SnippetId.ToString(), Context.ConnectionId,
             joinedSnippetResponse.JoinedUserId.ToString() ?? joinedSnippetResponse.JoinedUserName);
         if (added)
+        {
             await Clients.Group(joinedSnippetResponse.SnippetId.ToString())
                 .Message(LiveEvent<object>.Of(joinedSnippetEvent));
+            Context.Items["NAME"] = joinedSnippetResponse.JoinedUserName;
+        }
+            
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -54,7 +61,7 @@ public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IM
         var contextConnectionId = Context.ConnectionId;
         if (exception != null)
         {
-            logger.Error(exception, "A disconnect event has been called with an error message {Message} on connection id ", exception.Message, contextConnectionId);
+            _logger.Error(exception, "A disconnect event has been called with an error message {Message} on connection id ", exception.Message, contextConnectionId);
         }
         
         await DisconnectAsync(Context.ConnectionId);

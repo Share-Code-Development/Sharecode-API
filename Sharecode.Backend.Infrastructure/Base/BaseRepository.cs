@@ -159,7 +159,6 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         if (specification.Includes != null)
         {
             query = specification.Includes.Aggregate(query, (current, include) => current.Include(include));
-
         }
         if (specification.OrderBy != null)
         {
