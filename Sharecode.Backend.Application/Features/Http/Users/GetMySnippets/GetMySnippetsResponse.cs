@@ -25,4 +25,5 @@ public class MySnippetsDto
     public long TotalCount { get; set; }
     public string Language { get; set; }
     public string PreviewCode { get; set; }
+    public string? SelfReaction { get; set; }
 }

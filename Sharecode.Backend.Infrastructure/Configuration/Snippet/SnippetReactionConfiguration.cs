@@ -31,7 +31,7 @@ public class SnippetReactionConfiguration : IEntityTypeConfiguration<SnippetReac
 
         #region Indexes
 
-        builder.HasIndex(x => new { x.SnippetId, x.UserId })
+        builder.HasIndex(x => new { x.SnippetId, x.UserId, x.ReactionType })
             .HasMethod("BTREE")
             .IsUnique();
         

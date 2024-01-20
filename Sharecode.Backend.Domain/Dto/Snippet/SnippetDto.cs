@@ -17,7 +17,8 @@ public class SnippetDto
     public List<ReactionCommonDto> Reactions { get; set; } = [];
     public long CommentCount { get; set; } = 0;
     public string? Blob { get; set; }
-    public List<SnippetAccessControlDto> AccessControl = [];
-    public List<SnippetLineCommentDto> LineComments = [];
-    public bool IsCommentsLimited = false;
+    public List<SnippetAccessControlDto> AccessControl { get; set; } = [];
+    public List<SnippetLineCommentDto> LineComments { get; set; } = [];
+    public bool IsCommentsLimited { get; set; } = false;
+    public string? SelfReaction { get; set; }
 }

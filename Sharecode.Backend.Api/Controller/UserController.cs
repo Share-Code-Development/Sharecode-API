@@ -10,6 +10,7 @@ using Sharecode.Backend.Application.Features.Http.Users.Metadata.List;
 using Sharecode.Backend.Application.Features.Http.Users.Metadata.Upsert;
 using Sharecode.Backend.Application.Features.Http.Users.TagSearch;
 using Sharecode.Backend.Application.Features.Http.Users.Usage;
+using Sharecode.Backend.Domain.Entity.Profile;
 using Sharecode.Backend.Domain.Exceptions;
 using Sharecode.Backend.Utilities.Extensions;
 using Sharecode.Backend.Utilities.RedisCache;
@@ -96,8 +97,15 @@ public class UserController(IAppCacheClient cache, IHttpClientContext requestCon
     [HttpGet("tag-search", Name = "Get users to tag")]
     public async Task<ActionResult<SearchUserForTagResponse>> GetUsersToTag([FromQuery] SearchUsersForTagCommand command)
     {
-        //TODO Add admin role to the cache
-        FrameCacheKey(CacheModules.User, "search", GetQuery());
+        if (await AppRequestContext.HasPermissionAsync(Permissions.ViewUserOtherAdmin))
+        {
+            FrameCacheKey(CacheModules.User, "search", "admin" ,GetQuery());
+        }
+        else
+        {
+            FrameCacheKey(CacheModules.User, "search", GetQuery());
+        }
+            
         var response = await ScanAsync<SearchUserForTagResponse>();
         if (response != null)
         {
