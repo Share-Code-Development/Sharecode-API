@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Sharecode.Backend.Application.Client;
+using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Utilities.RedisCache;
 using ILogger = Serilog.ILogger;
@@ -9,6 +10,8 @@ namespace Sharecode.Backend.Api.SignalR;
 
 public abstract class AbstractHub<TClient>(ILogger logger, IGroupStateManager groupStateManager, IMediator mediator ,IAppCacheClient cacheClient) : Hub<TClient> where TClient : class
 {
+    private static readonly Dictionary<string, Func<object, LiveEventContext, Task<LiveEvent<object>>>> InvokeFunc = new();
+    private static readonly Dictionary<string, Func<object, LiveEventContext, Task>> SendFunc = new();
     protected IAppCacheClient CacheClient => cacheClient;
     protected IMediator Mediator => mediator;
     private IGroupStateManager StateManager => groupStateManager;
@@ -52,4 +55,30 @@ public abstract class AbstractHub<TClient>(ILogger logger, IGroupStateManager gr
             return false;
         }
     }
+
+    protected static void RegisterReturn(string eventType, Func<object, LiveEventContext, Task<LiveEvent<object>>> func)
+    {
+        InvokeFunc[eventType] = func;
+    }
+    
+    protected static void RegisterNonReturn(string eventType, Func<object, LiveEventContext, Task> act)
+    {
+        SendFunc[eventType] = act;
+    }
+    protected static Func<object, LiveEventContext, Task>? Action(string type) => SendFunc[type];
+    protected static Func<object, LiveEventContext, Task<LiveEvent<object>>>? Invoke(string type) => InvokeFunc[type];
+}
+
+public sealed class LiveEventContext
+{
+    public LiveEventContext(HubCallerContext hubCallerContext, IHubCallerClients<ISignalRClient> clients, IGroupStateManager stateManager)
+    {
+        HubCallerContext = hubCallerContext;
+        Clients = clients;
+        StateManager = stateManager;
+    }
+    public IHubCallerClients<ISignalRClient> Clients { get; }
+    public HubCallerContext HubCallerContext { get; }
+    
+    public IGroupStateManager StateManager { get; }
 }

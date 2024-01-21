@@ -71,6 +71,7 @@ public static class BootstrapExtensions
                 options.PermitLimit = 10;
                 options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
                 options.QueueLimit = 5;
+                
             });
         });
         return service;
