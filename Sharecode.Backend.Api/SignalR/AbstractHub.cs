@@ -67,6 +67,8 @@ public abstract class AbstractHub<TClient>(ILogger logger, IGroupStateManager gr
     }
     protected static Func<object, LiveEventContext, Task>? Action(string type) => SendFunc[type];
     protected static Func<object, LiveEventContext, Task<LiveEvent<object>>>? Invoke(string type) => InvokeFunc[type];
+    
+    
 }
 
 public sealed class LiveEventContext

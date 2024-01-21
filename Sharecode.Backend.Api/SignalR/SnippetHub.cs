@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Event;
+using Sharecode.Backend.Application.Event.Inbound;
 using Sharecode.Backend.Application.Event.Outbond;
 using Sharecode.Backend.Application.Features.Live.Snippet;
 using Sharecode.Backend.Application.Features.Live.Snippet.Joined;
@@ -25,8 +25,12 @@ public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IM
         {
             try
             {
+                var dataRequest = data.ToString() ?? string.Empty;
+                if (string.IsNullOrEmpty(dataRequest))
+                    return Task.CompletedTask;
+                
                 var lineCommentTypingEvent =
-                    JsonConvert.DeserializeObject<LineCommentTypingEvent>(JsonConvert.SerializeObject(data));
+                    JsonConvert.DeserializeObject<LineCommentTypingEvent>(dataRequest);
                 if(lineCommentTypingEvent == null)
                     return Task.CompletedTask;
 
@@ -40,7 +44,8 @@ public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IM
                     UserIdentifier = tryParse ? parsed : Guid.Empty
                 };
                 
-                context.Clients.Group(lineCommentTypingEvent.SnippetId.ToString())?.Message(LiveEvent<object>.Of(lineCommentTypingEvent));
+                context.Clients.OthersInGroup(lineCommentTypingEvent.SnippetId.ToString())
+                    .Message(LiveEvent<object>.Of(@event));
             }
             catch (Exception e)
             {
