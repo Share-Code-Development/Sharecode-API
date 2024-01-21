@@ -31,4 +31,8 @@
       <ProjectReference Include="..\Sharecode.Backend.Infrastructure\Sharecode.Backend.Infrastructure.csproj" />
       <ProjectReference Include="..\Sharecode.Backend.Presentation\Sharecode.Backend.Presentation.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Logs\" />
+    </ItemGroup>
 </Project>

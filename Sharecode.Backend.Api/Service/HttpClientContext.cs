@@ -17,6 +17,7 @@ public class HttpClientContext : IHttpClientContext
     private readonly ILogger _logger;
     private readonly IUserRepository _userRepository;
     private readonly IAppCacheClient _appCacheClient;
+    private readonly IJwtClient _jwtClient;
     private Guid? _userIdentifier = null;
     private User? _user = null;
     private bool? _isApiRequest = null;
@@ -27,14 +28,16 @@ public class HttpClientContext : IHttpClientContext
     private bool? _hasAuthorizationBearer = null;
     private readonly Dictionary<string, HashSet<string>> _cacheInvalidateRecords = new();
     private HashSet<Permission>? _permissions;
+    private bool? _isLiveRequest;
     
-    public HttpClientContext(IHttpContextAccessor contextAccessor, IUserRepository userRepository, IAppCacheClient cacheClient, ILogger logger)
+    public HttpClientContext(IHttpContextAccessor contextAccessor, IUserRepository userRepository, IAppCacheClient cacheClient, IJwtClient jwtClient ,ILogger logger)
     {
         _contextAccessor = contextAccessor;
         _userRepository = userRepository;
         _isApiRequest = IsApiRequest;
         _appCacheClient = cacheClient;
         _logger = logger;
+        _jwtClient = jwtClient;
     }
 
     public string? EmailAddress
@@ -46,6 +49,12 @@ public class HttpClientContext : IHttpClientContext
 
             if (string.IsNullOrEmpty(_emailAddress))
             {
+                if (IsLiveRequest)
+                {
+                    LoadFromToken();
+                    return _emailAddress;
+                }
+                
                 string? emailAddress = _contextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email);
                 if (string.IsNullOrEmpty(emailAddress))
                     return null;
@@ -73,6 +82,21 @@ public class HttpClientContext : IHttpClientContext
     }
 
     /// <summary>
+    /// Is the request coming from Live endpoints  
+    /// </summary>
+    private bool IsLiveRequest
+    {
+        get
+        {
+            if (_isLiveRequest.HasValue)
+                return _isLiveRequest.Value;
+
+            _isLiveRequest = _contextAccessor?.HttpContext?.Request.Path.StartsWithSegments("/v1/live") ?? false; 
+            return _isLiveRequest ?? false;
+        }
+    }
+
+    /// <summary>
     /// Get the user who send the request
     /// </summary>
     /// <returns></returns>
@@ -83,7 +107,19 @@ public class HttpClientContext : IHttpClientContext
             return _userIdentifier;
         }
 
-        _userIdentifier = IsApiRequest ? await GetUserIdentifierFromApiKeyHeader() : GetUserIdentifierFromClaim();
+        if (IsApiRequest)
+        {
+            _userIdentifier = await GetUserIdentifierFromApiKeyHeader();
+        }else if (IsLiveRequest)
+        {
+            //Load From token method will validate the header and manually append it to our claimList
+            LoadFromToken();
+            return _userIdentifier;
+        }
+        else
+        {
+            _userIdentifier = GetUserIdentifierFromClaim();
+        }
         return _userIdentifier;
     }
 
@@ -277,6 +313,32 @@ public class HttpClientContext : IHttpClientContext
         return identifier;
     }
 
+    private void LoadFromToken()
+    {
+        if (string.IsNullOrEmpty(Authorization))
+            return;
+
+        var claims = GetAuthorizationClaims().ToList();
+        if(!claims.Any())
+            return;
+
+        var rawGuid = claims?.FirstOrDefault(x => x.Type == "nameid")?.Value ?? String.Empty;
+        if (Guid.TryParse(rawGuid, out var parsedGuid))
+        {
+            _userIdentifier = parsedGuid;
+        }
+
+        _emailAddress = claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value ?? null;
+    }
+
+    private IEnumerable<Claim> GetAuthorizationClaims()
+    {
+        if (IsApiRequest)
+            return Enumerable.Empty<Claim>();
+        
+        return _contextAccessor?.HttpContext?.User.Claims ?? []; 
+    }
+
     private async Task<Guid?> GetUserIdentifierFromApiKeyHeader()
     {
         string? apiKey = _contextAccessor.HttpContext?.Request.Headers["XSC-Api-Key"];
@@ -344,4 +406,6 @@ public class HttpClientContext : IHttpClientContext
 
         return _permissions;
     }
+
+    private string? Authorization => _contextAccessor.HttpContext?.Request.Headers.Authorization;
 }

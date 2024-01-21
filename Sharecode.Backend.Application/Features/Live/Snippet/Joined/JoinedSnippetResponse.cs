@@ -1,6 +1,6 @@
 ﻿using Sharecode.Backend.Domain.Dto.Snippet;
 
-namespace Sharecode.Backend.Application.Features.Live.Snippet;
+namespace Sharecode.Backend.Application.Features.Live.Snippet.Joined;
 
 public class JoinedSnippetResponse
 {

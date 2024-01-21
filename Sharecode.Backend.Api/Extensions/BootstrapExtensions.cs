@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Logging;
@@ -192,8 +194,37 @@ public static class BootstrapExtensions
                             new SymmetricSecurityKey(
                                 Encoding.ASCII.GetBytes(value))
                     };
-            });
 
+                //SignalR Configuration
+                bearerOptions.Events = new JwtBearerEvents()
+                {
+                    OnMessageReceived = context =>
+                    {
+                        //Get the access token
+                        var signalRToken = context.Request.Query["access_token"];
+                        var requestPath = context.HttpContext.Request.Path;
+                        //If there is an access token and if the request is going to signalR client
+                        if (!string.IsNullOrEmpty(signalRToken) && requestPath.StartsWithSegments("/v1/live"))
+                        {
+                            var key = keyValueNamespace.Of(KeyVaultConstants.JwtSecretKey)?.Value;
+                            var encryptionKey = keyValueNamespace.Of(KeyVaultConstants.JwtAccessTokenEncryptionKey)?.Value;
+                            var token = signalRToken.ToString().Replace("%20", " ");
+                            var jwtClient = context.Request.HttpContext.RequestServices.GetService<IJwtClient>();
+                            var claims = jwtClient?.ValidateToken(token.Replace("Bearer ", string.Empty), key!, encryptionKey!, false) ?? [];
+                            var enumerable = claims as Claim[] ?? claims.ToArray();
+                            if (!enumerable.Any()) return Task.CompletedTask;
+                            
+                            context.Token = signalRToken.ToString().Replace("Bearer%20", string.Empty);
+                            context.Request.Headers.Authorization = signalRToken;
+                            context.HttpContext.User.AddIdentity(new ClaimsIdentity(enumerable));
+                            var userClaims = context.HttpContext.User.Claims;
+                        }
+                        
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+        
         return serviceCollection;
     }
     

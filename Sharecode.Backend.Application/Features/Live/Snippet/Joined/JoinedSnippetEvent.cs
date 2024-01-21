@@ -1,6 +1,6 @@
 ﻿using Sharecode.Backend.Application.Base;
 
-namespace Sharecode.Backend.Application.Features.Live.Snippet;
+namespace Sharecode.Backend.Application.Features.Live.Snippet.Joined;
 
 public class JoinedSnippetEvent : IAppRequest<JoinedSnippetResponse?>
 {

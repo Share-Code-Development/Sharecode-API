@@ -2,7 +2,7 @@
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Service;
 
-namespace Sharecode.Backend.Application.Features.Live.Snippet;
+namespace Sharecode.Backend.Application.Features.Live.Snippet.Joined;
 
 public class JoinedSnippetLiveHandler(IHttpClientContext clientContext, IGroupStateManager groupStateManager, ISnippetService snippetService, IUserService userService) : IRequestHandler<JoinedSnippetEvent, JoinedSnippetResponse?>
 {
@@ -111,6 +111,7 @@ public class JoinedSnippetLiveHandler(IHttpClientContext clientContext, IGroupSt
             //If there is data, Set the UserName and UserId for the newly joined user
             //Also add him in the current users array
             var activeSnippetUsersDto = activeUsers[requestingUser];
+            activeSnippetUsersDto.ConnectionId = request.ConnectionId;
             responseUsers.Add(activeSnippetUsersDto);
             response.JoinedUserName = activeSnippetUsersDto.FullName;
             response.JoinedUserId = activeSnippetUsersDto.Id;

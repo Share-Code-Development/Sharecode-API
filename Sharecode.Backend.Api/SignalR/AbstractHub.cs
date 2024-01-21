@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Sharecode.Backend.Application.Client;
+using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Utilities.RedisCache;
 using ILogger = Serilog.ILogger;
 
@@ -10,7 +11,7 @@ public abstract class AbstractHub<TClient>(ILogger logger, IGroupStateManager gr
 {
     protected IAppCacheClient CacheClient => cacheClient;
     protected IMediator Mediator => mediator;
-    protected IGroupStateManager StateManager => groupStateManager;
+    private IGroupStateManager StateManager => groupStateManager;
     
     protected async Task<bool> AddToGroupAsync(string groupName, string connectionId, string userIdentifier, CancellationToken token = default)
     {
@@ -50,6 +51,5 @@ public abstract class AbstractHub<TClient>(ILogger logger, IGroupStateManager gr
             logger.Error(e, "Failed to remove users {ConnectionId} from the group due to {Message}", Context.ConnectionId, e.Message);
             return false;
         }
-        
     }
 }
