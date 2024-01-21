@@ -87,6 +87,7 @@ public class JoinedSnippetLiveHandler(IHttpClientContext clientContext, IGroupSt
         var response = new JoinedSnippetResponse()
         {
             JoinedUserAccesses = snippetAccess.ToControlModel(),
+            SnippetId = request.SnippetId,
             JoinedUserId = Guid.Empty,
             ActiveUsers = responseUsers
         };
