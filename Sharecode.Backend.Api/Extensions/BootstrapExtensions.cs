@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.RateLimiting;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication;
@@ -139,6 +140,7 @@ public static class BootstrapExtensions
 
     public static IServiceCollection RegisterCors(this IServiceCollection service)
     {
+        Regex urlRegex = new Regex("^https:\\/\\/sharecodeapp-pr-\\d+\\.onrender\\.com$", RegexOptions.Compiled);
         service.AddCors(options =>
         {
             options.AddPolicy("DeployedLink", builder =>
@@ -146,7 +148,9 @@ public static class BootstrapExtensions
                 builder.WithOrigins("https://sharecodeapp.onrender.com", "http://localhost:4000")
                     .AllowCredentials()
                     .AllowAnyHeader()
+                    .SetIsOriginAllowed((url) => urlRegex.Match(url).Success)
                     .AllowAnyMethod();
+                
             });
         });
         return service;
