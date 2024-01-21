@@ -140,15 +140,20 @@ public static class BootstrapExtensions
 
     public static IServiceCollection RegisterCors(this IServiceCollection service)
     {
-        Regex urlRegex = new Regex("^https:\\/\\/sharecodeapp-pr-\\d+\\.onrender\\.com$", RegexOptions.Compiled);
+        Regex urlRegex = new Regex("^https:\\/\\/sharecodeapp(-pr-\\d+)?\\.onrender\\.com$", RegexOptions.Compiled);
         service.AddCors(options =>
         {
             options.AddPolicy("DeployedLink", builder =>
             {
-                builder.WithOrigins("https://sharecodeapp.onrender.com", "http://localhost:4000")
-                    .AllowCredentials()
+                builder.AllowCredentials()
                     .AllowAnyHeader()
-                    .SetIsOriginAllowed((url) => urlRegex.Match(url).Success)
+                    .SetIsOriginAllowed((url) =>
+                    {
+                        if (url == "https://sharecodeapp.onrender.com" || url == "http://localhost:4000")
+                            return true;
+                        
+                        return urlRegex.Match(url).Success;
+                    })
                     .AllowAnyMethod();
                 
             });
