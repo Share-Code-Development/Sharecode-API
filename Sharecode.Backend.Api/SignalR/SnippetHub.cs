@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using Sharecode.Backend.Application.Client;
 using Sharecode.Backend.Application.Event;
-using Sharecode.Backend.Application.Event.Inbound;
 using Sharecode.Backend.Application.Event.Outbond;
 using Sharecode.Backend.Application.Features.Live.Snippet;
 using Sharecode.Backend.Application.Features.Live.Snippet.Joined;
 using Sharecode.Backend.Application.Features.Live.Snippet.Left;
+using Sharecode.Backend.Application.LiveEvents.Inbound;
 using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Base.Primitive;
@@ -16,7 +16,7 @@ using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.SignalR;
 
-public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IMediator mediator, IAppCacheClient appCacheClient) : AbstractHub<ISignalRClient>(logger, groupStateManager, mediator, appCacheClient)
+public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IMediator mediator, IAppCacheClient appCacheClient) : AbstractHub(logger, groupStateManager, mediator, appCacheClient)
 {
 
     static SnippetHub()
@@ -99,61 +99,7 @@ public class SnippetHub(ILogger logger, IGroupStateManager groupStateManager, IM
             Context.Items["IDENTIFIER"] = joinedSnippetResponse.JoinedUserId.GetValueOrDefault();
         }
     }
-
-    public async Task Execute(ClientEvent @event)
-    {
-        if(string.IsNullOrEmpty(@event.EventType))
-        {
-            var liveEvent = LiveEvent<object>.Of(LogEvent.Error($"No execute action is passed in"));
-            await Clients.Caller.Message(liveEvent);
-            return;
-        }
-
-        var action = Action(@event.EventType);
-        if (action == null)
-        {
-            var liveEvent = LiveEvent<object>.Of(LogEvent.Warning($"No execute action is registered for the event {@event.EventType}"));
-            await Clients.Caller.Message(liveEvent);
-            return;
-        }
-
-        try
-        {
-            await action(@event.Event, new LiveEventContext(Context, Clients, groupStateManager));
-        }
-        catch (Exception e)
-        {
-            var liveEvent = LiveEvent<object>.Of(LogEvent.Error($"Failed to execute the action"));
-            await Clients.Caller.Message(liveEvent);
-        }
-    }
     
-    public async Task<LiveEvent<object>> Invoke(ClientEvent @event)
-    {
-        if(string.IsNullOrEmpty(@event.EventType))
-        {
-            var liveEvent = LiveEvent<object>.Of(LogEvent.Error($"No execute action is passed in"));
-            return liveEvent;
-        }
-
-        var action = Invoke(@event.EventType);
-        if (action == null)
-        {
-            var liveEvent = LiveEvent<object>.Of(LogEvent.Warning($"No execute action is registered for the event {@event.EventType}"));
-            return liveEvent;
-        }
-        
-        try
-        {
-            return await action(@event.Event, new LiveEventContext(Context, Clients, groupStateManager));
-        }
-        catch (Exception e)
-        {
-            var liveEvent = LiveEvent<object>.Of(LogEvent.Error($"Failed to execute the action"));
-            return liveEvent;
-        }
-    }
-
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var contextConnectionId = Context.ConnectionId;

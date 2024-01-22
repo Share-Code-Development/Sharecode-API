@@ -149,7 +149,7 @@ public static class BootstrapExtensions
                     .AllowAnyHeader()
                     .SetIsOriginAllowed((url) =>
                     {
-                        if (url == "https://sharecodeapp.onrender.com" || url == "http://localhost:4000")
+                        if (url is "https://sharecodeapp.onrender.com" or "http://localhost:4000")
                             return true;
                         
                         return urlRegex.Match(url).Success;
@@ -167,22 +167,7 @@ public static class BootstrapExtensions
         IKeyValueClient keyValueClient = serviceProvider.GetRequiredService<IKeyValueClient>();
         return keyValueClient;
     }
-
-    /*public static IServiceCollection CreateShareCodeJobScheduler(this IServiceCollection serviceCollection)
-    {
-        serviceCollection.AddQuartz(conf =>
-        {
-            var outboxJob = new JobKey(nameof(ProcessOutboxJob));
-            conf.AddJob<ProcessOutboxJob>(outboxJob)
-                .AddTrigger(trigger =>
-                {
-                    trigger.ForJob(jobKey: outboxJob)
-                        .WithSimpleSchedule(schedule => schedule.WithIntervalInSeconds(20).RepeatForever());
-                });
-        });
-        return serviceCollection;
-    }*/
-
+    
     public static IServiceCollection BuildAuthenticationSchema(this IServiceCollection serviceCollection, IConfiguration configuration, Namespace keyValueNamespace)
     {
         serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -227,7 +212,6 @@ public static class BootstrapExtensions
                             context.Token = signalRToken.ToString().Replace("Bearer%20", string.Empty);
                             context.Request.Headers.Authorization = signalRToken;
                             context.HttpContext.User.AddIdentity(new ClaimsIdentity(enumerable));
-                            var userClaims = context.HttpContext.User.Claims;
                         }
                         
                         return Task.CompletedTask;

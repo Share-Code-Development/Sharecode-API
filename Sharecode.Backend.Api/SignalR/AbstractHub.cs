@@ -1,6 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Sharecode.Backend.Application.Client;
+using Sharecode.Backend.Application.Event;
+using Sharecode.Backend.Application.Exceptions;
+using Sharecode.Backend.Application.Models;
 using Sharecode.Backend.Domain.Base.Interfaces;
 using Sharecode.Backend.Domain.Base.Primitive;
 using Sharecode.Backend.Utilities.RedisCache;
@@ -8,10 +11,8 @@ using ILogger = Serilog.ILogger;
 
 namespace Sharecode.Backend.Api.SignalR;
 
-public abstract class AbstractHub<TClient>(ILogger logger, IGroupStateManager groupStateManager, IMediator mediator ,IAppCacheClient cacheClient) : Hub<TClient> where TClient : class
+public abstract class AbstractHub(ILogger logger, IGroupStateManager groupStateManager, IMediator mediator ,IAppCacheClient cacheClient) : Hub<ISignalRClient>
 {
-    private static readonly Dictionary<string, Func<object, LiveEventContext, Task<LiveEvent<object>>>> InvokeFunc = new();
-    private static readonly Dictionary<string, Func<object, LiveEventContext, Task>> SendFunc = new();
     protected IAppCacheClient CacheClient => cacheClient;
     protected IMediator Mediator => mediator;
     private IGroupStateManager StateManager => groupStateManager;
@@ -56,19 +57,71 @@ public abstract class AbstractHub<TClient>(ILogger logger, IGroupStateManager gr
         }
     }
 
+    
+    public async Task Execute(ClientEvent @event)
+    {
+        if(string.IsNullOrEmpty(@event.EventType))
+        {
+            throw new LiveException("No event type specified");
+        }
+
+        var action = TriggerFunctions[@event.EventType];
+        if (action == null)
+        {
+            throw new LiveException("No event action has been registered", eventType: @event.EventType);
+        }
+
+        try
+        {
+            await action(@event.Event, new LiveEventContext(Context, Clients, groupStateManager));
+        }
+        catch (Exception e)
+        {
+            logger.Error(e, "An unknown error occured while handling the Invoke of {FunctionName} by {CallerId}", @event.EventType, Context.ConnectionId);
+            throw new LiveException("An error has been occured while processing", extendedMessage: e.Message, eventType: @event.EventType);
+        }
+    }
+    
+    public async Task<LiveEvent<object>> Invoke(ClientEvent @event)
+    {
+        if(string.IsNullOrEmpty(@event.EventType))
+        {
+            throw new LiveException("No event type specified");
+        }
+
+        var action = InvokeFunctions[@event.EventType];
+        if (action == null)
+        {
+            throw new LiveException("No event action has been registered", eventType: @event.EventType);
+        }
+        
+        try
+        {
+            return await action(@event.Event, new LiveEventContext(Context, Clients, groupStateManager));
+        }
+        catch (Exception e)
+        {
+            logger.Error(e, "An unknown error occured while handling the Invoke of {FunctionName} by {CallerId}", @event.EventType, Context.ConnectionId);
+            throw new LiveException("An error has been occured while processing", extendedMessage: e.Message, eventType: @event.EventType);
+        }
+    }
+
+    #region Static Invoke Functions
+
+    private static readonly Dictionary<string, Func<object, LiveEventContext, Task<LiveEvent<object>>>> InvokeFunctions = new();
+    private static readonly Dictionary<string, Func<object, LiveEventContext, Task>> TriggerFunctions = new();
+    
     protected static void RegisterReturn(string eventType, Func<object, LiveEventContext, Task<LiveEvent<object>>> func)
     {
-        InvokeFunc[eventType] = func;
+        InvokeFunctions[eventType] = func;
     }
     
     protected static void RegisterNonReturn(string eventType, Func<object, LiveEventContext, Task> act)
     {
-        SendFunc[eventType] = act;
+        TriggerFunctions[eventType] = act;
     }
-    protected static Func<object, LiveEventContext, Task>? Action(string type) => SendFunc[type];
-    protected static Func<object, LiveEventContext, Task<LiveEvent<object>>>? Invoke(string type) => InvokeFunc[type];
-    
-    
+
+    #endregion
 }
 
 public sealed class LiveEventContext

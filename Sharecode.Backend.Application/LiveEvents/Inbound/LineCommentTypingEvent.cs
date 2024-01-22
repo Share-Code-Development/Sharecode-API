@@ -1,4 +1,4 @@
-﻿namespace Sharecode.Backend.Application.Event.Inbound;
+﻿namespace Sharecode.Backend.Application.LiveEvents.Inbound;
 
 public class LineCommentTypingEvent
 {

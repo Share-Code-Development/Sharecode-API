@@ -1,4 +1,4 @@
-﻿namespace Sharecode.Backend.Application.Event;
+﻿namespace Sharecode.Backend.Application.LiveEvents.Outbond;
 
 public class LogEvent
 {
