@@ -15,6 +15,7 @@ internal class CreateUserCommandHandler(IUnitOfWork unitOfWork, IUserRepository 
 {
     public async Task<UserCreatedResponse> Handle(CreateUserCommand command, CancellationToken cancellationToken)
     {
+        
         securityClient.CreatePasswordHash(command.Password!, out var passwordHash, out var salt);
         User user = new User()
         {

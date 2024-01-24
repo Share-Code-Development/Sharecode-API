@@ -6,6 +6,7 @@ using Sharecode.Backend.Application.Service;
 using Sharecode.Backend.Domain.Entity.Snippet;
 using Sharecode.Backend.Domain.Enums;
 using Sharecode.Backend.Domain.Repositories;
+using Sharecode.Backend.Utilities.Extensions;
 using Sharecode.Backend.Utilities.MetaKeys;
 using Sharecode.Backend.Utilities.RedisCache;
 
@@ -63,7 +64,8 @@ public class CreateSnippetCommentCommandHandler(IHttpClientContext context, IUni
             UserId = userId,
             ParentCommentId = null,
             Reactions = [],
-            Id = Guid.NewGuid()
+            Id = Guid.NewGuid(),
+            Mentions = request.Text.ExtractMentionableUsers()
         };
 
         await snippetCommentRepository.AddAsync(snippetComment, token: cancellationToken);
@@ -88,7 +90,8 @@ public class CreateSnippetCommentCommandHandler(IHttpClientContext context, IUni
             UserId = userId,
             ParentCommentId = request.ParentCommentId!.Value,
             Reactions = [],
-            Id = Guid.NewGuid()
+            Id = Guid.NewGuid(),
+            Mentions = request.Text.ExtractMentionableUsers()
         };
 
         await snippetCommentRepository.AddAsync(replySnippetComment, cancellationToken);
@@ -112,7 +115,8 @@ public class CreateSnippetCommentCommandHandler(IHttpClientContext context, IUni
             Text = request.Text,
             UserId = userId,
             LineNumber = request.LineNumber!.Value,
-            Id = Guid.NewGuid()
+            Id = Guid.NewGuid(),
+            Mentions = request.Text.ExtractMentionableUsers()
         };
 
         await snippetLineCommentRepository.AddAsync(lineComment, cancellationToken);

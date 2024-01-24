@@ -16,8 +16,6 @@ public class CreateUserCommandPersistenceValidator : AbstractValidator<CreateUse
             {
                 // assume that user is your model object and you've populated EmailAddressState somewhere before this validation
                 var emailState = await userRepository.IsEmailAddressUnique(email!, token);
-
-
                 switch (emailState)
                 {
                     case EmailState.Present:

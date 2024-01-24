@@ -12,4 +12,5 @@ public class Comment : BaseEntity
     [Required]
     public Guid UserId { get; set; }
     public User User { get; set; }
+    public HashSet<Guid> Mentions { get; set; } = new();
 }

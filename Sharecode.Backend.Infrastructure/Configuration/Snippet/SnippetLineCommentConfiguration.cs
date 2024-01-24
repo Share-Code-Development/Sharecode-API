@@ -12,6 +12,9 @@ public class SnippetLineCommentConfiguration : IEntityTypeConfiguration<SnippetL
         builder.Property(x => x.Text)
             .IsRequired()
             .HasMaxLength(1000);
+
+        builder.Property(x => x.Mentions)
+            .HasColumnType("jsonb");
         
         #region ForeginKey
         //Link comment to snippet

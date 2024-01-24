@@ -49,16 +49,23 @@ public static class StringExtensions
             return new HashSet<Guid>();
 
         HashSet<Guid> mentionableUsers = new();
-        var matches = MentionRegex.Matches(text);
-        foreach (Match match in matches)
+        try
         {
-            var value = match.Groups[1].Value;
-            if (Guid.TryParse(value, out Guid guid))
+            var matches = MentionRegex.Matches(text);
+            foreach (Match match in matches)
             {
-                mentionableUsers.Add(guid);    
+                var value = match.Groups[1].Value;
+                if (Guid.TryParse(value, out Guid guid))
+                {
+                    mentionableUsers.Add(guid);
+                }
             }
         }
-        
+        catch (Exception ignored)
+        {
+            // ignored
+        }
+
         return mentionableUsers;
     }
     
