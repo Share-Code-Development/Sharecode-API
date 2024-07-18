@@ -10,6 +10,8 @@ using Sharecode.Backend.Utilities.KeyValue;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
 //Create a unique session to this runtime
 var singletonSession = builder.CreateAndRegisterSession();
 
